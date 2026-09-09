@@ -59,7 +59,7 @@
 </nav>
 <div class="content has-rail">
 <main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 8. Architecture</nav><h1 class="page"><span class="num">8</span>Architecture</h1><p class="lede">System context, the modular monolith deployed as one serverless application, and the principles that hold it together.</p><hr class="rule"><div class="prose"><h2 id="8-1-system-context"><span class="hn">8.1</span>System context<a class="anchor" href="#8-1-system-context" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart LR
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart LR
     subgraph Users
         C[Client]
         K[Contractor]
@@ -102,7 +102,7 @@
     WRK --&gt; OBS</pre></figure>
 <h2 id="8-2-internal-module-structure"><span class="hn">8.2</span>Internal module structure<a class="anchor" href="#8-2-internal-module-structure" aria-label="Link to this heading">#</a></h2>
 <p>A <strong>modular monolith deployed as one serverless application</strong>: a single Python ASGI app behind one Vercel function, with hard internal boundaries. Modules communicate through published service functions; they never reach into each other's tables.</p>
-<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TB
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TB
     subgraph Request[&quot;Request path&quot;]
         RT[&quot;Router and session middleware&quot;]
         AUTHM[&quot;identity: sign-in, MFA, demo persona switch&quot;]

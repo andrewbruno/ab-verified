@@ -59,7 +59,7 @@
 </nav>
 <div class="content has-rail">
 <main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 6. State Machines</nav><h1 class="page"><span class="num">6</span>State Machines</h1><p class="lede">Verification, job and bidding lifecycles drawn as explicit state machines.</p><hr class="rule"><div class="prose"><h2 id="6-1-organisation-verification"><span class="hn">6.1</span>Organisation verification<a class="anchor" href="#6-1-organisation-verification" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
+<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
     [*] --&gt; Registered: registration submitted
     Registered --&gt; ContactPending: awaiting email and mobile confirmation
     ContactPending --&gt; AbrLookup: both channels verified
@@ -75,7 +75,7 @@
     Rejected --&gt; [*]
     Suspended --&gt; [*]: account closed</pre></figure>
 <h2 id="6-2-job-lifecycle"><span class="hn">6.2</span>Job lifecycle<a class="anchor" href="#6-2-job-lifecycle" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
+<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
     [*] --&gt; Draft: verified Client creates job
     Draft --&gt; PendingApproval: Client submits
     PendingApproval --&gt; Draft: Staff rejects with reason
@@ -97,7 +97,7 @@
     Awarded --&gt; [*]
     Cancelled --&gt; [*]</pre></figure>
 <h2 id="6-3-invitation-and-bid-lifecycle"><span class="hn">6.3</span>Invitation and bid lifecycle<a class="anchor" href="#6-3-invitation-and-bid-lifecycle" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
+<figure class="diagram"><div class="d-bar"><span class="lang">State machine</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">stateDiagram-v2
     state &quot;Invitation&quot; as Inv {
         [*] --&gt; Sent: Staff invites contractor
         Sent --&gt; Accepted: Contractor intends to bid

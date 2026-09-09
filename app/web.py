@@ -181,14 +181,14 @@ def _nav_for(security: SecurityContext) -> list[dict[str, str]]:
         ]
     if security.role == "CLIENT":
         return [
-            {"href": "/dashboard", "label": "Dashboard"},
+            {"href": "/jobs", "label": "My jobs"},
             {"href": "/jobs/new", "label": "Post a job"},
             {"href": "/account", "label": "Account"},
         ]
     if security.role == "CONTRACTOR":
         return [
-            {"href": "/dashboard", "label": "Dashboard"},
             {"href": "/invitations", "label": "Invitations"},
+            {"href": "/bids", "label": "My bids"},
             {"href": "/account", "label": "Account"},
         ]
     return []

@@ -60,7 +60,7 @@
 </nav>
 <div class="content has-rail">
 <main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 7. Key Flows</nav><h1 class="page"><span class="num">7</span>Key Flows</h1><p class="lede">Sequence and flow diagrams for registration, job posting through to award, the staff operating loop and demo sign-in.</p><hr class="rule"><div class="prose"><h2 id="7-1-registration-and-verification"><span class="hn">7.1</span>Registration and verification<a class="anchor" href="#7-1-registration-and-verification" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
     autonumber
     actor A as Applicant
     participant V as Vercel function
@@ -100,7 +100,7 @@
     end
     Q-&gt;&gt;M: Deliver queued messages with retry</pre></figure>
 <h2 id="7-2-job-posting-through-to-award"><span class="hn">7.2</span>Job posting through to award<a class="anchor" href="#7-2-job-posting-through-to-award" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
     autonumber
     actor C as Client
     participant V as Vercel function
@@ -135,7 +135,7 @@
         V-&gt;&gt;SB: Enqueue award notices and contact detail release
     end</pre></figure>
 <h2 id="7-3-staff-daily-operating-loop"><span class="hn">7.3</span>Staff daily operating loop<a class="anchor" href="#7-3-staff-daily-operating-loop" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TD
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TD
     Start([Staff signs in with MFA]) --&gt; Dash[Operations dashboard with queue depths]
     Dash --&gt; Q1{Pending verifications?}
     Q1 --&gt;|yes| V[Review applicant against ABR evidence]
@@ -163,7 +163,7 @@
     AW --&gt; Dash
     Q4 --&gt;|no| Done([Queues clear])</pre></figure>
 <h2 id="7-4-demo-persona-selection"><span class="hn">7.4</span>Demo persona selection<a class="anchor" href="#7-4-demo-persona-selection" aria-label="Link to this heading">#</a></h2>
-<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="expand" type="button">Expand</button><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
     autonumber
     actor T as Tester
     participant V as Vercel function

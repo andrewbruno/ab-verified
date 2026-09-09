@@ -77,6 +77,45 @@
     document.body.removeChild(ta);
   }
 
+  /* ---------- expand a diagram to the full window ------------------ */
+  var overlay = null;
+  function diagramOverlay() {
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.className = 'd-overlay';
+    overlay.innerHTML =
+      '<div class="o-bar"><span class="o-ttl"></span><span class="grow"></span>' +
+      '<button class="expand" type="button">Close</button></div><div class="o-body"></div>';
+    overlay.querySelector('button').addEventListener('click', closeOverlay);
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+  function closeOverlay() {
+    if (overlay) {
+      overlay.classList.remove('on');
+      overlay.querySelector('.o-body').innerHTML = '';
+    }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('figure.diagram .expand'), function (btn) {
+    btn.addEventListener('click', function () {
+      var figure = btn.closest('figure.diagram');
+      var svg = figure && figure.querySelector('svg');
+      if (!svg) return;
+      var box = diagramOverlay();
+      box.querySelector('.o-ttl').textContent = figure.querySelector('.lang').textContent;
+      var body = box.querySelector('.o-body');
+      body.innerHTML = '';
+      var copy = svg.cloneNode(true);
+      copy.removeAttribute('width');
+      copy.style.maxWidth = '100%';
+      body.appendChild(copy);
+      box.classList.add('on');
+    });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeOverlay();
+  });
+
   /* ---------- mermaid diagrams ------------------------------------ */
   var mermaidLib = null;
   var mermaidPending = null;

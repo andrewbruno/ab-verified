@@ -128,6 +128,7 @@ def render_fence(language: str, source: str) -> str:
             '<figure class="diagram">'
             '<div class="d-bar"><span class="lang">' + html.escape(diagram_kind(source)) + "</span>"
             '<span class="grow"></span>'
+            '<button class="expand" type="button">Expand</button>'
             '<button class="copy" type="button">Copy source</button></div>'
             '<pre class="mermaid">' + html.escape(source) + "</pre>"
             "</figure>"
