@@ -17,11 +17,16 @@ from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
-from playwright.sync_api import Browser, Page, sync_playwright
+from playwright.sync_api import Browser, Page, expect, sync_playwright
 
 from .server import free_port, running_app
 
 ARTIFACTS = Path(__file__).parent / "artifacts"
+
+# Playwright's default assertion timeout is 5 seconds, which is generous on a
+# developer's laptop and tight on a shared CI runner starting a cold server.
+# One run in twelve here timed out on an otherwise passing journey.
+expect.set_options(timeout=15_000)
 
 
 @pytest.fixture(scope="session")
