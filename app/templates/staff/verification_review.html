@@ -1,0 +1,285 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import empty, org_pill %}
+{% from "staff/_macros.html" import staff_css, flag_list, score_block, timeline as audit_timeline, age %}
+{% block title %}{{ case.legal_name }} &#183; Verification review{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/verifications">Verification queue</a> &#183; case opened {{ case.opened_at|datetime }}</p>
+    <h1>{{ case.legal_name }}</h1>
+    <p class="row" style="margin-top:8px">
+      <span class="pill pill-warn">{{ case_state_label(case.state) }}</span>
+      <span class="pill">{{ case.kind|capitalize }}</span>
+      {{ org_pill(case.org_status) }}
+      <span class="muted small">Waiting {{ age(case.opened_at) }}</span>
+    </p>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm btn-ghost" href="/staff/organisations/{{ case.organisation_id }}">Organisation record</a>
+    <a class="btn btn-sm btn-ghost" href="/staff/audit/verification_case/{{ case.id }}">Full audit timeline</a>
+  </div>
+</div>
+
+{# --- The risk signals go first, in words, before any evidence ---------- #}
+{{ flag_list(case.flags) }}
+
+<div class="split">
+  {# ================= Evidence ======================================== #}
+  <div class="stack">
+    <section>
+      <div class="sec-head"><h2>The evidence, side by side</h2></div>
+      <div class="evidence">
+        <div>
+          <h3>Submitted by the applicant</h3>
+          <span class="source">At registration, {{ case.org_created_at|datetime }}</span>
+          <dl class="kv kv-tight">
+            <dt>Business name</dt><dd>{{ case.legal_name }}</dd>
+            <dt>Trading name</dt><dd>{{ case.trading_name or 'None supplied' }}</dd>
+            <dt>Account type</dt><dd>{{ case.kind|capitalize }}</dd>
+            <dt>Region</dt><dd>{{ case.region or 'Not stated' }}</dd>
+            <dt>ABN</dt><dd class="mono" style="font-size:14px;letter-spacing:0;text-transform:none">{{ case.abn_formatted or 'Not supplied' }}</dd>
+            <dt>Contacts</dt>
+            <dd>
+              {% for person in people %}
+                {{ person.full_name }}, {{ person.email }}{% if person.mobile_e164 %}, {{ person.mobile_e164 }}{% endif %}<br>
+              {% else %}No contact on file{% endfor %}
+            </dd>
+          </dl>
+        </div>
+        <div>
+          <h3>Australian Business Register</h3>
+          <span class="source">
+            {% if case.checked_at %}Retrieved {{ case.checked_at|datetime }}{% else %}Not yet retrieved{% endif %}
+            &#183; lookup {{ (case.lookup_state or 'PENDING')|replace('_', ' ')|lower }}
+          </span>
+          <dl class="kv kv-tight">
+            <dt>Entity name</dt><dd>{{ case.abr_entity_name or 'No entity name returned' }}</dd>
+            <dt>Entity type</dt><dd>{{ case.abr_entity_type or 'Not returned' }}</dd>
+            <dt>ABN status</dt>
+            <dd>
+              {{ (case.abr_status or 'UNKNOWN')|capitalize }}
+              {% if case.abr_status == 'CANCELLED' %}<span class="pill pill-flag">Cancelled</span>{% endif %}
+            </dd>
+            <dt>GST</dt><dd>{% if case.gst_registered %}Registered{% elif case.gst_registered is none %}Not returned{% else %}Not registered{% endif %}</dd>
+            <dt>Checked</dt><dd>{{ case.checked_at|datetime }}</dd>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>Name similarity (FR-202)</h2></div>
+      {{ score_block(case.score_reading) }}
+      <p class="small muted">
+        The submitted name <strong>{{ case.legal_name }}</strong> compared with the ABR entity name
+        <strong>{{ case.abr_entity_name or 'not returned' }}</strong>. The score is evidence for the
+        reviewer, never an automatic gate.
+      </p>
+    </section>
+
+    {# --- Duplicate ABN, FR-106 --------------------------------------- #}
+    {% if case.duplicate_abn_flag or duplicates %}
+    <section>
+      <div class="sec-head"><h2>Duplicate ABN check</h2></div>
+      {% if duplicates %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Other organisations holding this ABN</caption>
+          <thead><tr><th scope="col">Organisation</th><th scope="col">Status</th><th scope="col">Registered</th></tr></thead>
+          <tbody>
+            {% for other in duplicates %}
+            <tr>
+              <th scope="row"><a href="/staff/organisations/{{ other.id }}">{{ other.legal_name }}</a></th>
+              <td>{{ org_pill(other.status) }}</td>
+              <td>{{ other.created_at|date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="muted">
+        This registration was flagged as a duplicate at the time it was made. No other
+        organisation currently holds this ABN, so the earlier match may since have been
+        withdrawn. Check the audit timeline before rejecting on that basis.
+      </p>
+      {% endif %}
+    </section>
+    {% endif %}
+
+    {# --- Documents ---------------------------------------------------- #}
+    <section>
+      <div class="sec-head"><h2>Documents</h2></div>
+      {% if documents %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Supporting documents uploaded by the applicant</caption>
+          <thead><tr><th scope="col">Document</th><th scope="col">Kind</th><th scope="col">Uploaded</th><th scope="col" class="num">Size</th></tr></thead>
+          <tbody>
+            {% for document in documents %}
+            <tr>
+              <th scope="row">{{ document.filename }}</th>
+              <td>{{ document.kind }}</td>
+              <td>{{ document.uploaded_at|date }}</td>
+              <td class="num">{{ (document.size_bytes / 1024)|round|int }} KB</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="small muted" style="margin-top:8px">
+        Documents are held in a private bucket and opened through a short-lived signed
+        URL, so there is no direct link here.
+      </p>
+      {% else %}
+      {{ empty('No supporting documents have been uploaded.') }}
+      {% endif %}
+    </section>
+
+    {# --- Raw ABR response, kept verbatim as evidence (FR-605) --------- #}
+    <details class="raw">
+      <summary>Raw ABR response, retained verbatim as evidence (FR-605)</summary>
+      <pre>{{ raw_response or 'No response stored. The lookup did not complete.' }}</pre>
+    </details>
+  </div>
+
+  {# ================= Decision ======================================== #}
+  <aside class="stack">
+    {# --- FR-211 assignment -------------------------------------------- #}
+    <div class="panel">
+      <h2>Assignment</h2>
+      {% if case.assigned_staff_id %}
+        <p>Assigned to <strong>{{ case.assigned_staff_name }}</strong>.</p>
+        {% if case.assigned_staff_id == me.user_id %}
+        <form method="post" action="/staff/verifications/{{ case.id }}/assign" style="margin-top:12px">
+          <input type="hidden" name="action" value="release">
+          <button class="btn btn-sm btn-ghost" type="submit">Release back to the queue</button>
+        </form>
+        {% else %}
+        <p class="small muted" style="margin-top:8px">
+          Ask them to release it before you review it, so two of us do not decide the
+          same case (FR-211).
+        </p>
+        {% endif %}
+      {% else %}
+        <p class="muted">Nobody is reviewing this case yet.</p>
+        <form method="post" action="/staff/verifications/{{ case.id }}/assign" style="margin-top:12px">
+          <input type="hidden" name="action" value="claim">
+          <button class="btn btn-sm" type="submit">Assign to me</button>
+        </form>
+      {% endif %}
+    </div>
+
+    {# --- FR-203 the decision ------------------------------------------ #}
+    <form class="panel panel-sticky" method="post" action="/staff/verifications/{{ case.id }}/decide">
+      <h2>Decision</h2>
+
+      <fieldset>
+        <legend>Outcome</legend>
+        {% for key, spec in outcomes.items() %}
+        <div class="check">
+          <input type="radio" id="outcome-{{ key }}" name="outcome" value="{{ key }}"
+                 {% if loop.first %}checked{% endif %} required
+                 aria-describedby="outcome-help">
+          <label for="outcome-{{ key }}">{{ spec.label }}</label>
+        </div>
+        {% endfor %}
+        <p class="hint" id="outcome-help">
+          Approve verifies the organisation. Reject closes it with a reason. Request more
+          information parks the case and returns the applicant to an editable state (FR-205).
+        </p>
+      </fieldset>
+
+      <div class="field">
+        <label for="f-reason_code">Reason code <span aria-hidden="true">*</span></label>
+        <select id="f-reason_code" name="reason_code" required aria-describedby="reason-help">
+          <option value="">Choose a reason</option>
+          {% for key, spec in outcomes.items() %}
+          <optgroup label="{{ spec.label }}">
+            {% for code, description in spec.codes.items() %}
+            <option value="{{ code }}">{{ code }} &#183; {{ description }}</option>
+            {% endfor %}
+          </optgroup>
+          {% endfor %}
+        </select>
+        <span class="hint" id="reason-help">
+          Every decision carries a reason code (FR-203). Choose one from the group that
+          matches the outcome you selected above.
+        </span>
+      </div>
+
+      <div class="field">
+        <label for="f-note_to_applicant">Note to the applicant</label>
+        <textarea id="f-note_to_applicant" name="note_to_applicant" rows="4"
+                  aria-describedby="note-help"></textarea>
+        <span class="hint" id="note-help">
+          Sent with the outcome. A <code>SUSPECTED_FRAUD</code> reason suppresses this note
+          and sends a generic message instead, and your wording is kept as an internal note
+          (FR-206).
+        </span>
+      </div>
+
+      <div class="field">
+        <label for="f-internal_note">Internal note, never shown to the applicant</label>
+        <textarea id="f-internal_note" name="internal_note" rows="3"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-solid" type="submit">Record decision</button>
+        <a class="btn btn-ghost" href="/staff/verifications">Back to the queue</a>
+      </div>
+      <p class="readonly" style="margin-top:14px">
+        Decisions are immutable. Recording one appends to the case; a change of mind is a
+        new decision that supersedes this one, never an edit (FR-209).
+      </p>
+    </form>
+
+    {# --- Decisions already recorded ----------------------------------- #}
+    <div class="panel">
+      <h2>Decisions recorded</h2>
+      {% if decisions %}
+      <ul class="stack-sm" style="list-style:none">
+        {% for decision in decisions %}
+        <li class="card card-quiet">
+          <p>
+            <strong>{{ outcomes[decision.outcome].label if decision.outcome in outcomes else decision.outcome }}</strong>
+            &#183; <span class="reason mono">{{ decision.reason_code }}</span>
+            {% if decision.superseded_by %}<span class="pill">Superseded</span>{% endif %}
+          </p>
+          <p class="small muted">{{ decision.staff_name or 'Staff' }}, {{ decision.decided_at|datetime }}</p>
+          {% if decision.note_to_applicant %}
+          <p class="small"><span class="label">To the applicant</span> {{ decision.note_to_applicant }}</p>
+          {% endif %}
+          {% if decision.internal_note %}
+          <p class="small"><span class="label">Internal</span> {{ decision.internal_note }}</p>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="muted">No decision has been recorded on this case yet.</p>
+      {% endif %}
+    </div>
+
+    {# --- What each rejection code sends, FR-206 ----------------------- #}
+    <details class="raw">
+      <summary>What a rejected applicant reads (FR-206)</summary>
+      <div style="padding:14px">
+        <dl class="kv kv-tight">
+          {% for code, text in safe_reasons.items() %}
+          <dt>{{ code }}</dt><dd>{{ text }}</dd>
+          {% endfor %}
+        </dl>
+      </div>
+    </details>
+
+    <div class="panel">
+      <h2>Case history</h2>
+      {{ audit_timeline(timeline, 'Nothing recorded against this case yet.') }}
+    </div>
+  </aside>
+</div>
+{% endblock %}

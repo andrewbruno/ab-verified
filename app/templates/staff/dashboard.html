@@ -1,0 +1,208 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty, job_pill, org_pill %}
+{% from "staff/_macros.html" import staff_css, age %}
+{% block title %}Operations dashboard &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Operations dashboard',
+  'The four queues, oldest work first. Work them in this order and nothing waits longer than it should.',
+  'Staff console') }}
+
+{# --- Queue depths, each one a link straight into the work (FR-505) ------ #}
+<h2 class="visually-hidden">Queue depths</h2>
+<div class="tiles">
+  {% for queue in queues %}
+  <a class="tile {% if not queue.count %}tile-clear{% endif %}"
+     href="{{ queue.href }}"
+     {% if next_up and queue.key == next_up.key %}aria-current="true"{% endif %}>
+    <span class="tile-num num">{{ queue.count }}</span>
+    <span class="tile-label label">{{ queue.label }}</span>
+    <span class="tile-do">{{ queue.action }}</span>
+    {% if next_up and queue.key == next_up.key %}<span class="tile-first">Start here</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+
+{% if not next_up %}
+<p class="notice notice-ok" role="status" style="margin-top:20px">
+  Every queue is clear. Nothing is waiting on staff.
+</p>
+{% endif %}
+
+{# --- The operational numbers of NFR-10 --------------------------------- #}
+<section style="margin-top:var(--sp-1)">
+  <div class="sec-head"><h2>Operating numbers</h2></div>
+  <div class="grid grid-3">
+    <div class="card card-quiet">
+      <p class="label">Time to verify</p>
+      <p style="font-size:1.5rem;font-weight:700">{{ metrics.time_to_verify }}</p>
+      <p class="small muted">Average from case opened to decision, over {{ metrics.time_to_verify_sample }} closed case(s).</p>
+    </div>
+    <div class="card card-quiet">
+      <p class="label">Bids per job</p>
+      <p style="font-size:1.5rem;font-weight:700">{{ metrics.bids_per_job }}</p>
+      <p class="small muted">Across {{ metrics.bids_per_job_sample }} job(s) that received at least one bid. {{ metrics.invitations_issued }} invitation(s) live or answered.</p>
+    </div>
+    <div class="card card-quiet">
+      <p class="label">Oldest thing waiting</p>
+      <p style="font-size:1.5rem;font-weight:700">{{ metrics.oldest_waiting }}</p>
+      <p class="small muted">The longest an applicant has been in the verification queue.</p>
+    </div>
+  </div>
+</section>
+
+{# --- Risk signals, in words as well as colour -------------------------- #}
+{% if attention %}
+<section style="margin-top:var(--sp-1)">
+  <div class="sec-head"><h2>Needs attention</h2></div>
+  <div class="flags">
+    {% for signal in attention %}
+    <p class="flag">
+      <span class="flag-code">{{ signal.code }}</span>
+      <span class="flag-detail">{{ signal.text }}. <a href="{{ signal.href }}">Open</a></span>
+    </p>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<div class="split" style="margin-top:var(--sp-1)">
+  <div class="stack">
+    {# --- Oldest verifications ------------------------------------------ #}
+    <section>
+      <div class="sec-head">
+        <h2>Oldest verifications</h2><span class="spacer"></span>
+        <a class="btn btn-sm btn-ghost" href="/staff/verifications">Open the queue</a>
+      </div>
+      {% if cases %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Verification cases waiting longest</caption>
+          <thead>
+            <tr><th scope="col">Applicant</th><th scope="col">State</th><th scope="col">Name match</th><th scope="col">Waiting</th><th scope="col"><span class="visually-hidden">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for case in cases %}
+            <tr>
+              <th scope="row" style="font-weight:600">
+                <a href="/staff/verifications/{{ case.id }}">{{ case.legal_name }}</a>
+                <span class="why">{{ case.kind|lower }} &#183; ABN {{ case.abn or 'not supplied' }}</span>
+              </th>
+              <td><span class="pill">{{ case_state_label(case.state) }}</span></td>
+              <td class="num">{{ case.name_match_score if case.name_match_score is not none else '-' }}</td>
+              <td class="nowrap">{{ age(case.opened_at) }}</td>
+              <td><a class="btn btn-sm" href="/staff/verifications/{{ case.id }}">Review</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}{{ empty('No registrations are waiting on a verification decision.') }}{% endif %}
+    </section>
+
+    {# --- Oldest jobs pending approval ----------------------------------- #}
+    <section>
+      <div class="sec-head">
+        <h2>Jobs pending approval</h2><span class="spacer"></span>
+        <a class="btn btn-sm btn-ghost" href="/staff/jobs/pending">Open the queue</a>
+      </div>
+      {% if pending_jobs %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Jobs waiting on moderation</caption>
+          <thead>
+            <tr><th scope="col">Job</th><th scope="col">Client</th><th scope="col">Budget</th><th scope="col">Waiting</th><th scope="col"><span class="visually-hidden">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for job in pending_jobs %}
+            <tr>
+              <th scope="row" style="font-weight:600"><a href="/staff/jobs/{{ job.id }}">{{ job.title }}</a></th>
+              <td>{{ job.client_name }}</td>
+              <td class="nowrap">{{ budget_range(job.budget_min, job.budget_max) }}</td>
+              <td class="nowrap">{{ age(job.submitted_at or job.created_at) }}</td>
+              <td><a class="btn btn-sm" href="/staff/jobs/{{ job.id }}">Moderate</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}{{ empty('No jobs are waiting on approval.') }}{% endif %}
+    </section>
+
+    {# --- Bids awaiting release ------------------------------------------ #}
+    <section>
+      <div class="sec-head">
+        <h2>Bids awaiting release</h2><span class="spacer"></span>
+        <a class="btn btn-sm btn-ghost" href="/staff/bids">Open the queue</a>
+      </div>
+      {% if bid_groups %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Jobs with bids awaiting release</caption>
+          <thead>
+            <tr><th scope="col">Job</th><th scope="col">State</th><th scope="col" class="num">Bids</th><th scope="col">Oldest</th><th scope="col"><span class="visually-hidden">Action</span></th></tr>
+          </thead>
+          <tbody>
+            {% for group in bid_groups %}
+            <tr>
+              <th scope="row" style="font-weight:600"><a href="/staff/jobs/{{ group.job_id }}/bids">{{ group.job_title }}</a></th>
+              <td>{{ job_pill(group.job_state) }}</td>
+              <td class="num">{{ group.count }}</td>
+              <td class="nowrap">{{ age(group.oldest) }}</td>
+              <td><a class="btn btn-sm" href="/staff/jobs/{{ group.job_id }}/bids">Screen</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}{{ empty('No bids are waiting on release.') }}{% endif %}
+    </section>
+  </div>
+
+  <aside class="stack">
+    <div class="panel">
+      <h2>Awards to confirm</h2>
+      {% if awards %}
+      <ul class="stack-sm" style="list-style:none">
+        {% for award in awards %}
+        <li class="card card-quiet">
+          <p style="font-weight:600"><a href="/staff/awards">{{ award.job_title }}</a></p>
+          <p class="small muted">{{ award.client_name }} selected {{ award.contractor_name }}
+            for <span class="money">{{ award.amount|money if award.amount else (award.day_rate|money ~ ' per day') }}</span>,
+            {{ age(award.selected_at) }}.</p>
+        </li>
+        {% endfor %}
+      </ul>
+      <p style="margin-top:14px"><a class="btn btn-sm" href="/staff/awards">Run the pre-award checks</a></p>
+      {% else %}
+      <p class="muted">No awards are waiting on confirmation.</p>
+      {% endif %}
+    </div>
+
+    <div class="panel">
+      <h2>The daily loop</h2>
+      <ol class="small" style="padding-left:18px;color:var(--mut)">
+        <li>Verify the registrations that are waiting.</li>
+        <li>Moderate the jobs, setting a bid closing date on approval.</li>
+        <li>Curate and invite contractors for approved jobs.</li>
+        <li>Screen bids, then release the ones the client should see.</li>
+        <li>Confirm awards and release contact details.</li>
+      </ol>
+      <p class="small muted" style="margin-top:10px">
+        Staff cannot act on records belonging to their own organisation (FR-604),
+        and nothing on this console can alter the audit log (FR-602).
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Elsewhere</h2>
+      <ul class="stack-sm" style="list-style:none">
+        <li><a href="/staff/organisations">All organisations</a></li>
+        <li><a href="/staff/audit">Recent audit events</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+{% endblock %}

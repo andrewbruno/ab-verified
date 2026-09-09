@@ -1,0 +1,66 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import job_pill %}
+{% from "staff/_macros.html" import staff_css, chips %}
+{% block title %}Invite contractors &#183; {{ job.title }}{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/jobs/{{ job.id }}">Back to the job</a></p>
+    <h1>Invite contractors</h1>
+    <p class="lead">{{ job.title }}</p>
+    <p class="row" style="margin-top:8px">
+      {{ job_pill(job.state) }}
+      {% if job.bids_close_at %}
+      <span class="pill">Bids close {{ job.bids_close_at|date }}</span>
+      {% endif %}
+      <span class="muted small">{{ job.client_name }} &#183; {{ job.location or 'Location not stated' }}</span>
+    </p>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ job.id }}/bids">Bids on this job</a>
+  </div>
+</div>
+
+<p class="notice" role="note">
+  Suggestions are scored on skill, category and region overlap and are
+  <strong>advisory only</strong>. The invitation list is a staff decision, and nobody is
+  ever invited automatically (FR-401). Required skills:
+  {% if required_skills %}{{ required_skills|join(', ') }}{% else %}none recorded{% endif %}.
+</p>
+
+{# Filtering is a GET form so it works without JavaScript; htmx swaps the
+   shortlist in place when it is available. #}
+<form class="toolbar" method="get" action="/staff/jobs/{{ job.id }}/candidates"
+      hx-get="/staff/jobs/{{ job.id }}/candidates" hx-target="#candidates"
+      hx-swap="outerHTML" hx-push-url="true" hx-trigger="change, submit">
+  <div class="field" style="flex:1">
+    <label for="f-q">Search by name or ABN</label>
+    <input id="f-q" name="q" type="search" value="{{ q }}" placeholder="Blackwattle">
+  </div>
+  <div class="field">
+    <label for="f-region">Region</label>
+    <select id="f-region" name="region">
+      <option value="">Any state</option>
+      {% for value in regions %}
+      <option value="{{ value }}" {% if region == value %}selected{% endif %}>{{ value }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-show">Shortlist</label>
+    <select id="f-show" name="show">
+      <option value="">Suggested only</option>
+      <option value="all" {% if show == 'all' %}selected{% endif %}>Every verified contractor</option>
+    </select>
+  </div>
+  <button class="btn btn-sm" type="submit">Apply</button>
+  <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ job.id }}/candidates">Clear</a>
+</form>
+
+<form method="post" action="/staff/jobs/{{ job.id }}/invite">
+  {% include "staff/_candidate_table.html" %}
+</form>
+{% endblock %}

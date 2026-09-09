@@ -13,6 +13,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap">
   <link rel="stylesheet" href="/static/css/app.css">
+  {# Module stylesheets. Small enough to ship together and cache once, which
+     keeps every <link> in the head where it belongs. #}
+  <link rel="stylesheet" href="/static/css/identity.css">
+  <link rel="stylesheet" href="/static/css/jobs.css">
+  <link rel="stylesheet" href="/static/css/staff.css">
+  {% block head %}{% endblock %}
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%231a2e4a'/><rect x='3' y='3' width='10' height='3' fill='%23fa0d0d'/></svg>">
   <script src="/static/js/htmx.min.js" defer></script>
   <script src="/static/js/alpine.min.js" defer></script>

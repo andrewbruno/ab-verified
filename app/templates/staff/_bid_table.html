@@ -1,0 +1,158 @@
+{% from "components/macros.html" import empty, bid_pill %}
+{#
+  Bid screening for one job (S-15). Returned whole to an htmx request so a
+  release or a rejection updates the screen in place; without JavaScript the
+  same posts redirect back here and the flash carries the same words.
+#}
+<div id="bid-screen">
+  {% if notice is defined and notice %}
+  <p class="notice {{ 'notice-error' if notice_tone == 'error' else 'notice-ok' }}" role="status">{{ notice }}</p>
+  {% endif %}
+
+  {% if awaiting %}
+  <form method="post" action="/staff/jobs/{{ job.id }}/release-all">
+    <div class="sec-head">
+      <h2>Awaiting release</h2>
+      <span class="label">{{ awaiting|length }} bid(s)</span>
+      <span class="spacer"></span>
+      <span class="label">Budget {{ budget_range(job.budget_min, job.budget_max) }}{% if job.engagement_type == 'DAY_RATE' %} per day{% endif %}</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="pick">
+        <caption class="visually-hidden">Bids awaiting release on this job</caption>
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">Release</span></th>
+            <th scope="col">Contractor</th>
+            <th scope="col" class="num">{{ 'Day rate' if job.engagement_type == 'DAY_RATE' else 'Price' }}</th>
+            <th scope="col" class="num">Days</th>
+            <th scope="col">Proposed start</th>
+            <th scope="col" class="num">Versions</th>
+            <th scope="col">Checks</th>
+            <th scope="col">Submitted</th>
+            <th scope="col"><span class="visually-hidden">Action</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bid in awaiting %}
+          <tr>
+            <td>
+              <input type="checkbox" name="bid_ids" value="{{ bid.id }}" id="pick-{{ bid.id }}" checked>
+              <label class="visually-hidden" for="pick-{{ bid.id }}">Release the bid from {{ bid.contractor_name }}</label>
+            </td>
+            <th scope="row" style="font-weight:600">
+              <a href="/staff/organisations/{{ bid.contractor_org_id }}">{{ bid.contractor_name }}</a>
+              <span class="why">{{ bid.contractor_region or 'Region not stated' }}</span>
+            </th>
+            <td class="num money">{{ bid.day_rate|money if bid.day_rate else bid.amount|money }}</td>
+            <td class="num">{{ bid.estimated_days or '-' }}</td>
+            <td class="nowrap">{{ bid.proposed_start|date }}</td>
+            <td class="num">{{ bid.checks.versions }}</td>
+            <td>
+              {% if bid.checks.budget.over %}
+              <span class="pill pill-flag">Over budget</span>
+              <span class="why">{{ bid.checks.budget.label }}</span>
+              {% else %}
+              <span class="why">{{ bid.checks.budget.label }}</span>
+              {% endif %}
+              {% if bid.checks.contact_details %}
+              <span class="pill pill-flag">Contact details</span>
+              <span class="why">Found {{ bid.checks.contact_details|join(', ') }} in the approach</span>
+              {% else %}
+              <span class="why">No contact details found</span>
+              {% endif %}
+            </td>
+            <td class="nowrap">{{ bid.submitted_at|relative }}</td>
+            <td>
+              <button class="btn btn-sm" type="submit"
+                      formmethod="post" formaction="/staff/bids/{{ bid.id }}/release"
+                      hx-post="/staff/bids/{{ bid.id }}/release"
+                      hx-target="#bid-screen" hx-swap="outerHTML">Release</button>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td colspan="8">
+              <p class="approach">{{ bid.approach }}</p>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-solid" type="submit">Release the bids you have ticked</button>
+      <span class="spacer"></span>
+    </div>
+    <p class="small muted">
+      Releasing notifies the client and moves the job to bids released.
+      {% if job.state == 'BIDDING' %}
+      Bidding is still open on this job, so releasing now closes it early. That is recorded
+      in the audit log as your act.
+      {% endif %}
+    </p>
+  </form>
+
+  {# --- Rejection, one form per bid so each carries its own reason ------ #}
+  <section style="margin-top:var(--sp-1)">
+    <div class="sec-head"><h2>Reject a bid</h2></div>
+    <p class="small muted" style="margin-bottom:12px">
+      A rejected bid is never shown to the client, and the contractor is told it was not
+      put forward, with a reason (FR-408).
+    </p>
+    {% for bid in awaiting %}
+    <details class="raw">
+      <summary>{{ bid.contractor_name }} &#183; {{ bid.day_rate|money if bid.day_rate else bid.amount|money }}</summary>
+      <form method="post" action="/staff/bids/{{ bid.id }}/reject" style="padding:16px"
+            hx-post="/staff/bids/{{ bid.id }}/reject" hx-target="#bid-screen" hx-swap="outerHTML">
+        <div class="field">
+          <label for="reject-code-{{ bid.id }}">Reason code <span aria-hidden="true">*</span></label>
+          <select id="reject-code-{{ bid.id }}" name="reason_code" required>
+            <option value="">Choose a reason</option>
+            {% for code, description in bid_rejection_codes.items() %}
+            <option value="{{ code }}">{{ code }} &#183; {{ description }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label for="reject-note-{{ bid.id }}">Note to the contractor</label>
+          <textarea id="reject-note-{{ bid.id }}" name="note" rows="3"></textarea>
+        </div>
+        <button class="btn btn-sm" type="submit">Reject this bid</button>
+      </form>
+    </details>
+    {% endfor %}
+  </section>
+  {% else %}
+  {{ empty('No bids on this job are awaiting release.') }}
+  {% endif %}
+
+  {# --- Already settled -------------------------------------------------- #}
+  {% if released or rejected %}
+  <section style="margin-top:var(--sp-1)">
+    <div class="sec-head"><h2>Already decided</h2></div>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Bids already released or rejected on this job</caption>
+        <thead><tr><th scope="col">Contractor</th><th scope="col">State</th><th scope="col" class="num">Price</th><th scope="col">Reason</th><th scope="col">When</th></tr></thead>
+        <tbody>
+          {% for bid in released + rejected %}
+          <tr>
+            <th scope="row">{{ bid.contractor_name }}</th>
+            <td>{{ bid_pill(bid.state) }}</td>
+            <td class="num money">{{ bid.day_rate|money if bid.day_rate else bid.amount|money }}</td>
+            <td>
+              {% if bid.reject_reason_code %}<span class="reason mono">{{ bid.reject_reason_code }}</span>{% endif %}
+              {% if bid.staff_note %}<span class="why">{{ bid.staff_note }}</span>{% endif %}
+            </td>
+            <td class="nowrap">{{ (bid.released_at or bid.submitted_at)|date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</div>

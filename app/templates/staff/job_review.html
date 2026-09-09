@@ -1,0 +1,240 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import empty, job_pill, org_pill, invitation_pill, bid_pill, reason_select %}
+{% from "staff/_macros.html" import staff_css, timeline as audit_timeline, age, chips %}
+{% block title %}{{ job.title }} &#183; Job moderation{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/jobs/pending">Job moderation</a></p>
+    <h1>{{ job.title }}</h1>
+    <p class="row" style="margin-top:8px">
+      {{ job_pill(job.state) }}
+      <span class="muted small">
+        Submitted {{ age(job.submitted_at or job.created_at) }} by {{ job.client_name }}
+      </span>
+    </p>
+  </div>
+  <div class="row">
+    {% if job.state in ('APPROVED', 'INVITING', 'BIDDING') %}
+    <a class="btn btn-sm" href="/staff/jobs/{{ job.id }}/candidates">Invite contractors</a>
+    {% endif %}
+    {% if job.bid_count %}
+    <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ job.id }}/bids">Bids ({{ job.bid_count }})</a>
+    {% endif %}
+    <a class="btn btn-sm btn-ghost" href="/staff/audit/job/{{ job.id }}">Audit timeline</a>
+  </div>
+</div>
+
+{% if contact_details %}
+<p class="flag">
+  <span class="flag-code">Contact details</span>
+  <span class="flag-detail">
+    This job appears to contain {{ contact_details|join(', ') }}. Contact details are
+    embargoed until award (FR-411), and prose is the easiest way around that embargo.
+    Redact the text below before approving, or reject with
+    <code>CONTAINS_CONTACT_DETAILS</code>. The original is kept in the audit log either
+    way (FR-306).
+  </span>
+</p>
+{% endif %}
+
+<div class="split">
+  <div class="stack">
+    <section>
+      <div class="sec-head"><h2>The job as submitted</h2></div>
+      <dl class="kv">
+        <dt>Client</dt>
+        <dd>
+          <a href="/staff/organisations/{{ client.id }}">{{ client.legal_name }}</a>
+          {{ org_pill(client.status) }}
+          <span class="why">ABN {{ client.abn or 'not recorded' }} &#183; ABR {{ (client.abr_status or 'unknown')|lower }}
+            &#183; {{ client_jobs|length }} job(s) posted in total</span>
+        </dd>
+        <dt>Category</dt><dd>{{ job.category or 'Not stated' }}</dd>
+        <dt>Required skills</dt><dd>{{ chips(skill_list) }}</dd>
+        <dt>Engagement</dt>
+        <dd>{{ 'Day rate' if job.engagement_type == 'DAY_RATE' else 'Fixed price' }},
+          {{ budget_range(job.budget_min, job.budget_max) }}{% if job.engagement_type == 'DAY_RATE' %} per day{% endif %}</dd>
+        <dt>Location</dt><dd>{{ job.location or 'Not stated' }}</dd>
+        <dt>Start</dt><dd>{{ job.start_date|date }}, {{ job.duration or 'duration not stated' }}</dd>
+        <dt>Bids close</dt>
+        <dd>{% if job.bids_close_at %}{{ job.bids_close_at|datetime }} ({{ job.bids_close_at|relative }})
+            {% else %}Not set. It is set when the job is approved (FR-307).{% endif %}</dd>
+        {% if job.reject_reason_code %}
+        <dt>Last rejection</dt><dd><span class="reason mono">{{ job.reject_reason_code }}</span> {{ job.staff_feedback }}</dd>
+        {% endif %}
+      </dl>
+    </section>
+
+    {# --- FR-306: edit or redact before approval ----------------------- #}
+    <section>
+      <div class="sec-head">
+        <h2>Description</h2><span class="spacer"></span>
+        <span class="label">Editable by staff before approval</span>
+      </div>
+      {% if job.state in ('PENDING_APPROVAL', 'DRAFT') %}
+      <form method="post" action="/staff/jobs/{{ job.id }}/redact">
+        <div class="field">
+          <label for="f-title">Title</label>
+          <input id="f-title" name="title" type="text" value="{{ job.title }}">
+        </div>
+        <div class="field">
+          <label for="f-description">Description</label>
+          <textarea id="f-description" name="description" rows="14"
+                    aria-describedby="redact-help">{{ job.description }}</textarea>
+          <span class="hint" id="redact-help">
+            Remove contact details and anything that breaches policy. The text you replace
+            is retained verbatim in the audit log, so the edit is always reviewable (FR-306).
+          </span>
+        </div>
+        <div class="field">
+          <label for="f-note">Why you changed it</label>
+          <input id="f-note" name="note" type="text"
+                 placeholder="Removed a mobile number from the second paragraph">
+        </div>
+        <button class="btn btn-sm" type="submit">Save the edit</button>
+      </form>
+      {% else %}
+      <p class="approach">{{ job.description }}</p>
+      <p class="readonly" style="margin-top:12px">
+        This job is past moderation, so its text is no longer editable here.
+      </p>
+      {% endif %}
+    </section>
+
+    {% if invitations %}
+    <section>
+      <div class="sec-head"><h2>Invitations</h2></div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Invitations issued on this job</caption>
+          <thead><tr><th scope="col">Contractor</th><th scope="col">State</th><th scope="col">Sent</th><th scope="col">Expires</th></tr></thead>
+          <tbody>
+            {% for invitation in invitations %}
+            <tr>
+              <th scope="row">{{ invitation.contractor_name }}</th>
+              <td>{{ invitation_pill(invitation.state) }}</td>
+              <td class="nowrap">{{ invitation.sent_at|date }}</td>
+              <td class="nowrap">{{ invitation.expires_at|date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if bids %}
+    <section>
+      <div class="sec-head">
+        <h2>Bids</h2><span class="spacer"></span>
+        <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ job.id }}/bids">Screen the bids</a>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Bids received on this job</caption>
+          <thead><tr><th scope="col">Contractor</th><th scope="col">State</th><th scope="col" class="num">Price</th><th scope="col">Submitted</th></tr></thead>
+          <tbody>
+            {% for bid in bids %}
+            <tr>
+              <th scope="row">{{ bid.contractor_name }}</th>
+              <td>{{ bid_pill(bid.state) }}</td>
+              <td class="num money">{{ bid.amount|money if bid.amount else (bid.day_rate|money ~ ' per day') }}</td>
+              <td class="nowrap">{{ bid.submitted_at|date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    <section>
+      <div class="sec-head"><h2>Audit trail</h2></div>
+      {{ audit_timeline(timeline, 'Nothing has been recorded against this job yet.') }}
+    </section>
+  </div>
+
+  <aside class="stack">
+    {% if job.state == 'PENDING_APPROVAL' %}
+    <form class="panel panel-sticky" method="post" action="/staff/jobs/{{ job.id }}/decide">
+      <h2>Decision</h2>
+      <fieldset>
+        <legend>Outcome</legend>
+        <div class="check">
+          <input type="radio" id="outcome-approve" name="outcome" value="approve" checked required>
+          <label for="outcome-approve">Approve and open for invitations</label>
+        </div>
+        <div class="check">
+          <input type="radio" id="outcome-reject" name="outcome" value="reject">
+          <label for="outcome-reject">Reject and return to the client as a draft</label>
+        </div>
+      </fieldset>
+
+      <div class="field">
+        <label for="f-bids_close_at">Bids close <span aria-hidden="true">*</span></label>
+        <input id="f-bids_close_at" name="bids_close_at" type="datetime-local"
+               value="{{ default_close }}" aria-describedby="close-help">
+        <span class="hint" id="close-help">
+          Required to approve (FR-307). Sydney time, and it becomes the default expiry for
+          every invitation issued on this job. Type it as 2026-09-23T17:00 if your browser
+          shows a plain text box.
+        </span>
+      </div>
+
+      {{ reason_select('reason_code', job_rejection_codes, 'Rejection reason code', False) }}
+
+      <div class="field">
+        <label for="f-note">Note to the client</label>
+        <textarea id="f-note" name="note" rows="4" aria-describedby="note-help"></textarea>
+        <span class="hint" id="note-help">
+          Sent with the outcome. On a rejection this is the feedback the client acts on, so
+          say what needs to change.
+        </span>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-solid" type="submit">Record decision</button>
+        <a class="btn btn-ghost" href="/staff/jobs/pending">Back to the queue</a>
+      </div>
+      <p class="readonly" style="margin-top:14px">
+        The reason code is required on a rejection and ignored on an approval. Approving
+        takes you straight to the invitation shortlist.
+      </p>
+    </form>
+    {% else %}
+    <div class="panel">
+      <h2>Where this job is up to</h2>
+      <p>{{ job_pill(job.state) }}</p>
+      <p class="small muted" style="margin-top:10px">
+        Moderation applies while a job is pending approval. This one has moved on, so the
+        next step is whichever queue it now sits in.
+      </p>
+      <ul class="stack-sm" style="list-style:none;margin-top:12px">
+        {% if job.state in ('APPROVED', 'INVITING', 'BIDDING') %}
+        <li><a href="/staff/jobs/{{ job.id }}/candidates">Curate and invite contractors</a></li>
+        {% endif %}
+        {% if job.bids_awaiting_release %}
+        <li><a href="/staff/jobs/{{ job.id }}/bids">Screen {{ job.bids_awaiting_release }} bid(s) awaiting release</a></li>
+        {% endif %}
+        {% if award %}
+        <li><a href="/staff/awards">Award awaiting confirmation</a></li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <h2>Rejection reason codes</h2>
+      <dl class="kv kv-tight">
+        {% for code, description in job_rejection_codes.items() %}
+        <dt>{{ code }}</dt><dd>{{ description }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+  </aside>
+</div>
+{% endblock %}

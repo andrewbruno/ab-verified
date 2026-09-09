@@ -1,0 +1,54 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head %}
+{% from "staff/_macros.html" import staff_css %}
+{% block title %}Verification queue &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Verification queue',
+  'A registration reaches this queue once email and mobile are confirmed and an ABR lookup has been attempted (FR-201). Claim a case before you review it so two of us do not work the same applicant (FR-211).',
+  'Staff console') }}
+
+{# Filtering is a plain GET form, so it works with JavaScript disabled. htmx
+   swaps the table in place when it is available. #}
+<form class="toolbar" method="get" action="/staff/verifications"
+      hx-get="/staff/verifications" hx-target="#queue" hx-swap="outerHTML"
+      hx-push-url="true" hx-trigger="change, submit">
+  <div class="field">
+    <label for="f-state">Case state</label>
+    <select id="f-state" name="state">
+      <option value="">Open cases</option>
+      {% for value in states %}
+      <option value="{{ value }}" {% if state == value %}selected{% endif %}>{{ case_state_label(value) }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-assignment">Assignment</label>
+    <select id="f-assignment" name="assignment">
+      <option value="">Anyone</option>
+      <option value="unassigned" {% if assignment == 'unassigned' %}selected{% endif %}>Unassigned</option>
+      <option value="mine" {% if assignment == 'mine' %}selected{% endif %}>Assigned to me</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-flag">Flag</label>
+    <select id="f-flag" name="flag">
+      <option value="">Any</option>
+      <option value="duplicate" {% if flag == 'duplicate' %}selected{% endif %}>Duplicate ABN</option>
+      <option value="abr" {% if flag == 'abr' %}selected{% endif %}>ABR unavailable</option>
+      <option value="cancelled" {% if flag == 'cancelled' %}selected{% endif %}>ABN cancelled</option>
+      <option value="mismatch" {% if flag == 'mismatch' %}selected{% endif %}>Name mismatch</option>
+    </select>
+  </div>
+  <div class="field" style="flex:1">
+    <label for="f-q">Search by business name or ABN</label>
+    <input id="f-q" name="q" type="search" value="{{ search }}" placeholder="Warrigal, or 51824753556">
+  </div>
+  <button class="btn btn-sm" type="submit">Apply</button>
+  <a class="btn btn-sm btn-ghost" href="/staff/verifications">Clear</a>
+</form>
+
+{% include "staff/_verification_table.html" %}
+{% endblock %}

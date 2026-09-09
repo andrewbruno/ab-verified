@@ -1,0 +1,56 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty %}
+{% from "staff/_macros.html" import staff_css, age, chips %}
+{% block title %}Jobs pending approval &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Jobs pending approval',
+  'Read the job as the contractor will read it. Redact anything that breaks the contact embargo, set a bid closing date, and approve. Rejection returns the job to the client as a draft with your feedback.',
+  'Staff console') }}
+
+{% if jobs %}
+<p class="label" role="status">{{ jobs|length }} job(s) waiting</p>
+<div class="stack">
+  {% for job in jobs %}
+  <article class="card {% if job.contact_details %}card-accent{% endif %}">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title"><a href="/staff/jobs/{{ job.id }}">{{ job.title }}</a></h2>
+        <p class="small muted">
+          {{ job.client_name }} &#183; {{ job.category or 'No category' }} &#183;
+          {{ job.location or 'Location not stated' }} &#183; submitted {{ age(job.submitted_at or job.created_at) }}
+        </p>
+      </div>
+      <div class="row">
+        <span class="pill pill-warn">{{ job_state_label(job.state) }}</span>
+        <a class="btn btn-sm" href="/staff/jobs/{{ job.id }}">Moderate</a>
+      </div>
+    </div>
+
+    {% if job.contact_details %}
+    <p class="flag">
+      <span class="flag-code">Contact details</span>
+      <span class="flag-detail">
+        The description appears to contain {{ job.contact_details|join(', ') }}. Contact
+        details are embargoed until award, so redact before approving or reject with
+        <code>CONTAINS_CONTACT_DETAILS</code>.
+      </span>
+    </p>
+    {% endif %}
+
+    <dl class="kv kv-tight" style="margin-top:10px">
+      <dt>Engagement</dt>
+      <dd>{{ 'Day rate' if job.engagement_type == 'DAY_RATE' else 'Fixed price' }},
+        {{ budget_range(job.budget_min, job.budget_max) }}{% if job.engagement_type == 'DAY_RATE' %} per day{% endif %}</dd>
+      <dt>Required skills</dt><dd>{{ chips(job.skill_list) }}</dd>
+      <dt>Start and duration</dt><dd>{{ job.start_date|date }}, {{ job.duration or 'not stated' }}</dd>
+    </dl>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty('No jobs are waiting on approval. Next, check the bids awaiting release.', '/staff/bids', 'Bids awaiting release') }}
+{% endif %}
+{% endblock %}

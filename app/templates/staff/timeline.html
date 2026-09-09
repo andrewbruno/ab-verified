@@ -1,0 +1,37 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import empty %}
+{% from "staff/_macros.html" import staff_css, timeline as audit_timeline %}
+{% block title %}Audit timeline &#183; {{ entity_title }}{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/audit">Audit</a> &#183; {{ entity_label|lower }}</p>
+    <h1>Audit timeline</h1>
+    <p class="lead">{{ entity_title }}</p>
+  </div>
+  <div class="row">
+    {% if entity_type == 'job' %}<a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ entity_id }}">The job</a>{% endif %}
+    {% if entity_type == 'organisation' %}<a class="btn btn-sm btn-ghost" href="/staff/organisations/{{ entity_id }}">The organisation</a>{% endif %}
+    {% if entity_type == 'verification_case' %}<a class="btn btn-sm btn-ghost" href="/staff/verifications/{{ entity_id }}">The case</a>{% endif %}
+  </div>
+</div>
+
+<p class="readonly">
+  Append only. Every row carries the actor, their role, the action, the before and after
+  state, the reason code, the note, the IP address and the time. No role, staff included,
+  may alter or remove one: a correction is a new record (FR-601, FR-602). That is why there
+  is no edit or delete control anywhere on this screen.
+</p>
+
+<div style="margin-top:var(--sp-1)">
+  {% if events %}
+  <p class="label" role="status">{{ events|length }} event(s), oldest first</p>
+  {{ audit_timeline(events) }}
+  {% else %}
+  {{ empty('Nothing has been recorded against this entity yet.', '/staff/audit', 'Back to the audit log') }}
+  {% endif %}
+</div>
+{% endblock %}

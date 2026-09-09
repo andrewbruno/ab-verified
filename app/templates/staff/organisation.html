@@ -1,0 +1,218 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import empty, org_pill, job_pill, bid_pill, invitation_pill, reason_select %}
+{% from "staff/_macros.html" import staff_css, timeline as audit_timeline, chips %}
+{% block title %}{{ org.legal_name }} &#183; Organisation{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/organisations">Organisations</a></p>
+    <h1>{{ org.legal_name }}</h1>
+    <p class="row" style="margin-top:8px">
+      {{ org_pill(org.status) }}
+      <span class="pill">{{ org.kind|capitalize }}</span>
+      <span class="muted small">Registered {{ org.created_at|date }} &#183; {{ org.region or 'region not stated' }}</span>
+    </p>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm btn-ghost" href="/staff/audit/organisation/{{ org.id }}">Full audit timeline</a>
+  </div>
+</div>
+
+{% if org.status == 'SUSPENDED' %}
+<p class="flag">
+  <span class="flag-code">Suspended</span>
+  <span class="flag-detail">
+    {{ org.suspend_reason or 'No reason recorded.' }} New jobs, invitations and bids are
+    blocked while this stands. Everything already on file is preserved (FR-208).
+  </span>
+</p>
+{% endif %}
+
+<div class="split">
+  <div class="stack">
+    <section>
+      <div class="sec-head"><h2>ABR evidence</h2></div>
+      <dl class="kv">
+        <dt>ABN</dt><dd class="nowrap">{{ org.abn or 'Not recorded' }}</dd>
+        <dt>Entity name</dt><dd>{{ org.abr_entity_name or 'Not returned' }}</dd>
+        <dt>Entity type</dt><dd>{{ org.abr_entity_type or 'Not returned' }}</dd>
+        <dt>ABN status</dt><dd>{{ (org.abr_status or 'unknown')|capitalize }}</dd>
+        <dt>GST</dt><dd>{% if org.gst_registered %}Registered{% elif org.gst_registered is none %}Not returned{% else %}Not registered{% endif %}</dd>
+        <dt>Lookup</dt><dd>{{ (org.lookup_state or 'PENDING')|replace('_', ' ')|lower }}, checked {{ org.checked_at|datetime }}</dd>
+        <dt>Skills</dt><dd>{{ chips(skills) }}</dd>
+        <dt>Categories</dt><dd>{{ chips(categories) }}</dd>
+      </dl>
+      <details class="raw">
+        <summary>Raw ABR response, retained verbatim (FR-605)</summary>
+        <pre>{{ raw_response or 'No response stored.' }}</pre>
+      </details>
+    </section>
+
+    <section>
+      <div class="sec-head"><h2>People</h2></div>
+      {% if people %}
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Users at this organisation</caption>
+          <thead><tr><th scope="col">Name</th><th scope="col">Role</th><th scope="col">Email</th><th scope="col">Mobile</th></tr></thead>
+          <tbody>
+            {% for person in people %}
+            <tr>
+              <th scope="row">{{ person.full_name }}</th>
+              <td>{{ person.role|capitalize }}</td>
+              <td>{{ person.email }}</td>
+              <td class="nowrap">{{ person.mobile_e164 or 'Not supplied' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}{{ empty('No users are attached to this organisation.') }}{% endif %}
+    </section>
+
+    {% if cases %}
+    <section>
+      <div class="sec-head"><h2>Verification cases</h2></div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Verification cases for this organisation</caption>
+          <thead><tr><th scope="col">Opened</th><th scope="col">State</th><th scope="col" class="num">Name match</th><th scope="col">Closed</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+          <tbody>
+            {% for case in cases %}
+            <tr>
+              <th scope="row" class="nowrap">{{ case.opened_at|date }}</th>
+              <td><span class="pill">{{ case_state_label(case.state) }}</span></td>
+              <td class="num">{{ case.name_match_score if case.name_match_score is not none else '-' }}</td>
+              <td class="nowrap">{{ case.closed_at|date }}</td>
+              <td><a class="btn btn-sm btn-ghost" href="/staff/verifications/{{ case.id }}">Open</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if jobs %}
+    <section>
+      <div class="sec-head"><h2>Jobs posted</h2></div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Jobs posted by this organisation</caption>
+          <thead><tr><th scope="col">Job</th><th scope="col">State</th><th scope="col" class="num">Bids</th><th scope="col">Posted</th></tr></thead>
+          <tbody>
+            {% for job in jobs %}
+            <tr>
+              <th scope="row"><a href="/staff/jobs/{{ job.id }}">{{ job.title }}</a></th>
+              <td>{{ job_pill(job.state) }}</td>
+              <td class="num">{{ job.bid_count }}</td>
+              <td class="nowrap">{{ job.created_at|date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if invitations or bids %}
+    <section>
+      <div class="sec-head"><h2>Invitations and bids</h2></div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Invitations received and bids submitted</caption>
+          <thead><tr><th scope="col">Job</th><th scope="col">Invitation</th><th scope="col">Bid</th><th scope="col" class="num">Price</th></tr></thead>
+          <tbody>
+            {% for invitation in invitations %}
+            <tr>
+              <th scope="row"><a href="/staff/jobs/{{ invitation.job_id }}">{{ invitation.job_title }}</a></th>
+              <td>{{ invitation_pill(invitation.state) }}</td>
+              <td>{% if invitation.bid_state %}{{ bid_pill(invitation.bid_state) }}{% else %}<span class="muted">No bid</span>{% endif %}</td>
+              <td class="num money">
+                {% for bid in bids %}{% if bid.job_id == invitation.job_id %}{{ bid.amount|money if bid.amount else (bid.day_rate|money ~ ' per day') }}{% endif %}{% endfor %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    {% if documents %}
+    <section>
+      <div class="sec-head"><h2>Documents</h2></div>
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Documents uploaded by this organisation</caption>
+          <thead><tr><th scope="col">Document</th><th scope="col">Kind</th><th scope="col">Uploaded</th></tr></thead>
+          <tbody>
+            {% for document in documents %}
+            <tr>
+              <th scope="row">{{ document.filename }}</th>
+              <td>{{ document.kind }}</td>
+              <td class="nowrap">{{ document.uploaded_at|date }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
+
+    <section>
+      <div class="sec-head"><h2>Timeline</h2></div>
+      {{ audit_timeline(timeline, 'Nothing has been recorded against this organisation yet.') }}
+    </section>
+  </div>
+
+  <aside class="stack">
+    {% if org.status == 'SUSPENDED' %}
+    <form class="panel" method="post" action="/staff/organisations/{{ org.id }}/reinstate">
+      <h2>Reinstate</h2>
+      <p class="small muted">Restores the organisation to verified and unblocks new jobs, invitations and bids.</p>
+      <div class="field" style="margin-top:12px">
+        <label for="f-note">Note for the record</label>
+        <input id="f-note" name="note" type="text" placeholder="ABN active again at the ABR">
+      </div>
+      <button class="btn btn-solid" type="submit">Reinstate this organisation</button>
+    </form>
+    {% elif org.status == 'VERIFIED' %}
+    <form class="panel" method="post" action="/staff/organisations/{{ org.id }}/suspend">
+      <h2>Suspend</h2>
+      <p class="small muted">
+        Blocks new jobs, invitations and bids immediately. Everything already on file is
+        preserved (FR-208).
+      </p>
+      {{ reason_select('reason_code', suspension_codes, 'Reason code', True) }}
+      <div class="field">
+        <label for="f-note">Note</label>
+        <textarea id="f-note" name="note" rows="3"></textarea>
+      </div>
+      <button class="btn" type="submit">Suspend this organisation</button>
+    </form>
+    {% else %}
+    <div class="panel">
+      <h2>Status</h2>
+      <p>{{ org_pill(org.status) }}</p>
+      <p class="small muted" style="margin-top:10px">
+        Suspension applies to a verified organisation. This one is
+        {{ org.status|lower }}, so its next move is a verification decision rather than a
+        suspension.
+      </p>
+    </div>
+    {% endif %}
+
+    <div class="panel">
+      <h2>Conflict of interest</h2>
+      <p class="small muted">
+        Staff may not act on records belonging to their own organisation (FR-604). That
+        check runs on every action here, not just on this page.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

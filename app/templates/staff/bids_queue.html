@@ -1,0 +1,82 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty, job_pill %}
+{% from "staff/_macros.html" import staff_css, age %}
+{% block title %}Bids awaiting release &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Bids awaiting release',
+  'Every bid the client cannot yet see, grouped by job. Open a job to compare the bids side by side, or release them all from here once you have read them.',
+  'Staff console') }}
+
+{% if groups %}
+<p class="label" role="status">
+  {{ groups|map(attribute='bids')|map('length')|sum }} bid(s) across {{ groups|length }} job(s)
+</p>
+
+<div class="stack">
+  {% for group in groups %}
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title"><a href="/staff/jobs/{{ group.job_id }}/bids">{{ group.job_title }}</a></h2>
+        <p class="small muted">
+          {{ group.bids|length }} bid(s) awaiting release &#183;
+          budget {{ budget_range(group.budget_min, group.budget_max) }}{% if group.engagement_type == 'DAY_RATE' %} per day{% endif %} &#183;
+          oldest submitted {{ age(group.oldest) }}
+        </p>
+      </div>
+      <div class="row">
+        {{ job_pill(group.job_state) }}
+        <a class="btn btn-sm" href="/staff/jobs/{{ group.job_id }}/bids">Screen these bids</a>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Bids awaiting release on {{ group.job_title }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Contractor</th>
+            <th scope="col" class="num">{{ 'Day rate' if group.engagement_type == 'DAY_RATE' else 'Price' }}</th>
+            <th scope="col" class="num">Days</th>
+            <th scope="col">Start</th>
+            <th scope="col">Checks</th>
+            <th scope="col">Submitted</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bid in group.bids %}
+          <tr>
+            <th scope="row" style="font-weight:600">{{ bid.contractor_name }}</th>
+            <td class="num money">{{ bid.day_rate|money if bid.day_rate else bid.amount|money }}</td>
+            <td class="num">{{ bid.estimated_days or '-' }}</td>
+            <td class="nowrap">{{ bid.proposed_start|date }}</td>
+            <td>
+              {% if bid.checks.budget.over %}<span class="pill pill-flag">Over budget</span>{% endif %}
+              {% if bid.checks.contact_details %}<span class="pill pill-flag">Contact details</span>{% endif %}
+              {% if bid.checks.clean %}<span class="why">In budget, no contact details</span>{% endif %}
+            </td>
+            <td class="nowrap">{{ age(bid.submitted_at) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" action="/staff/jobs/{{ group.job_id }}/release-all" style="margin-top:14px">
+      <button class="btn btn-sm btn-solid" type="submit">
+        Release all {{ group.bids|length }} bid(s) to the client
+      </button>
+      <span class="small muted" style="margin-left:10px">
+        Releasing notifies the client and moves the job to bids released.
+      </span>
+    </form>
+  </section>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty('No bids are waiting on release. Next, check the awards awaiting confirmation.', '/staff/awards', 'Awards awaiting confirmation') }}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty, org_pill %}
+{% from "staff/_macros.html" import staff_css %}
+{% block title %}Organisations &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Organisations',
+  'Every business on the platform, whatever its state. Open one for its ABR evidence, its jobs and bids, and its full timeline.',
+  'Staff console') }}
+
+<form class="toolbar" method="get" action="/staff/organisations">
+  <div class="field">
+    <label for="f-status">Status</label>
+    <select id="f-status" name="status">
+      <option value="">Any status</option>
+      {% for value in ['PENDING', 'VERIFIED', 'SUSPENDED', 'REJECTED'] %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ org_status_label(value) }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="f-kind">Type</label>
+    <select id="f-kind" name="kind">
+      <option value="">Any type</option>
+      <option value="CLIENT" {% if kind == 'CLIENT' %}selected{% endif %}>Client</option>
+      <option value="CONTRACTOR" {% if kind == 'CONTRACTOR' %}selected{% endif %}>Contractor</option>
+    </select>
+  </div>
+  <div class="field" style="flex:1">
+    <label for="f-q">Search by name or ABN</label>
+    <input id="f-q" name="q" type="search" value="{{ q }}">
+  </div>
+  <button class="btn btn-sm" type="submit">Apply</button>
+  <a class="btn btn-sm btn-ghost" href="/staff/organisations">Clear</a>
+</form>
+
+{% if organisations %}
+<p class="label" role="status">{{ organisations|length }} organisation(s) listed</p>
+<div class="table-wrap">
+  <table>
+    <caption class="visually-hidden">Organisations on the platform</caption>
+    <thead>
+      <tr>
+        <th scope="col">Organisation</th>
+        <th scope="col">Type</th>
+        <th scope="col">ABN</th>
+        <th scope="col">ABR</th>
+        <th scope="col">Region</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for org in organisations %}
+      <tr>
+        <th scope="row" style="font-weight:600">
+          <a href="/staff/organisations/{{ org.id }}">{{ org.legal_name }}</a>
+          {% if org.trading_name %}<span class="why">Trading as {{ org.trading_name }}</span>{% endif %}
+        </th>
+        <td>{{ org.kind|capitalize }}</td>
+        <td class="nowrap">{{ org.abn or 'Not recorded' }}</td>
+        <td>
+          {{ (org.abr_status or 'unknown')|capitalize }}
+          {% if org.lookup_state and org.lookup_state != 'OK' %}
+          <span class="why">Lookup {{ org.lookup_state|replace('_', ' ')|lower }}</span>
+          {% endif %}
+        </td>
+        <td>{{ org.region or 'Not stated' }}</td>
+        <td>{{ org_pill(org.status) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+{{ empty('No organisation matches these filters.', '/staff/organisations', 'Clear the filters') }}
+{% endif %}
+{% endblock %}

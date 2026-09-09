@@ -667,7 +667,19 @@ def status_view(conn: Db, ctx: SecurityContext) -> dict[str, Any]:
     cases = repo.verification_cases(conn, ctx, organisation_id=organisation["id"])
     case = cases[-1] if cases else None
     decisions = repo.decisions(conn, ctx, case["id"]) if case else []
-    latest = decisions[0] if decisions else None
+
+    # Decisions are immutable and a case accumulates them (FR-209), so the
+    # one to show is the most recent decision of the kind that produced the
+    # state the applicant is looking at, not simply the newest row.
+    def _newest(outcome: str) -> dict[str, Any] | None:
+        return next((d for d in decisions if d["outcome"] == outcome), None)
+
+    if organisation["status"] == "REJECTED":
+        latest = _newest("REJECT") or (decisions[0] if decisions else None)
+    elif case and case["state"] == "INFO_REQUESTED":
+        latest = _newest("REQUEST_INFO") or (decisions[0] if decisions else None)
+    else:
+        latest = decisions[0] if decisions else None
 
     safe_reason = None
     if organisation["status"] == "REJECTED" and latest:

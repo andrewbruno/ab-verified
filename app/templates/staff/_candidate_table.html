@@ -1,0 +1,141 @@
+{% from "components/macros.html" import empty, org_pill, invitation_pill %}
+{% from "staff/_macros.html" import match_chips %}
+{#
+  The curated shortlist (S-14). Rendered inside the invite form, and returned
+  on its own to an htmx request so filtering does not lose the page.
+#}
+<div id="candidates">
+  <p class="label" role="status">{{ candidates|length }} contractor(s) listed, {{ already_invited|length }} already invited</p>
+
+  {% if candidates %}
+  <div class="table-wrap">
+    <table class="pick">
+      <caption class="visually-hidden">Suggested contractors, scored against this job</caption>
+      <thead>
+        <tr>
+          <th scope="col"><span class="visually-hidden">Invite</span></th>
+          <th scope="col">Contractor</th>
+          <th scope="col" class="num">Match</th>
+          <th scope="col">Why</th>
+          <th scope="col">Region</th>
+          <th scope="col">Last 90 days</th>
+          <th scope="col">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for candidate in candidates %}
+        <tr class="{% if candidate.invitation_state in ('SENT', 'ACCEPTED') %}row-invited{% elif not candidate.selectable %}row-blocked{% endif %}">
+          <td>
+            <input type="checkbox" name="contractor_org_ids" value="{{ candidate.id }}"
+                   id="pick-{{ candidate.id }}"
+                   {% if not candidate.selectable %}disabled{% endif %}>
+            <label class="visually-hidden" for="pick-{{ candidate.id }}">
+              Invite {{ candidate.legal_name }}
+            </label>
+          </td>
+          <th scope="row" style="font-weight:600">
+            <a href="/staff/organisations/{{ candidate.id }}">{{ candidate.legal_name }}</a>
+            <span class="why">ABN {{ candidate.abn or 'not recorded' }}</span>
+          </th>
+          <td class="num match">
+            <span class="match-num">{{ candidate.score }}</span>
+            <span class="match-bar" aria-hidden="true"><span style="width: {{ candidate.score }}%"></span></span>
+          </td>
+          <td>
+            <span class="why" style="color:var(--fg)">{{ candidate.explanation }}</span>
+            {{ match_chips(candidate.matched_skills, candidate.missing_skills) }}
+          </td>
+          <td>{{ candidate.region or 'Not stated' }}</td>
+          <td class="small muted nowrap">
+            {{ candidate.activity.invited }} invited &#183;
+            {{ candidate.activity.bids }} bid &#183;
+            {{ candidate.activity.won }} won
+          </td>
+          <td>
+            {{ org_pill(candidate.status) }}
+            {% if candidate.invitation_state %}
+              <span class="why">{{ invitation_state_label(candidate.invitation_state) }}
+                {% if candidate.invitation_state in ('SENT', 'ACCEPTED') %}
+                &#183; <a href="/staff/jobs/{{ job.id }}">on this job</a>
+                {% endif %}
+              </span>
+            {% endif %}
+            {% if candidate.blocked_reason %}
+              <span class="why">{{ candidate.blocked_reason }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {{ empty('No contractor matched this job on skills, category or region. Widen the filters, or invite someone directly below.') }}
+  {% endif %}
+
+  {# --- Invite someone the suggestion did not surface ------------------- #}
+  <fieldset style="margin-top:20px">
+    <legend>Invite a contractor who is not on the shortlist</legend>
+    <div class="field">
+      <label for="f-other_org_id">Verified contractor</label>
+      <select id="f-other_org_id" name="other_org_id" aria-describedby="other-help">
+        <option value="">Nobody selected</option>
+        {% for candidate in all_contractors %}
+        {% if candidate.selectable %}
+        <option value="{{ candidate.id }}">{{ candidate.legal_name }} &#183; {{ candidate.region or 'region not stated' }} &#183; match {{ candidate.score }}</option>
+        {% endif %}
+        {% endfor %}
+      </select>
+      <span class="hint" id="other-help">
+        The scoring is a shortcut, not a judgement. If you know a contractor who suits this
+        job, invite them from here whatever their score.
+      </span>
+    </div>
+  </fieldset>
+
+  <div class="toolbar" style="margin-top:16px">
+    <div class="field">
+      <label for="f-expires_at">Invitations expire</label>
+      <input id="f-expires_at" name="expires_at" type="datetime-local"
+             value="{{ default_expiry }}" aria-describedby="expiry-help">
+      <span class="hint" id="expiry-help">
+        Sydney time. Defaults to the job's bid closing date (FR-402).
+      </span>
+    </div>
+    <span class="spacer"></span>
+    <button class="btn btn-solid" type="submit">Invite the contractors you have ticked</button>
+  </div>
+  <p class="small muted" style="margin-top:10px">
+    Each invitation goes out by email and by SMS, because responsiveness inside the bid
+    window is what the client is paying for (FR-502). Unverified and suspended contractors
+    are listed with the reason they cannot be selected rather than hidden (FR-207, FR-208).
+  </p>
+
+  {# --- Who is already invited, and how to undo it ---------------------- #}
+  {% if already_invited %}
+  <section style="margin-top:var(--sp-1)">
+    <div class="sec-head"><h2>Already invited</h2></div>
+    <div class="table-wrap">
+      <table>
+        <caption class="visually-hidden">Invitations already issued on this job</caption>
+        <thead><tr><th scope="col">Contractor</th><th scope="col">Invitation</th><th scope="col">Sent</th><th scope="col">Expires</th><th scope="col"><span class="visually-hidden">Action</span></th></tr></thead>
+        <tbody>
+          {% for candidate in already_invited %}
+          <tr>
+            <th scope="row">{{ candidate.legal_name }}</th>
+            <td>{{ invitation_pill(candidate.invitation_state) }}</td>
+            <td class="nowrap">{{ candidate.invitation.sent_at|date }}</td>
+            <td class="nowrap">{{ candidate.invitation.expires_at|date }}</td>
+            <td>
+              <button class="btn btn-sm btn-ghost" type="submit" formmethod="post"
+                      formaction="/staff/invitations/{{ candidate.invitation.id }}/withdraw"
+                      name="back" value="/staff/jobs/{{ job.id }}/candidates">Withdraw</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+</div>

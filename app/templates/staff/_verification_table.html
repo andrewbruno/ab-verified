@@ -1,0 +1,59 @@
+{% from "components/macros.html" import empty %}
+{% from "staff/_macros.html" import age, flag_pills %}
+{#
+  The queue table (S-11). Rendered inside the page, and returned on its own to
+  an htmx request so filtering does not reload the console.
+#}
+<div id="queue">
+  <p class="label" role="status">{{ cases|length }} case(s) listed</p>
+  {% if cases %}
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">Registrations awaiting a verification decision</caption>
+      <thead>
+        <tr>
+          <th scope="col">Applicant</th>
+          <th scope="col">Type</th>
+          <th scope="col">ABN and ABR status</th>
+          <th scope="col" class="num">Name match</th>
+          <th scope="col">Flags</th>
+          <th scope="col">Waiting</th>
+          <th scope="col">Assigned</th>
+          <th scope="col"><span class="visually-hidden">Action</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for case in cases %}
+        <tr>
+          <th scope="row" style="font-weight:600">
+            <a href="/staff/verifications/{{ case.id }}">{{ case.legal_name }}</a>
+            <span class="why">{{ case.region or 'Region not stated' }} &#183; registered {{ case.org_created_at|date }}</span>
+          </th>
+          <td>{{ case.kind|capitalize }}</td>
+          <td>
+            <span class="mono" style="font-size:13px;letter-spacing:0;text-transform:none">{{ case.abn_formatted or 'Not supplied' }}</span>
+            <span class="why">
+              {{ case.abr_status|capitalize }}{% if case.gst_registered %}, GST registered{% endif %}
+              {% if case.lookup_state != 'OK' %} &#183; lookup {{ case.lookup_state|replace('_', ' ')|lower }}{% endif %}
+            </span>
+          </td>
+          <td class="num">
+            {{ case.name_match_score if case.name_match_score is not none else 'n/a' }}
+            <span class="why">{{ case.score_reading.label }}</span>
+          </td>
+          <td>{{ flag_pills(case.flags) }}</td>
+          <td class="nowrap">{{ age(case.opened_at) }}</td>
+          <td>
+            {% if case.assigned_staff_name %}{{ case.assigned_staff_name }}
+            {% else %}<span class="muted">Unassigned</span>{% endif %}
+          </td>
+          <td><a class="btn btn-sm" href="/staff/verifications/{{ case.id }}">Review</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {{ empty('No verification cases match these filters.', '/staff/verifications', 'Clear the filters') }}
+  {% endif %}
+</div>

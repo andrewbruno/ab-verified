@@ -1,0 +1,63 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import job_pill %}
+{% from "staff/_macros.html" import staff_css, timeline as audit_timeline %}
+{% block title %}Screen bids &#183; {{ job.title }}{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+
+<div class="page-head">
+  <div>
+    <p class="label"><a href="/staff/bids">Bids awaiting release</a> &#183;
+      <a href="/staff/jobs/{{ job.id }}">the job</a></p>
+    <h1>Screen bids</h1>
+    <p class="lead">{{ job.title }}</p>
+    <p class="row" style="margin-top:8px">
+      {{ job_pill(job.state) }}
+      {% if job.bids_close_at %}
+      <span class="pill">Bids close {{ job.bids_close_at|datetime }} ({{ job.bids_close_at|relative }})</span>
+      {% endif %}
+      <span class="muted small">{{ job.client_name }} &#183; {{ bids|length }} bid(s) in total</span>
+    </p>
+  </div>
+  <div class="row">
+    <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ job.id }}/candidates">Invite more contractors</a>
+    <a class="btn btn-sm btn-ghost" href="/staff/audit/job/{{ job.id }}">Audit timeline</a>
+  </div>
+</div>
+
+<p class="notice" role="note">
+  Screening is the mechanism behind the promise the client bought: they compare a few
+  considered bids, not every raw one. Release what they should see, reject the rest with a
+  reason, and the rejected bids are never shown (FR-408, FR-409).
+</p>
+
+{% include "staff/_bid_table.html" %}
+
+{# --- FR-412 re-open bidding ------------------------------------------- #}
+<section style="margin-top:var(--sp-1)">
+  <div class="sec-head"><h2>Re-open bidding</h2></div>
+  <p class="small muted" style="margin-bottom:12px">
+    Use this when every bid was rejected, or when the awarded contractor withdrew. The job
+    goes back to inviting so you can widen the shortlist (FR-412).
+  </p>
+  <form method="post" action="/staff/jobs/{{ job.id }}/reopen" class="toolbar">
+    <div class="field">
+      <label for="f-bids_close_at">New closing date</label>
+      <input id="f-bids_close_at" name="bids_close_at" type="datetime-local"
+             aria-describedby="reopen-help">
+      <span class="hint" id="reopen-help">Sydney time. Leave blank to keep the existing one.</span>
+    </div>
+    <div class="field" style="flex:1">
+      <label for="f-note">Why</label>
+      <input id="f-note" name="note" type="text" placeholder="Every bid was over budget">
+    </div>
+    <button class="btn btn-sm btn-ghost" type="submit">Re-open bidding</button>
+  </form>
+</section>
+
+<section style="margin-top:var(--sp-1)">
+  <div class="sec-head"><h2>Audit trail</h2></div>
+  {{ audit_timeline(timeline, 'Nothing has been recorded against this job yet.') }}
+</section>
+{% endblock %}

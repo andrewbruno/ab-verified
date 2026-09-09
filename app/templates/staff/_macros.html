@@ -1,0 +1,122 @@
+{#
+  Staff console macros.
+
+  Import with:
+      {% from "staff/_macros.html" import staff_css, flag_list, timeline, age %}
+
+  These sit alongside components/macros.html rather than replacing it: the
+  shared macros carry the product's pills, fields and stats, and these carry
+  the patterns only the console needs.
+#}
+
+{% macro staff_css() %}
+{#- base.html exposes no head block, so the console stylesheet is linked at
+    the top of the content. Browsers honour it and the page still works with
+    JavaScript disabled. -#}
+<link rel="stylesheet" href="/static/css/staff.css">
+{% endmacro %}
+
+{% macro age(value) %}<span class="nowrap">{{ value|relative }}</span>{% endmacro %}
+
+{% macro flag_list(flags, quiet_codes=['NO DOCUMENTS']) %}
+{% if flags %}
+<div class="flags">
+  {% for flag in flags %}
+  <p class="flag {% if flag.code in quiet_codes %}flag-quiet{% endif %}">
+    <span class="flag-code">{{ flag.code }}</span>
+    <span class="flag-detail">{{ flag.detail }}</span>
+  </p>
+  {% endfor %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro flag_pills(flags) %}
+{% if flags %}
+  {% for flag in flags %}<span class="pill pill-flag" title="{{ flag.detail }}">{{ flag.code }}</span>{% endfor %}
+{% else %}
+  <span class="muted small">No flags</span>
+{% endif %}
+{% endmacro %}
+
+{% macro score_block(reading) %}
+<div class="score">
+  <div>
+    <span class="score-num {% if reading.score is not none and reading.score < 60 %}score-low{% endif %} num">{{ reading.score if reading.score is not none else '-' }}</span>
+    <span class="score-out">out of 100</span>
+  </div>
+  <div>
+    <span class="score-band">{{ reading.label }}</span>
+  </div>
+  <p class="score-detail">{{ reading.detail }}</p>
+  {% if reading.score is not none %}
+  <span class="meter" aria-hidden="true"><span class="{% if reading.score < 60 %}low{% endif %}" style="width: {{ reading.score }}%"></span></span>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro state_change(before, after) %}
+{% set b = before|json_load({}) %}
+{% set a = after|json_load({}) %}
+{% if b or a %}
+<span class="states">
+  {% for key, value in b.items() %}
+    <span class="pill">{{ key|replace('_', ' ') }}: {{ value }}</span>
+  {% endfor %}
+  {% if b and a %}<span class="arrow" aria-hidden="true">&rarr;</span><span class="visually-hidden">changed to</span>{% endif %}
+  {% for key, value in a.items() %}
+    <span class="pill pill-info">{{ key|replace('_', ' ') }}: {{ value }}</span>
+  {% endfor %}
+</span>
+{% endif %}
+{% endmacro %}
+
+{% macro timeline(events, empty_message='Nothing has happened here yet.') %}
+{% if events %}
+<ol class="timeline">
+  {% for event in events %}
+  <li class="by-{{ (event.actor_role or 'system')|lower }}">
+    <p class="when">
+      {{ event.occurred_at|datetime }}
+      {% if event.ip %} &#183; IP {{ event.ip }}{% endif %}
+    </p>
+    <p class="what">
+      <strong>{{ event.actor_name or 'System' }}</strong>
+      <span class="muted">({{ (event.actor_role or 'system')|lower }})</span>
+      {{ event.action|replace('.', ' ')|replace('_', ' ') }}
+    </p>
+    {{ state_change(event.before_state, event.after_state) }}
+    {% if event.reason_code %}<p class="reason">Reason: {{ event.reason_code }}</p>{% endif %}
+    {% if event.note %}<p class="note">{{ event.note }}</p>{% endif %}
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="muted">{{ empty_message }}</p>
+{% endif %}
+{% endmacro %}
+
+{% macro checklist(checks) %}
+<ul class="checklist">
+  {% for check in checks %}
+  <li>
+    <span class="verdict {{ 'pass' if check.ok else 'fail' }}">{{ 'Pass' if check.ok else 'Fails' }}</span>
+    <span class="what">{{ check.label }}</span>
+    <span class="detail">{{ check.detail }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %}
+
+{% macro chips(values, empty='None recorded') %}
+{% if values %}
+<span class="chips">{% for value in values %}<span class="chip">{{ value }}</span>{% endfor %}</span>
+{% else %}<span class="muted small">{{ empty }}</span>{% endif %}
+{% endmacro %}
+
+{% macro match_chips(matched, missing) %}
+<span class="chips">
+  {% for skill in matched %}<span class="chip chip-on">{{ skill }}</span>{% endfor %}
+  {% for skill in missing %}<span class="chip chip-off">{{ skill }}</span>{% endfor %}
+</span>
+{% endmacro %}

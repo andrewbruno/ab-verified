@@ -1,0 +1,120 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty %}
+{% from "staff/_macros.html" import staff_css, checklist, age %}
+{% block title %}Awards awaiting confirmation &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Awards awaiting confirmation',
+  'The client has chosen. Confirmation is the moment two businesses begin dealing with each other directly, so the checks run first and every one of them has to pass.',
+  'Staff console') }}
+
+{% if awards %}
+<div class="stack">
+  {% for award in awards %}
+  {% set blocked = award.checks|rejectattr('ok')|list %}
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 class="card-title"><a href="/staff/jobs/{{ award.job_id }}">{{ award.job_title }}</a></h2>
+        <p class="small muted">
+          {{ award.client_name }} selected {{ award.contractor_name }}
+          {{ age(award.selected_at) }}{% if award.selected_by_name %}, chosen by {{ award.selected_by_name }}{% endif %}.
+        </p>
+      </div>
+      <div class="row">
+        <span class="pill pill-warn">Award pending</span>
+        <a class="btn btn-sm btn-ghost" href="/staff/jobs/{{ award.job_id }}/bids">The bids</a>
+        <a class="btn btn-sm btn-ghost" href="/staff/audit/job/{{ award.job_id }}">Audit timeline</a>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="stack">
+        <div class="panel">
+          <h3>Winning bid: {{ award.contractor_name }}</h3>
+          <dl class="kv kv-tight" style="margin-top:10px">
+            <dt>Price</dt>
+            <dd class="money">
+              {% if award.amount %}{{ award.amount|money }}
+              {% else %}{{ award.day_rate|money }} per day{% endif %}
+              <span class="why">Job budget {{ budget_range(award.budget_min, award.budget_max) }}</span>
+            </dd>
+            <dt>Estimated days</dt><dd>{{ award.estimated_days or 'Not stated' }}</dd>
+            <dt>Selected</dt><dd>{{ award.selected_at|datetime }}</dd>
+            <dt>Other bids</dt>
+            <dd>
+              {% if award.other_bids %}
+                {% for other in award.other_bids %}
+                {{ other.contractor_name }},
+                {{ other.amount|money if other.amount else (other.day_rate|money ~ ' per day') }}<br>
+                {% else %}None{% endfor %}
+              {% else %}No other released bids{% endif %}
+            </dd>
+          </dl>
+        </div>
+
+        <div class="panel">
+          <h3>What confirming does</h3>
+          <ul class="consequences">
+            <li>The bid from {{ award.contractor_name }} becomes <strong>won</strong>.</li>
+            <li>{{ award.other_bids|length }} other released bid(s) become <strong>not selected</strong>, and those contractors are notified.</li>
+            <li>Contact details are exchanged between {{ award.client_name }} and {{ award.contractor_name }}, lifting the embargo for the first time (FR-411).</li>
+            <li>The job becomes <strong>awarded</strong>, which is a terminal state.</li>
+            <li>An audit event is written for every one of those changes (FR-601).</li>
+          </ul>
+        </div>
+
+        <form class="panel" method="post" action="/staff/jobs/{{ award.job_id }}/confirm-award">
+          <h3>Confirm the award</h3>
+          <div class="field">
+            <label for="confirm-note-{{ award.id }}">Note for the record</label>
+            <input id="confirm-note-{{ award.id }}" name="note" type="text"
+                   placeholder="Checks run against the ABR on the day of confirmation">
+          </div>
+          {% if blocked %}
+          <p class="notice notice-error" role="status">
+            This award cannot be confirmed yet: {{ blocked|map(attribute='label')|join('; ') }}.
+          </p>
+          {% endif %}
+          <div class="form-actions">
+            <button class="btn btn-solid" type="submit" {% if blocked %}disabled aria-disabled="true"{% endif %}>
+              Confirm and release contact details
+            </button>
+          </div>
+        </form>
+
+        <form class="panel" method="post" action="/staff/jobs/{{ award.job_id }}/decline-award">
+          <h3>Return to the client instead</h3>
+          <p class="small muted">
+            Declining to confirm sends the job back to bids released with every released bid
+            intact, so the client can reconsider.
+          </p>
+          <div class="field" style="margin-top:12px">
+            <label for="decline-note-{{ award.id }}">Why <span aria-hidden="true">*</span></label>
+            <input id="decline-note-{{ award.id }}" name="note" type="text" required
+                   placeholder="The contractor's ABN was cancelled after the bid was released">
+          </div>
+          <button class="btn" type="submit">Return for reconsideration</button>
+        </form>
+      </div>
+
+      <aside>
+        <div class="panel panel-sticky">
+          <h3>Pre-award checks</h3>
+          {{ checklist(award.checks) }}
+          <p class="small muted" style="margin-top:12px">
+            Confirmation is blocked while any check fails. The checks are re-run at the
+            moment you confirm, not just when this page loaded.
+          </p>
+        </div>
+      </aside>
+    </div>
+  </section>
+  {% endfor %}
+</div>
+{% else %}
+{{ empty('No awards are waiting on confirmation. Every queue behind this one is clear too, unless the dashboard says otherwise.', '/staff', 'Back to the dashboard') }}
+{% endif %}
+{% endblock %}

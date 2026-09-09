@@ -1,0 +1,76 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty %}
+{% from "staff/_macros.html" import staff_css %}
+{% block title %}Audit &#183; AB-Verified staff{% endblock %}
+
+{% block content %}
+{{ staff_css() }}
+{{ page_head(
+  'Recent audit events',
+  'Every state transition on the platform, newest first. Open any entity for its full timeline.',
+  'Staff console') }}
+
+<p class="readonly">
+  The audit log is append only. No role, staff included, can update or delete a record: a
+  correction is a new record (FR-602). There is therefore no edit or delete control on this
+  screen or anywhere else in the console.
+</p>
+
+<form class="toolbar" method="get" action="/staff/audit" style="margin-top:18px">
+  <div class="field">
+    <label for="f-entity_type">Entity</label>
+    <select id="f-entity_type" name="entity_type">
+      <option value="">Everything</option>
+      {% for value, label in entity_labels.items() %}
+      <option value="{{ value }}" {% if entity_type == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field" style="flex:1">
+    <label for="f-action">Action contains</label>
+    <input id="f-action" name="action" type="search" value="{{ action }}" placeholder="released, approved, invitation">
+  </div>
+  <button class="btn btn-sm" type="submit">Apply</button>
+  <a class="btn btn-sm btn-ghost" href="/staff/audit">Clear</a>
+</form>
+
+{% if events %}
+<p class="label" role="status">{{ events|length }} event(s) listed</p>
+<div class="table-wrap">
+  <table>
+    <caption class="visually-hidden">Recent audit events</caption>
+    <thead>
+      <tr>
+        <th scope="col">When</th>
+        <th scope="col">Who</th>
+        <th scope="col">Action</th>
+        <th scope="col">Entity</th>
+        <th scope="col">Reason</th>
+        <th scope="col">Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <th scope="row" class="nowrap" style="font-weight:400">{{ event.occurred_at|datetime }}</th>
+        <td class="nowrap">
+          {{ event.actor_name or 'System' }}
+          <span class="why">{{ (event.actor_role or 'system')|lower }}</span>
+        </td>
+        <td class="nowrap">{{ event.action }}</td>
+        <td>
+          <a href="/staff/audit/{{ event.entity_type }}/{{ event.entity_id }}">
+            {{ entity_labels.get(event.entity_type, event.entity_type) }}
+          </a>
+        </td>
+        <td>{% if event.reason_code %}<span class="reason mono">{{ event.reason_code }}</span>{% endif %}</td>
+        <td>{{ event.note or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+{{ empty('No audit events match these filters.', '/staff/audit', 'Clear the filters') }}
+{% endif %}
+{% endblock %}

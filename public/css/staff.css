@@ -1,0 +1,193 @@
+/* ---------------------------------------------------------------------------
+   Staff console additions.
+
+   app.css is the design language and stays the source of truth: square
+   corners, Roboto only, hierarchy from weight and letter-spacing, red used
+   sparingly as a single accent per viewport. Everything below is a console
+   pattern that app.css does not already carry, written against the same
+   custom properties so a change there flows through here.
+
+   Accessibility notes that shaped these rules (NFR-09, WCAG 2.2 AA):
+   every flag and every check carries a word, never colour alone; wide tables
+   scroll inside their own container so the page never scrolls sideways.
+   --------------------------------------------------------------------------- */
+
+/* --- Queue tiles (S-10) --------------------------------------------------- */
+.tiles { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); }
+.tile {
+  display: block; color: inherit; border: 1px solid var(--ln);
+  padding: 18px 20px 20px; background: var(--bg);
+}
+.tile:hover { text-decoration: none; border-color: var(--orange); }
+.tile .tile-num {
+  font-size: clamp(2.4rem, 5vw, 3.4rem); font-weight: 800; line-height: .9;
+  font-variant-numeric: tabular-nums; color: var(--orange);
+}
+.tile.tile-clear .tile-num { color: var(--mut); }
+.tile .tile-label { margin-top: 10px; }
+.tile .tile-do { display: block; margin-top: 8px; font-size: 13px; color: var(--mut); }
+.tile[aria-current="true"] { border-left: 3px solid var(--orange); }
+.tile-first {
+  display: inline-block; margin-top: 10px; font-family: var(--font-m);
+  font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: #fff; background: var(--orange); padding: 2px 7px;
+}
+
+/* --- Section headings inside a page --------------------------------------- */
+.sec-head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--ln); padding-bottom: 8px; margin-bottom: 14px;
+}
+.sec-head h2 { font-size: 1.05rem; }
+.sec-head .spacer { flex: 1; }
+
+/* --- Toolbars and filters ------------------------------------------------- */
+.toolbar {
+  display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end;
+  border: 1px solid var(--ln); padding: 14px 16px; margin-bottom: 18px;
+  background: var(--grey);
+}
+.toolbar .field { margin-bottom: 0; min-width: 150px; }
+.toolbar .field label { margin-bottom: 4px; }
+.toolbar input, .toolbar select { font-size: 14px; padding: 7px 9px; }
+
+/* --- Flags: a word first, a colour second (NFR-09) ------------------------ */
+.flags { display: grid; gap: 10px; margin: 16px 0; }
+.flag {
+  display: grid; grid-template-columns: minmax(0, auto) 1fr; gap: 4px 14px;
+  border: 1px solid rgba(var(--red-rgb), .45); border-left: 3px solid var(--red);
+  background: rgba(var(--red-rgb), .05); padding: 11px 14px;
+}
+.flag .flag-code {
+  font-family: var(--font-m); font-size: 11px; font-weight: 800;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--red);
+  white-space: nowrap;
+}
+.flag .flag-detail { font-size: 14px; grid-column: 1 / -1; }
+.flag-quiet { border-color: var(--ln); border-left-color: var(--amber); background: var(--grey); }
+.flag-quiet .flag-code { color: var(--amber); }
+
+/* --- Evidence, submitted against the register (S-12) ---------------------- */
+.evidence { display: grid; gap: 0; grid-template-columns: 1fr 1fr; border: 1px solid var(--ln); }
+@media (max-width: 780px) { .evidence { grid-template-columns: 1fr; } }
+.evidence > div { padding: 16px 18px; }
+.evidence > div + div { border-left: 1px solid var(--ln); }
+@media (max-width: 780px) {
+  .evidence > div + div { border-left: none; border-top: 1px solid var(--ln); }
+}
+.evidence h3 { font-size: .95rem; text-transform: uppercase; letter-spacing: .06em; }
+.evidence .source { display: block; margin: 4px 0 12px; font-size: 12.5px; color: var(--mut); }
+
+/* --- The name similarity score -------------------------------------------- */
+.score {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; align-items: center;
+  border: 1px solid var(--ln); border-left: 3px solid var(--sky-ink);
+  padding: 14px 16px; margin: 16px 0;
+}
+.score-num {
+  font-size: 2.6rem; font-weight: 800; line-height: 1;
+  font-variant-numeric: tabular-nums; color: var(--sky-ink);
+}
+.score-num.score-low { color: var(--red); }
+.score-out { font-size: 12px; color: var(--mut); display: block; }
+.score-band { font-weight: 700; }
+.score-detail { grid-column: 2; font-size: 14px; color: var(--mut); }
+.meter { height: 6px; background: rgba(var(--fg-rgb), .1); grid-column: 1 / -1; margin-top: 6px; }
+.meter > span { display: block; height: 100%; background: var(--sky-ink); }
+.meter > span.low { background: var(--red); }
+
+/* --- Chips ---------------------------------------------------------------- */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font-size: 12px; padding: 2px 9px; border: 1px solid var(--ln); color: var(--mut);
+  background: var(--bg); white-space: nowrap;
+}
+.chip-on { border-color: var(--green); color: var(--green); background: rgba(var(--green-rgb), .07); }
+.chip-off { border-style: dashed; }
+
+/* --- Raw evidence, folded away (FR-605) ----------------------------------- */
+details.raw { border: 1px solid var(--ln); padding: 0; margin-top: 16px; }
+details.raw > summary {
+  cursor: pointer; padding: 11px 14px; background: var(--grey);
+  font-family: var(--font-m); font-size: 11px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+details.raw > summary:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+details.raw pre {
+  margin: 0; padding: 14px; overflow-x: auto; font-size: 13px; line-height: 1.5;
+  background: var(--navy); color: var(--bone); white-space: pre;
+}
+
+/* --- Decision panel, pinned beside the evidence it depends on ------------- */
+.panel { border: 1px solid var(--ln); padding: 18px 20px; }
+.panel + .panel { margin-top: 16px; }
+.panel > h2, .panel > h3 { font-size: 1rem; margin-bottom: 12px; }
+@media (min-width: 901px) { .panel-sticky { position: sticky; top: calc(var(--topbar-h) + 16px); } }
+
+/* --- Selectable rows ------------------------------------------------------ */
+table.pick td:first-child, table.pick th:first-child { width: 34px; text-align: center; }
+table.pick input[type="checkbox"] { width: 17px; height: 17px; }
+tr.row-blocked td { color: var(--mut); background: rgba(var(--fg-rgb), .02); }
+tr.row-invited td { background: rgba(var(--green-rgb), .05); }
+.why { display: block; font-size: 12.5px; color: var(--mut); }
+
+/* --- Match bar in the candidate table ------------------------------------- */
+.match { min-width: 92px; }
+.match-num { font-weight: 700; font-variant-numeric: tabular-nums; }
+.match-bar { height: 5px; background: rgba(var(--fg-rgb), .1); margin-top: 4px; }
+.match-bar > span { display: block; height: 100%; background: var(--sky-ink); }
+
+/* --- Pre-award checklist (S-16) ------------------------------------------- */
+.checklist { list-style: none; border: 1px solid var(--ln); }
+.checklist li {
+  display: grid; grid-template-columns: 74px 1fr; gap: 2px 14px;
+  padding: 10px 14px; border-bottom: 1px solid var(--ln);
+}
+.checklist li:last-child { border-bottom: none; }
+.checklist .verdict {
+  font-family: var(--font-m); font-size: 10px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; padding-top: 3px;
+}
+.checklist .pass { color: var(--green); }
+.checklist .fail { color: var(--red); }
+.checklist .what { font-weight: 600; font-size: 14.5px; }
+.checklist .detail { grid-column: 2; font-size: 13px; color: var(--mut); }
+
+/* --- What happens on confirmation ----------------------------------------- */
+.consequences { list-style: none; font-size: 14px; }
+.consequences li { padding: 5px 0 5px 18px; position: relative; }
+.consequences li::before {
+  content: ""; position: absolute; left: 0; top: 13px; width: 7px; height: 2px;
+  background: var(--orange);
+}
+
+/* --- Audit timeline additions (S-17) -------------------------------------- */
+.timeline .detail { font-size: 13.5px; color: var(--mut); margin-top: 3px; }
+.timeline .states { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
+.timeline .states .arrow { color: var(--mut); }
+.timeline .reason {
+  font-family: var(--font-m); font-size: 10.5px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--red);
+}
+.timeline .note {
+  margin-top: 6px; padding-left: 12px; border-left: 2px solid var(--ln);
+  font-size: 14px; max-width: 68ch;
+}
+.timeline li.by-system::before { background: var(--sky-ink); }
+.timeline li.by-staff::before { background: var(--orange); }
+.timeline li.by-client::before, .timeline li.by-contractor::before { background: var(--navy); }
+
+/* --- Compact definition list used in dense panels ------------------------- */
+.kv-tight { grid-template-columns: minmax(110px, auto) 1fr; gap: 6px 14px; font-size: 14px; }
+
+/* --- Read-only banner ----------------------------------------------------- */
+.readonly {
+  border: 1px dashed var(--ln); padding: 12px 14px; font-size: 13.5px; color: var(--mut);
+}
+
+/* --- Bid comparison cards ------------------------------------------------- */
+.approach {
+  font-size: 14px; line-height: 1.55; max-width: 70ch; white-space: pre-wrap;
+  border-left: 2px solid var(--ln); padding-left: 12px; margin-top: 8px;
+}
+.money { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }

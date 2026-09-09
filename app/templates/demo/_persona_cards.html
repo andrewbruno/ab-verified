@@ -15,8 +15,9 @@
       <p>{{ persona.blurb }}</p>
       <form method="post" action="/demo/login">
         <input type="hidden" name="persona" value="{{ persona.key }}">
+        {# The visible label stays short; the accessible name stays unique. #}
         <button type="submit" class="btn btn-sm btn-block">
-          Sign in as {{ persona.card_title }}
+          Sign in<span class="visually-hidden"> as {{ persona.card_title }}</span>
         </button>
       </form>
     </div>

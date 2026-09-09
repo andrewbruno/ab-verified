@@ -235,7 +235,7 @@ insert into public.verification_case (
     ('f241ec71-47a3-599e-b497-5a8b0fb94882', '69456d0c-3f1e-59cd-aa63-1240746ade56', 'IN_REVIEW', 100, false, null, true, now() - interval '4 days', null),
     ('cbb3568c-c7f5-5e77-a34f-a884add89196', '777080af-ba57-5bde-a0a6-3b2eae352d33', 'INFO_REQUESTED', 92, false, null, true, now() - interval '4 days', null);
 
--- verification_decision: 1 rows.
+-- verification_decision: 1 row.
 insert into public.verification_decision (
     id,
     case_id,
