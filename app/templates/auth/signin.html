@@ -1,0 +1,64 @@
+{% extends "layout/base.html" %}
+{% block title %}Sign in &#183; AB-Verified{% endblock %}
+{% block wrapclass %}wrap-narrow{% endblock %}
+
+{# FR-159: email and password sign-in, available to every persona outside
+   production. The form is written out rather than assembled from the field
+   macro because the one error applies to both inputs, so both point at it
+   with aria-describedby. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<div class="stack">
+  <div>
+    <p class="label">AB-Verified</p>
+    <h1>Sign in</h1>
+  </div>
+
+  {% if error %}
+    <p class="notice notice-error" id="signin-error" role="alert">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" action="/signin" class="card">
+    <input type="hidden" name="next" value="{{ next }}">
+
+    <div class="field {% if error %}field-error{% endif %}">
+      <label for="f-email">Email</label>
+      <input id="f-email" name="email" type="email" autocomplete="username"
+             value="{{ email or '' }}" required aria-required="true"
+             {% if error %}aria-invalid="true" aria-describedby="signin-error"{% endif %}>
+    </div>
+
+    <div class="field {% if error %}field-error{% endif %}">
+      <label for="f-password">Password</label>
+      <input id="f-password" name="password" type="password"
+             autocomplete="current-password" required aria-required="true"
+             {% if error %}aria-invalid="true" aria-describedby="signin-error"{% endif %}>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-solid">Sign in</button>
+      <a class="btn" href="/register">Register instead</a>
+    </div>
+
+    {% if environment != 'production' %}
+      <p class="hint" style="margin-top:16px">
+        Staff sign-in additionally prompts for a TOTP code in production
+        (FR-109). This environment does not enforce it.
+      </p>
+    {% endif %}
+  </form>
+
+  {% if demo_mode %}
+    <div class="card card-quiet">
+      <h3>Or try a seeded persona</h3>
+      <p class="small muted" style="margin-top:8px">
+        Demo sign-in performs exactly this same password check against a
+        seeded account, so a demo session is subject to the same policies as
+        any other.
+      </p>
+      <p style="margin-top:14px"><a class="btn btn-sm" href="/demo">Choose a demo persona</a></p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

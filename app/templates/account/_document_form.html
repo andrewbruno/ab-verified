@@ -1,0 +1,47 @@
+{#
+  FR-110: record a supporting document.
+
+  There is no storage bucket in this build, so the file itself is not kept.
+  The form is honest about that rather than pretending: the bytes are read
+  only to measure them, and the row records what was supplied and where the
+  file would live in production.
+
+  Included by both S-03 and the account page, posting back to whichever page
+  included it.
+#}
+<form method="post" action="/account/documents" enctype="multipart/form-data"
+      class="card" style="margin-top:16px">
+  <h3>Add a supporting document</h3>
+
+  <div class="grid grid-2" style="margin-top:14px">
+    <div class="field">
+      <label for="f-kind">What the document is</label>
+      <select id="f-kind" name="kind" required aria-required="true">
+        <option value="">Choose one</option>
+        {% for kind in document_kinds %}
+          <option value="{{ kind }}">{{ kind }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="field id-file">
+      <label for="f-file">File</label>
+      <input id="f-file" name="file" type="file" required aria-required="true"
+             accept="application/pdf,image/png,image/jpeg" aria-describedby="h-file">
+      <span class="hint" id="h-file">PDF, PNG or JPG, up to 10 MB.</span>
+    </div>
+  </div>
+
+  <input type="hidden" name="return_to" value="{{ request.url.path }}">
+
+  <p class="hint">
+    In production the file is uploaded to a private Supabase Storage bucket,
+    reachable only through a short-lived signed URL and scanned before our
+    team opens it. This build has no bucket, so only the record of the
+    document is kept: the file is not stored anywhere.
+  </p>
+
+  <div class="form-actions">
+    <button type="submit" class="btn">Record document</button>
+  </div>
+</form>

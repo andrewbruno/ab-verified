@@ -1,0 +1,127 @@
+{# S-06 Compare released bids and select a winner (FR-409, FR-410, FR-411).
+
+   The bids on this page came back from `repo.bids(...)`, which applies the
+   `bid_select` policy: a client is admitted to RELEASED, WON and NOT_SELECTED
+   bids and to nothing else. This template does not filter them again, because
+   a template is not a safety net. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, stat, empty, bid_pill %}
+{% from "client/_macros.html" import budget, bid_price %}
+
+{% block title %}Compare bids &#183; {{ job.title }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/jobs.css">
+
+<p class="small"><a href="/jobs/{{ job.id }}">Back to the job</a></p>
+
+{{ page_head(job.title, none, "Compare released bids") }}
+
+<p class="lead">
+  {% if job.bids_close_at %}Bidding closed {{ job.bids_close_at|date }}. {% endif %}
+  Our team screened the bids that came in and released
+  {{ bids|length }} of them to you. Your budget was {{ budget(job) }}.
+</p>
+
+{% if bids %}
+  <section aria-labelledby="glance-heading">
+    <h2 id="glance-heading" class="visually-hidden">The bids at a glance</h2>
+    <div class="grid grid-tiles">
+      {{ stat(bids|length, "Bids released to you") }}
+      {{ stat(lowest|money, "Lowest") }}
+      {{ stat(highest|money, "Highest") }}
+      {{ stat(spread|money, "Spread") }}
+    </div>
+  </section>
+
+  <section aria-labelledby="compare-heading" class="stack">
+    <h2 id="compare-heading">Side by side</h2>
+    <div class="table-wrap">
+      <table class="compare">
+        <caption class="visually-hidden">
+          Released bids on {{ job.title }}, with price, proposed start, estimated
+          duration and approach for each contractor.
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">Contractor</th>
+            <th scope="col" class="num">Price</th>
+            <th scope="col">Proposed start</th>
+            <th scope="col">Estimated duration</th>
+            <th scope="col">Approach</th>
+            <th scope="col"><span class="visually-hidden">Select</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for bid in bids %}
+            <tr>
+              <th scope="row">
+                <strong>{{ bid.contractor_name }}</strong>
+                <div class="small muted">
+                  Verified &#183; {{ bid.contractor_region or "Region not stated" }}
+                </div>
+                <div>{{ bid_pill(bid.state) }}</div>
+              </th>
+              <td class="num">
+                {{ bid_price(bid) }}
+                {# Marked in words, not by colour alone (WCAG 2.2 AA). #}
+                {% if bid.is_lowest %}<div class="flag">Lowest price</div>{% endif %}
+                {% if bid.is_highest %}<div class="flag">Highest price</div>{% endif %}
+              </td>
+              <td>{{ bid.proposed_start|date }}</td>
+              <td>
+                {% if bid.estimated_days %}{{ bid.estimated_days }} days
+                {% else %}<span class="muted">Not stated</span>{% endif %}
+              </td>
+              <td class="approach">{{ bid.approach or "No approach given." }}</td>
+              <td>
+                {% if selectable %}
+                  <a class="btn btn-sm" href="/jobs/{{ job.id }}/select/{{ bid.id }}">
+                    Select this bid</a>
+                {% elif bid.state == "WON" %}
+                  <span class="small">Awarded</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if not selectable %}
+      <p class="notice" role="status">
+        {% if job.state == "AWARD_PENDING" %}
+          You have already selected a bid on this job. Our team is confirming the
+          award, and until they do nothing here can change.
+        {% elif job.state == "AWARDED" %}
+          This job has been awarded.
+        {% else %}
+          Selection is not open on this job at the moment.
+        {% endif %}
+      </p>
+    {% endif %}
+  </section>
+
+  <section class="notice" aria-labelledby="embargo-heading">
+    <h3 id="embargo-heading">What you can and cannot see here</h3>
+    <p class="small">
+      You see the contractor's business name, region and capability. Email addresses,
+      phone numbers and street addresses are held back until our team confirms the
+      award, which is what stops either side stepping around the marketplace
+      mid-bid.
+    </p>
+    <p class="small">
+      Selecting a bid does not award the job. It moves the job to
+      <strong>award pending</strong> so our team can confirm it. Only then does the
+      winning contractor get the work, the other bids move to not selected, and
+      contact details are released to both sides.
+    </p>
+  </section>
+{% else %}
+  {{ empty(
+      "No bids have been released to you on this job yet. Our team screens every bid
+       before you see it, so that what reaches you is priced properly and free of
+       contact details. We will email you the moment there is something to compare.",
+      "/jobs/" ~ job.id, "Back to the job") }}
+{% endif %}
+{% endblock %}

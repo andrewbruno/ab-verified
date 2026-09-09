@@ -1,0 +1,65 @@
+{# The contractor's own bids. The bid policy returns their rows and nobody
+   else's (FR-407), so there is no filter here that could widen it. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, stat, empty, bid_pill %}
+
+{% block title %}My bids &#183; AB-Verified{% endblock %}
+
+{% block content %}
+{{ page_head(
+     "My bids",
+     "Every bid you have lodged, in whatever state it has reached. You see your own bids only, and no other contractor can see them.",
+     kicker="Contractor") }}
+
+{% if bids %}
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">Bids you have lodged</caption>
+      <thead>
+        <tr>
+          <th scope="col">Job</th>
+          <th scope="col" class="num">Your price</th>
+          <th scope="col" class="num">Days</th>
+          <th scope="col">Version</th>
+          <th scope="col">State</th>
+          <th scope="col">Bids close</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bid in bids %}
+        <tr>
+          <td><a href="/bids/{{ bid.id }}">{{ bid.job_title }}</a></td>
+          <td class="num">
+            {%- if bid.day_rate %}{{ bid.day_rate|money }} per day
+            {%- elif bid.amount %}{{ bid.amount|money }}
+            {%- else %}<span class="muted">Not priced</span>{% endif -%}
+          </td>
+          <td class="num">{{ bid.estimated_days or '-' }}</td>
+          <td class="num">{{ bid.version }}</td>
+          <td>{{ bid_pill(bid.state) }}</td>
+          <td class="nowrap">
+            {%- if bid.bidding_closed %}<span class="muted">Closed {{ bid.bids_close_at|date }}</span>
+            {%- else %}{{ bid.bids_close_at|date }}
+              {% if bid.closing_soon %}<span class="pill pill-danger">Closing soon</span>{% endif %}
+            {%- endif -%}
+          </td>
+          <td class="right">
+            {% if bid.state in ('DRAFT', 'SUBMITTED') and not bid.bidding_closed %}
+              <a class="btn btn-sm" href="/jobs/{{ bid.job_id }}/bid">
+                {{ 'Revise' if bid.state == 'SUBMITTED' else 'Continue' }}</a>
+            {% else %}
+              <a class="btn btn-sm btn-ghost" href="/bids/{{ bid.id }}">View</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  {{ empty(
+     "You have not lodged a bid yet. Bidding starts with an invitation: Staff match verified contractors to each approved job, and everything you can bid on appears under Invitations.",
+     "/invitations", "Go to invitations") }}
+{% endif %}
+{% endblock %}

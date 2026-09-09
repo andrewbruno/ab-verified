@@ -1,0 +1,149 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import org_pill %}
+{% block title %}Account &#183; AB-Verified{% endblock %}
+
+{# The organisation as its own members see it: status, the ABR evidence a
+   staff decision is made against, the people on the account and the
+   supporting documents. Every row on this page was read through
+   app/domain/repo.py, so the organisation policy decided what appears. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<div class="page-head">
+  <div>
+    <p class="label">Your organisation</p>
+    <h1>{{ organisation.legal_name }}</h1>
+    {% if organisation.trading_name %}
+      <p class="lead">Trading as {{ organisation.trading_name }}</p>
+    {% endif %}
+  </div>
+  <div class="row">
+    {{ org_pill(organisation.status) }}
+    {% if organisation.status != 'VERIFIED' %}
+      <a class="btn btn-sm" href="/verification-status">View your verification</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="split">
+  <div class="stack">
+    <div class="card">
+      <h2 class="card-title">Australian Business Register</h2>
+      <p class="small muted" style="margin:6px 0 14px">
+        This is the evidence our team reviews. We hold what the register
+        returned, not what you told us.
+      </p>
+      <dl class="kv">
+        <dt>ABN</dt>
+        <dd class="mono">{{ organisation.abn or 'Not recorded' }}</dd>
+        <dt>Entity name</dt>
+        <dd>{{ organisation.abr_entity_name or 'Not returned yet' }}</dd>
+        <dt>Entity type</dt>
+        <dd>{{ organisation.abr_entity_type or 'Not returned yet' }}</dd>
+        <dt>ABN status</dt>
+        <dd>
+          {{ organisation.abr_status|lower|capitalize }}
+          {% if organisation.abr_status == 'CANCELLED' %}
+            <span class="pill pill-danger">Cancelled</span>
+          {% endif %}
+        </dd>
+        <dt>GST</dt>
+        <dd>
+          {% if organisation.gst_registered is none %}Not returned yet
+          {% elif organisation.gst_registered %}Registered
+          {% else %}Not registered{% endif %}
+        </dd>
+        <dt>Lookup</dt>
+        <dd>
+          {% if organisation.lookup_state == 'OK' %}
+            Completed {{ organisation.checked_at|datetime }}
+          {% elif organisation.lookup_state == 'ABR_UNAVAILABLE' %}
+            The register was unavailable. A scheduled task retries it.
+          {% elif organisation.lookup_state == 'NOT_FOUND' %}
+            The number was not found on the register.
+          {% else %}
+            Queued.
+          {% endif %}
+        </dd>
+      </dl>
+    </div>
+
+    <div>
+      <h2>Supporting documents</h2>
+      {% if documents %}
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <caption class="visually-hidden">Documents held against this organisation</caption>
+            <thead>
+              <tr>
+                <th scope="col">Document</th>
+                <th scope="col">File</th>
+                <th scope="col">Size</th>
+                <th scope="col">Supplied</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for document in documents %}
+                <tr>
+                  <td>{{ document.kind }}</td>
+                  <td class="small muted">{{ document.filename }}</td>
+                  <td class="num nowrap">
+                    {{ '%.0f'|format((document.size_bytes or 0) / 1024) }} kB
+                  </td>
+                  <td class="nowrap">{{ document.uploaded_at|date }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="small muted" style="margin-top:10px">
+          Nothing supplied yet. Certificates of currency, insurance and
+          licences all help our team reach a decision sooner.
+        </p>
+      {% endif %}
+
+      {% include "account/_document_form.html" %}
+    </div>
+  </div>
+
+  <aside class="stack-sm">
+    <div class="card card-quiet">
+      <h3>Status</h3>
+      <dl class="kv" style="margin-top:10px">
+        <dt>Organisation</dt><dd>{{ org_status_label(organisation.status) }}</dd>
+        <dt>Registered as</dt><dd>{{ organisation.kind|lower|capitalize }}</dd>
+        <dt>Region</dt><dd>{{ organisation.region or 'Not stated' }}</dd>
+        <dt>Joined</dt><dd>{{ organisation.created_at|date }}</dd>
+        {% if case %}
+          <dt>Verification</dt><dd>{{ case_state_label(case.state) }}</dd>
+        {% endif %}
+      </dl>
+    </div>
+
+    <div class="card card-quiet">
+      <h3>People</h3>
+      <ul style="margin:10px 0 0 18px">
+        {% for person in people %}
+          <li style="margin-bottom:8px">
+            <strong>{{ person.full_name }}</strong>
+            <span class="small muted">&#183; {{ person.role|lower }}</span><br>
+            <span class="small muted">{{ person.email }}</span>
+            {% if not person.email_verified or not person.mobile_verified %}
+              <br><span class="pill pill-warn">Contact not confirmed</span>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card card-quiet">
+      <h3>Your messages</h3>
+      <p class="small muted" style="margin-top:8px">
+        Everything we have sent to this account is listed in the outbox.
+      </p>
+      <p style="margin-top:14px"><a class="btn btn-sm" href="/outbox">Open the outbox</a></p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

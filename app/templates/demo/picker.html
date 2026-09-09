@@ -1,0 +1,50 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head %}
+{% block title %}Demo personas &#183; AB-Verified{% endblock %}
+
+{# The persona picker on a page of its own, reached from the demo banner's
+   "switch persona" control (FR-155). The cards are the same ones the landing
+   page renders. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+{{ page_head(
+    "Choose a demo persona",
+    lead="Signing in as a persona is an ordinary password sign-in against a seeded account. Switching persona replaces your session; nothing is carried across from the one you are leaving.",
+    kicker="Demo mode") }}
+
+{% include "demo/_persona_cards.html" %}
+
+<div class="grid grid-2" style="margin-top:var(--sp-1)">
+  <div class="card card-quiet">
+    <h3>Nothing here reaches anyone</h3>
+    <p class="small muted" style="margin-top:8px">
+      Demo accounts use the reserved domain <span class="mono">demo.ab-verified.invalid</span>,
+      which under RFC 2606 can never receive mail. Email and SMS raised during
+      a demo session are captured to the in-app outbox instead of being sent
+      (FR-157).
+    </p>
+    {% if me.is_authenticated %}
+      <p style="margin-top:14px"><a class="btn btn-sm" href="/outbox">Open the outbox</a></p>
+    {% endif %}
+  </div>
+  <div class="card card-quiet">
+    <h3>Starting again</h3>
+    <p class="small muted" style="margin-top:8px">
+      Reset demo data restores the fixture to its seeded state. It touches
+      only rows marked as demo data, and the reset is itself recorded in the
+      audit log (FR-156).
+    </p>
+    {% if me.is_demo %}
+      <form method="post" action="/demo/reset" style="margin-top:14px">
+        <button type="submit" class="btn btn-sm">Reset demo data</button>
+      </form>
+    {% else %}
+      <p class="small muted" style="margin-top:14px">
+        Sign in as a persona first, then reset from here or from the banner at
+        the top of any page.
+      </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

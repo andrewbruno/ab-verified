@@ -1,0 +1,197 @@
+{# S-09 submit a bid (FR-405, FR-406).
+
+   One form serves both buttons. The submit button posts `intent=submit`, the
+   draft button posts `intent=draft`, so the page works with JavaScript off.
+   Revising creates a new version rather than overwriting the last one.
+#}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, bid_pill %}
+{% from "contractor/_macros.html" import budget, engagement, closes, skills %}
+
+{% block title %}Your bid &#183; {{ job.title }}{% endblock %}
+
+{% block content %}
+{{ page_head("Your bid", job.title, kicker="Bid") }}
+
+{% if errors %}
+  <p class="notice notice-error" role="alert">
+    Your bid was not lodged. There
+    {{ 'is one thing' if errors|length == 1 else 'are ' ~ errors|length ~ ' things' }}
+    to fix below.
+  </p>
+{% endif %}
+
+<div class="split">
+  <div>
+    <div class="row" style="margin-bottom:18px">
+      {% if bid %}{{ bid_pill(bid.state) }}
+        <span class="pill">Version {{ bid.version }}</span>
+      {% else %}<span class="pill">Not started</span>{% endif %}
+      <span class="muted small">
+        Bids close {{ job.bids_close_at|datetime }} ({{ job.bids_close_at|relative }}).
+      </span>
+    </div>
+
+    <p class="muted">
+      You may revise this bid until bidding closes. Each revision is kept as a
+      new version, and the client sees only your latest one, after Staff have
+      released it.
+    </p>
+
+    <form method="post" action="/jobs/{{ job.id }}/bid" enctype="multipart/form-data"
+          class="stack-sm" style="margin-top:var(--sp-1)">
+
+      <div class="grid grid-3">
+        {% if job.engagement_type == 'DAY_RATE' %}
+          <div class="field {% if errors.day_rate %}field-error{% endif %}">
+            <label for="f-day_rate">Day rate, excluding GST <span aria-hidden="true">*</span></label>
+            <input id="f-day_rate" name="day_rate" type="text" inputmode="decimal"
+                   value="{{ values.day_rate }}" required aria-required="true"
+                   aria-describedby="{% if errors.day_rate %}e-day_rate {% endif %}h-day_rate">
+            <span class="hint" id="h-day_rate">Dollars per day, for example 1250.</span>
+            {% if errors.day_rate %}<span class="error-text" id="e-day_rate">{{ errors.day_rate }}</span>{% endif %}
+          </div>
+        {% else %}
+          <div class="field {% if errors.amount %}field-error{% endif %}">
+            <label for="f-amount">Fixed price, excluding GST <span aria-hidden="true">*</span></label>
+            <input id="f-amount" name="amount" type="text" inputmode="decimal"
+                   value="{{ values.amount }}" required aria-required="true"
+                   aria-describedby="{% if errors.amount %}e-amount {% endif %}h-amount">
+            <span class="hint" id="h-amount">Dollars for the whole engagement, for example 24500.</span>
+            {% if errors.amount %}<span class="error-text" id="e-amount">{{ errors.amount }}</span>{% endif %}
+          </div>
+        {% endif %}
+
+        <div class="field {% if errors.proposed_start %}field-error{% endif %}">
+          <label for="f-proposed_start">Proposed start <span aria-hidden="true">*</span></label>
+          <input id="f-proposed_start" name="proposed_start" type="date"
+                 value="{{ values.proposed_start }}" required aria-required="true"
+                 aria-describedby="{% if errors.proposed_start %}e-proposed_start {% endif %}h-proposed_start">
+          <span class="hint" id="h-proposed_start">
+            The client would prefer {{ job.start_date|date }}.
+          </span>
+          {% if errors.proposed_start %}<span class="error-text" id="e-proposed_start">{{ errors.proposed_start }}</span>{% endif %}
+        </div>
+
+        <div class="field {% if errors.estimated_days %}field-error{% endif %}">
+          <label for="f-estimated_days">Estimated duration, working days <span aria-hidden="true">*</span></label>
+          <input id="f-estimated_days" name="estimated_days" type="number" min="1" step="1"
+                 value="{{ values.estimated_days }}" required aria-required="true"
+                 aria-describedby="{% if errors.estimated_days %}e-estimated_days {% endif %}h-estimated_days">
+          <span class="hint" id="h-estimated_days">
+            The client expects around {{ job.duration or 'an unstated period' }}.
+          </span>
+          {% if errors.estimated_days %}<span class="error-text" id="e-estimated_days">{{ errors.estimated_days }}</span>{% endif %}
+        </div>
+      </div>
+
+      <div class="field {% if errors.approach %}field-error{% endif %}">
+        <label for="f-approach">Your approach <span aria-hidden="true">*</span></label>
+        <textarea id="f-approach" name="approach" rows="10" required aria-required="true"
+                  aria-describedby="{% if errors.approach %}e-approach {% endif %}h-approach"
+                  >{{ values.approach }}</textarea>
+        <span class="hint" id="h-approach">
+          How you would do the work, in at least {{ min_approach }} characters. Please
+          leave out phone numbers, email addresses and website links: contact details
+          are released automatically if you win, and we flag them to Staff if they
+          appear here.
+        </span>
+        {% if errors.approach %}<span class="error-text" id="e-approach">{{ errors.approach }}</span>{% endif %}
+      </div>
+
+      <div class="field">
+        <label for="f-attachment">Attachment</label>
+        <input id="f-attachment" name="attachment" type="file"
+               accept=".pdf,.doc,.docx" aria-describedby="h-attachment">
+        <span class="hint" id="h-attachment">
+          Optional: a capability statement or an indicative plan, PDF or Word, one
+          file at a time. The file itself goes to a private Supabase Storage
+          bucket that only you and Staff can reach, through a short lived signed
+          link. This screen records the metadata row that describes it.
+        </span>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" name="intent" value="submit" class="btn btn-big btn-solid">
+          {{ 'Submit revision' if bid and bid.state == 'SUBMITTED' else 'Submit bid' }}
+        </button>
+        <button type="submit" name="intent" value="draft" class="btn"
+                formnovalidate>Save draft</button>
+      </div>
+    </form>
+
+    {% if bid and bid.state in ('DRAFT', 'SUBMITTED') %}
+      <form method="post" action="/bids/{{ bid.id }}/withdraw" style="margin-top:var(--sp-1)">
+        <button type="submit" class="btn btn-sm">Withdraw this bid</button>
+        <span class="hint">
+          You may withdraw until bidding closes. A withdrawn bid is never shown
+          to the client and cannot be reinstated.
+        </span>
+      </form>
+    {% endif %}
+  </div>
+
+  {# --- Sidebar -------------------------------------------------------- #}
+  <aside class="stack-sm">
+    <div class="card card-accent">
+      <h3 class="card-title">The client's budget</h3>
+      <p class="num" style="font-size:1.3rem; font-weight:700; margin-top:8px">
+        {{ budget(job) }}
+      </p>
+      <p class="small muted" style="margin-top:6px">{{ engagement(job) }}</p>
+      <dl class="kv" style="margin-top:14px">
+        <dt>Location</dt><dd>{{ job.location or 'Not stated' }}</dd>
+        <dt>Skills wanted</dt><dd>{{ skills(job.required_skills) }}</dd>
+        <dt>Bids close</dt><dd>{{ closes(job.bids_close_at) }}</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Version history</h3>
+      {% if versions %}
+        <ul class="timeline" style="margin-top:12px">
+          {% for version in versions %}
+            {% set snapshot = version.snapshot|json_load({}) %}
+            <li>
+              <div class="when">{{ version.created_at|datetime }}</div>
+              <div class="what">Version {{ version.version }}</div>
+              <div class="who">
+                {% if snapshot.day_rate %}{{ snapshot.day_rate|money }} per day
+                {% elif snapshot.amount %}{{ snapshot.amount|money }}
+                {% else %}No price recorded{% endif %}
+                {% if snapshot.estimated_days %} &#183; {{ snapshot.estimated_days }} days{% endif %}
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="small muted" style="margin-top:8px">
+          No versions yet. One is written each time you submit, and every one is
+          kept.
+        </p>
+      {% endif %}
+    </div>
+
+    {% if attachments %}
+      <div class="card">
+        <h3 class="card-title">Attachments</h3>
+        <ul class="small" style="margin-top:10px; padding-left:18px">
+          {% for file in attachments %}
+            <li>{{ file.filename }}
+              <span class="muted">({{ (file.size_bytes or 0) // 1024 }} kB, {{ file.uploaded_at|date }})</span></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="card card-quiet">
+      <h3 class="card-title">After you submit</h3>
+      <p class="small" style="margin-top:8px">
+        Staff screen every bid before the client sees it. You will be notified
+        when your bid is released, and again when the job is awarded. You will
+        not be told how many others bid, and they will not be told about you.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

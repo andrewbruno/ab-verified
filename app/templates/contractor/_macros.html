@@ -1,0 +1,79 @@
+{#
+  Macros shared by the contractor screens (S-07, S-08, S-09).
+
+  Nothing here renders a bid count, an invitee count or a competitor name.
+  FR-407 makes competitive blindness a product decision rather than an
+  omission, so the columns that would allow it are simply never read.
+#}
+{% from "components/macros.html" import invitation_pill, bid_pill %}
+
+{% macro budget(row) %}{{ budget_range(row.budget_min, row.budget_max) }}{% if row.engagement_type == 'DAY_RATE' %} per day{% endif %}{% endmacro %}
+
+{% macro engagement(row) %}{{ 'Day rate' if row.engagement_type == 'DAY_RATE' else 'Fixed price' }}{% endmacro %}
+
+{% macro closes(value, soon=False, past_label='Closed') %}
+  {%- if value -%}
+    <span class="nowrap num">{{ value|datetime }}</span>
+    <span class="pill {{ 'pill-danger' if soon else 'pill-info' }}">
+      {%- if soon %}Closing soon &#183; {% endif -%}{{ value|relative }}</span>
+  {%- else -%}
+    <span class="muted">{{ past_label }}</span>
+  {%- endif -%}
+{% endmacro %}
+
+{% macro skills(raw) %}
+  {%- set list = raw|json_load -%}
+  {%- if list -%}
+    <span class="row" style="gap:6px">
+      {%- for skill in list %}<span class="pill">{{ skill }}</span>{% endfor -%}
+    </span>
+  {%- else -%}<span class="muted">Not stated</span>{%- endif -%}
+{% endmacro %}
+
+{#
+  One invitation, as S-07 lists it: the job, who it is for, what it is worth,
+  where it is, and how long is left to act.
+#}
+{% macro invitation_card(inv, accent=False) %}
+<article class="card {% if accent %}card-accent{% endif %}">
+  <div class="card-head">
+    <div>
+      <h3 class="card-title">
+        <a href="/invitations/{{ inv.id }}">{{ inv.job_title }}</a>
+      </h3>
+      <p class="small muted" style="margin-top:2px">
+        {{ inv.client_name }}{% if inv.category %} &#183; {{ inv.category }}{% endif %}
+        {% if inv.location %} &#183; {{ inv.location }}{% endif %}
+      </p>
+    </div>
+    <div class="row" style="gap:8px">
+      {{ invitation_pill(inv.state) }}
+      {% if inv.bid_state %}{{ bid_pill(inv.bid_state) }}{% endif %}
+    </div>
+  </div>
+
+  <dl class="kv">
+    <dt>Budget</dt><dd class="num">{{ budget(inv) }} <span class="muted small">({{ engagement(inv) }})</span></dd>
+    {% if inv.state == 'SENT' %}
+      <dt>Respond by</dt><dd>{{ closes(inv.expires_at, inv.closing_soon, 'Lapsed') }}</dd>
+    {% endif %}
+    <dt>Bids close</dt><dd>{{ closes(inv.bids_close_at, inv.closing_soon, 'Closed') }}</dd>
+  </dl>
+
+  <div class="row" style="margin-top:16px">
+    {% if inv.state == 'SENT' %}
+      <a class="btn btn-sm btn-solid" href="/invitations/{{ inv.id }}">Review invitation</a>
+    {% elif inv.state == 'ACCEPTED' and not inv.bidding_closed %}
+      <a class="btn btn-sm btn-solid" href="/jobs/{{ inv.job_id }}/bid">
+        {{ 'Revise your bid' if inv.bid_state == 'SUBMITTED' else ('Continue your bid' if inv.bid_id else 'Start your bid') }}
+      </a>
+      <a class="btn btn-sm" href="/invitations/{{ inv.id }}">Job detail</a>
+    {% else %}
+      <a class="btn btn-sm" href="/invitations/{{ inv.id }}">Job detail</a>
+    {% endif %}
+    {% if inv.bid_id %}
+      <a class="btn btn-sm btn-ghost" href="/bids/{{ inv.bid_id }}">Your bid</a>
+    {% endif %}
+  </div>
+</article>
+{% endmacro %}

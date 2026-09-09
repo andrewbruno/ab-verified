@@ -1,0 +1,153 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import field %}
+{% block title %}Register &#183; AB-Verified{% endblock %}
+
+{# S-01. FR-101, FR-104, FR-106, FR-108.
+
+   Nothing the visitor typed is lost on a failed submission except the two
+   password fields, which are never echoed back into HTML. Errors are listed
+   once at the top, where a screen reader meets them first, and again beside
+   the field they belong to. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<div class="split">
+  <div>
+    <ol class="steps">
+      <li class="current">1. Your details</li>
+      <li>2. Verify email and mobile</li>
+      <li>3. Staff verification</li>
+    </ol>
+
+    <p class="label">Registration</p>
+    <h1>Create your account</h1>
+    <p class="lead" style="margin-top:8px">
+      AB-Verified is a verified-only marketplace. Every business is checked
+      against the Australian Business Register before it can post or bid.
+    </p>
+
+    {% if form.errors %}
+      <div class="notice notice-error" role="alert" style="margin-top:var(--sp-1)">
+        <h3>There {{ 'is one thing' if form.errors|length == 1 else 'are ' ~ form.errors|length ~ ' things' }} to fix</h3>
+        <ul style="margin:8px 0 0 18px">
+          {% for name, message in form.errors.items() %}
+            <li><a href="#f-{{ name }}">{{ message }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <form method="post" action="/register" style="margin-top:var(--sp-1)">
+      <fieldset>
+        <legend>I am registering as</legend>
+        <div class="id-choice" role="radiogroup"
+             {% if form.errors.get('account_type') %}aria-describedby="e-account_type"{% endif %}>
+          <label>
+            <input type="radio" id="f-account_type" name="account_type" value="CLIENT"
+                   {% if form.account_type != 'CONTRACTOR' %}checked{% endif %}>
+            <span class="id-choice-text">
+              <strong>A client</strong>
+              <span>I need IT work delivered.</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="account_type" value="CONTRACTOR"
+                   {% if form.account_type == 'CONTRACTOR' %}checked{% endif %}>
+            <span class="id-choice-text">
+              <strong>A contractor</strong>
+              <span>I deliver IT work for clients.</span>
+            </span>
+          </label>
+        </div>
+        {% if form.errors.get('account_type') %}
+          <span class="error-text" id="e-account_type">{{ form.errors.get('account_type') }}</span>
+        {% endif %}
+      </fieldset>
+
+      <fieldset>
+        <legend>Business</legend>
+        {{ field('legal_name', 'Registered business name', form.legal_name, required=True,
+                 hint='Exactly as it is registered with the Australian Business Register.',
+                 error=form.errors.get('legal_name')) }}
+        {{ field('trading_name', 'Trading name', form.trading_name,
+                 hint='Only if it differs from the registered name.',
+                 error=form.errors.get('trading_name')) }}
+        {{ field('abn', 'ABN', form.abn, required=True, placeholder='11 digits',
+                 hint='Checked immediately against the ATO check digit test, then looked up at the Australian Business Register.',
+                 error=form.errors.get('abn')) }}
+      </fieldset>
+
+      <fieldset>
+        <legend>Primary contact</legend>
+        {{ field('full_name', 'Full name', form.full_name, required=True,
+                 error=form.errors.get('full_name')) }}
+        <div class="grid grid-2">
+          {{ field('email', 'Email', form.email, type='email', required=True,
+                   placeholder='name@business.com.au',
+                   error=form.errors.get('email')) }}
+          {{ field('mobile', 'Mobile', form.mobile, type='tel', required=True,
+                   placeholder='0412 345 678',
+                   hint='An Australian mobile. We send a six-digit code to it.',
+                   error=form.errors.get('mobile')) }}
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Password</legend>
+        <div class="grid grid-2">
+          {{ field('password', 'Password', '', type='password', required=True,
+                   hint='At least 12 characters, and checked against a list of breached passwords.',
+                   error=form.errors.get('password')) }}
+          {{ field('confirm_password', 'Confirm password', '', type='password', required=True,
+                   error=form.errors.get('confirm_password')) }}
+        </div>
+      </fieldset>
+
+      <div class="check {% if form.errors.get('accepted_terms') %}field-error{% endif %}">
+        <input type="checkbox" id="f-accepted_terms" name="accepted_terms" value="yes"
+               {% if form.accepted_terms %}checked{% endif %}
+               {% if form.errors.get('accepted_terms') %}aria-invalid="true" aria-describedby="e-accepted_terms"{% endif %}>
+        <label for="f-accepted_terms">
+          I confirm I am authorised to act for this business, and I accept the
+          terms and the privacy collection notice.
+        </label>
+      </div>
+      {% if form.errors.get('accepted_terms') %}
+        <span class="error-text" id="e-accepted_terms">{{ form.errors.get('accepted_terms') }}</span>
+      {% endif %}
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-solid">Create account</button>
+        <a class="btn" href="/">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <aside class="stack-sm">
+    <div class="card card-quiet">
+      <h3>What happens after this</h3>
+      <p class="small muted" style="margin-top:8px">
+        We confirm your email and mobile, then look up your ABN at the
+        Australian Business Register. A member of our team reads the result
+        and decides. Most reviews finish within one business day.
+      </p>
+    </div>
+    <div class="card card-quiet">
+      <h3>Your ABN</h3>
+      <p class="small muted" style="margin-top:8px">
+        The number is checked here for its check digit, which catches a typo
+        immediately. The register itself is queried afterwards, in the
+        background, so an outage at the register cannot stop you registering.
+      </p>
+    </div>
+    <div class="card card-quiet">
+      <h3>Already registered?</h3>
+      <p class="small muted" style="margin-top:8px">
+        <a href="/signin">Sign in</a> instead. If you are not sure whether
+        your business already has an account, contact support rather than
+        registering twice.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

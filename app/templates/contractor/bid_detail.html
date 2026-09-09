@@ -1,0 +1,136 @@
+{# One bid, with the full version history FR-406 requires be retained. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, bid_pill %}
+{% from "contractor/_macros.html" import budget, engagement, closes %}
+
+{% block title %}Bid on {{ bid.job_title }} &#183; AB-Verified{% endblock %}
+
+{% block content %}
+{{ page_head("Your bid", bid.job_title, kicker="Bid detail") }}
+
+<div class="split">
+  <div class="stack">
+    <div class="row">
+      {{ bid_pill(bid.state) }}
+      <span class="pill">Version {{ bid.version }}</span>
+      {% if bid.contact_flagged %}
+        <span class="pill pill-flag">Flagged for contact details</span>
+      {% endif %}
+    </div>
+
+    <section>
+      <h2>What you lodged</h2>
+      <dl class="kv" style="margin-top:14px">
+        {% if bid.day_rate %}
+          <dt>Day rate</dt><dd class="num">{{ bid.day_rate|money }} per day, excluding GST</dd>
+        {% else %}
+          <dt>Fixed price</dt><dd class="num">{{ bid.amount|money }}, excluding GST</dd>
+        {% endif %}
+        <dt>Estimated duration</dt><dd class="num">{{ bid.estimated_days or '-' }} working days</dd>
+        <dt>Proposed start</dt><dd>{{ bid.proposed_start|date }}</dd>
+        <dt>Lodged</dt><dd>{{ bid.submitted_at|datetime if bid.submitted_at else 'Not submitted yet' }}</dd>
+        <dt>Bids close</dt><dd>{{ closes(bid.bids_close_at, bid.closing_soon) }}</dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Your approach</h2>
+      <p style="margin-top:12px; white-space:pre-line">{{ bid.approach }}</p>
+    </section>
+
+    {% if bid.state == 'REJECTED' and bid.staff_note %}
+      <p class="notice notice-error" role="status">
+        Staff did not release this bid. {{ bid.staff_note }}
+      </p>
+    {% endif %}
+
+    {% if attachments %}
+      <section>
+        <h2>Attachments</h2>
+        <div class="table-wrap" style="margin-top:12px">
+          <table>
+            <caption class="visually-hidden">Files attached to this bid</caption>
+            <thead><tr>
+              <th scope="col">File</th><th scope="col">Type</th>
+              <th scope="col" class="num">Size</th><th scope="col">Added</th>
+            </tr></thead>
+            <tbody>
+              {% for file in attachments %}
+                <tr>
+                  <td>{{ file.filename }}</td>
+                  <td class="small muted">{{ file.content_type or 'Unknown' }}</td>
+                  <td class="num">{{ (file.size_bytes or 0) // 1024 }} kB</td>
+                  <td class="nowrap">{{ file.uploaded_at|date }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted" style="margin-top:10px">
+          Files live in a private Supabase Storage bucket under
+          <span class="mono">bid/{{ bid.id }}/</span> and are reachable only
+          through a short lived signed link, so nobody can fetch one by guessing
+          its name.
+        </p>
+      </section>
+    {% endif %}
+
+    {% if can_change %}
+      <div class="row">
+        <a class="btn btn-solid" href="/jobs/{{ bid.job_id }}/bid">
+          {{ 'Revise this bid' if bid.state == 'SUBMITTED' else 'Continue this bid' }}</a>
+        <form method="post" action="/bids/{{ bid.id }}/withdraw">
+          <button type="submit" class="btn">Withdraw this bid</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+
+  <aside class="stack-sm">
+    <div class="card">
+      <h3 class="card-title">Version history</h3>
+      <p class="small muted" style="margin-top:6px">
+        Every version is retained (FR-406). The client sees only the latest
+        released one; Staff can read them all, which is what settles an argument
+        about a price later on.
+      </p>
+      <ul class="timeline" style="margin-top:14px">
+        {% for version in versions %}
+          {% set snapshot = version.snapshot|json_load({}) %}
+          <li>
+            <div class="when">{{ version.created_at|datetime }}</div>
+            <div class="what">
+              Version {{ version.version }}{% if version.version == bid.version %} (current){% endif %}
+            </div>
+            <div class="who">
+              {% if snapshot.day_rate %}{{ snapshot.day_rate|money }} per day
+              {% elif snapshot.amount %}{{ snapshot.amount|money }}
+              {% else %}No price recorded{% endif %}
+              {% if snapshot.estimated_days %} &#183; {{ snapshot.estimated_days }} working days{% endif %}
+            </div>
+          </li>
+        {% else %}
+          <li><div class="what">No versions recorded yet.</div></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card card-quiet">
+      <h3 class="card-title">The client's budget</h3>
+      <p class="num" style="font-size:1.2rem; font-weight:700; margin-top:8px">
+        {{ budget(bid) }}
+      </p>
+      <p class="small muted" style="margin-top:6px">{{ engagement(bid) }}</p>
+    </div>
+
+    <div class="card card-quiet">
+      <h3 class="card-title">What happens next</h3>
+      <p class="small" style="margin-top:8px">
+        Staff screen every bid before the client sees it. You are notified when
+        yours is released and again when the job is awarded. You will never be
+        told how many other contractors bid, or what they offered.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

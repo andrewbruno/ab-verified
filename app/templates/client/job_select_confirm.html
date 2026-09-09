@@ -1,0 +1,48 @@
+{# Confirming a selection (FR-410, FR-411). Selecting is consequential, so it
+   is never a single click, and the page says plainly what happens next. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head %}
+{% from "client/_macros.html" import bid_price, budget %}
+
+{% block title %}Confirm your selection &#183; AB-Verified{% endblock %}
+{% block wrapclass %}wrap wrap-narrow{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/jobs.css">
+
+<p class="small"><a href="/jobs/{{ job.id }}/bids">Back to the comparison</a></p>
+
+{{ page_head("Confirm your selection", none, job.title) }}
+
+<div class="card card-accent">
+  <h2 class="card-title">{{ bid.contractor_name }}</h2>
+  <p class="small muted">Verified &#183; {{ bid.contractor_region or "Region not stated" }}</p>
+  <dl class="kv">
+    <dt>Price</dt><dd>{{ bid_price(bid) }}</dd>
+    <dt>Proposed start</dt><dd>{{ bid.proposed_start|date }}</dd>
+    <dt>Estimated duration</dt>
+    <dd>{% if bid.estimated_days %}{{ bid.estimated_days }} days{% else %}Not stated{% endif %}</dd>
+    <dt>Your budget</dt><dd>{{ budget(job) }}</dd>
+    <dt>Approach</dt><dd style="white-space: pre-line">{{ bid.approach }}</dd>
+  </dl>
+</div>
+
+<div class="notice">
+  <h3>What happens when you confirm</h3>
+  <ol class="numbered">
+    <li>The job moves to <strong>award pending</strong>. Your selection is recorded
+      against it, with your name and the time.</li>
+    <li>Our team confirms the award. Until they do, nothing is awarded and no
+      contact details move.</li>
+    <li>On confirmation the contractor is told they have won, the other bids move to
+      not selected and those contractors are told too.</li>
+    <li>Contact details are released to both sides at that point, and not before.</li>
+  </ol>
+</div>
+
+<form method="post" action="/jobs/{{ job.id }}/select/{{ bid.id }}" class="form-actions">
+  <button class="btn btn-solid btn-big" type="submit">
+    Select {{ bid.contractor_name }}</button>
+  <a class="btn btn-ghost" href="/jobs/{{ job.id }}/bids">Go back and keep comparing</a>
+</form>
+{% endblock %}

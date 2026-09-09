@@ -1,0 +1,226 @@
+/* ---------------------------------------------------------------------------
+   Identity, demo mode and onboarding: the few classes app.css does not
+   already carry.
+
+   Loaded only by the templates that need it (the landing page, the auth
+   screens, the account screens). Everything here is prefixed `id-` so it can
+   never collide with a class another module adds to app.css.
+
+   Same rules as app.css: square corners, Roboto only, hierarchy from weight,
+   case, letter-spacing and scale. Red appears once per viewport.
+   --------------------------------------------------------------------------- */
+
+/* --- Full-bleed bands ----------------------------------------------------
+   `main` pads the page; a band cancels that padding so its surface reaches
+   both edges, then re-applies it inside. That is what gives the landing page
+   its rhythm rather than one flat column.                                    */
+.id-page {
+  margin: calc(var(--sp-1) * -1) 0 calc(var(--sp-2) * -1);
+}
+.id-band {
+  margin-left: calc(var(--pad-x) * -1);
+  margin-right: calc(var(--pad-x) * -1);
+  padding: var(--sp-2) var(--pad-x);
+}
+.id-band-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.id-band + .id-band {
+  border-top: 1px solid var(--ln);
+}
+.id-band.surf-deep + .id-band.surf-deep,
+.id-band.surf-deep + .id-band.paper-band {
+  border-top-color: rgba(var(--bone-rgb), .18);
+}
+
+/* --- Hero ---------------------------------------------------------------- */
+.id-hero {
+  padding-top: var(--sp-3);
+  padding-bottom: var(--sp-3);
+}
+.id-hero-title {
+  font-size: clamp(2.1rem, 5.2vw, 4.6rem);
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -.015em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 20ch;
+  margin: 18px 0 24px;
+}
+.id-section-title {
+  font-size: clamp(1.6rem, 3.2vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: .005em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+.id-lede {
+  font-size: clamp(17px, 1.5vw, 20px);
+  color: var(--mut);
+  max-width: 62ch;
+}
+.id-hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: var(--sp-1);
+}
+
+/* --- Numbered explanation of the curated model --------------------------- */
+.id-steps-3 {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-top: var(--sp-1);
+}
+.id-step {
+  border-top: 2px solid var(--ln);
+  padding-top: 16px;
+}
+.id-step-num {
+  font-family: var(--font-m);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+.id-step h3 {
+  margin: 10px 0 8px;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  letter-spacing: .02em;
+  font-weight: 700;
+}
+.id-step p {
+  color: var(--mut);
+  font-size: 15px;
+}
+
+/* --- Account type choice (S-01) ------------------------------------------ */
+.id-choice {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  margin-bottom: 22px;
+}
+.id-choice label {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  border: 1px solid var(--ln);
+  padding: 16px 18px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.id-choice label:hover { border-color: var(--blue); }
+.id-choice input { margin-top: 4px; width: auto; }
+.id-choice input:checked ~ .id-choice-text { color: var(--fg); }
+.id-choice-text strong {
+  display: block;
+  font-family: var(--font-m);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.id-choice-text span { color: var(--mut); font-size: 14px; }
+.id-choice label:has(input:checked) {
+  border-color: var(--fg);
+  box-shadow: inset 3px 0 0 var(--orange);
+}
+
+/* --- One-time code (S-02) ------------------------------------------------ */
+.id-otp {
+  font-family: var(--font-m);
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: .5em;
+  text-align: center;
+  padding: 14px 12px;
+  max-width: 320px;
+}
+.id-meter {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-family: var(--font-m);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--mut);
+  margin-bottom: 12px;
+}
+
+/* --- Development affordance ---------------------------------------------
+   Deliberately loud. No mail or SMS provider is configured locally, so the
+   link and the code are shown on the page instead. This block must never be
+   rendered outside development.                                             */
+.id-dev {
+  border: 1px dashed var(--ln);
+  border-left: 3px solid var(--amber);
+  background: rgba(var(--amber-rgb), .06);
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+.id-dev .label { color: var(--amber); }
+.id-dev code, .id-dev .id-dev-value {
+  display: block;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  font-size: 14px;
+  word-break: break-all;
+  margin-top: 6px;
+  color: var(--fg);
+}
+.id-dev .id-dev-code {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: .3em;
+}
+
+/* --- Small pieces -------------------------------------------------------- */
+.id-tick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border: 1px solid currentColor;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+.id-tick-done { color: var(--green); }
+.id-tick-todo { color: var(--mut); }
+.id-inline-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.id-quote {
+  border-left: 3px solid var(--blue);
+  background: rgba(var(--blue-rgb), .05);
+  padding: 14px 16px;
+  font-size: 15.5px;
+}
+.id-quote p { max-width: none; }
+.id-file input[type="file"] {
+  width: 100%;
+  font-family: inherit;
+  font-size: 14px;
+  border: 1px solid rgba(var(--fg-rgb), .3);
+  padding: 9px 10px;
+  background: var(--bg);
+}
+.id-msg-body {
+  white-space: pre-wrap;
+  font-size: 14.5px;
+  margin-top: 6px;
+  max-width: 72ch;
+}

@@ -1,0 +1,174 @@
+{# S-08 invitation detail: the job as the contractor is allowed to see it,
+   then accept or decline (FR-403).
+
+   The client's organisation is named, because a contractor needs to know who
+   the work is for before agreeing to bid. Contact details stay embargoed until
+   award (FR-411), and nothing on this page says how many others were invited
+   (FR-407).
+#}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, invitation_pill, bid_pill %}
+{% from "contractor/_macros.html" import budget, engagement, closes, skills %}
+
+{% block title %}{{ invitation.job_title }} &#183; AB-Verified{% endblock %}
+
+{% block content %}
+{{ page_head(invitation.job_title, kicker="Invitation to bid") }}
+
+<div class="split">
+  <div class="stack">
+
+    <div class="row">
+      {{ invitation_pill(invitation.state) }}
+      {% if invitation.bid_state %}{{ bid_pill(invitation.bid_state) }}{% endif %}
+      <span class="muted small">Invited {{ invitation.sent_at|date }}</span>
+    </div>
+
+    <section>
+      <h2>The work</h2>
+      <dl class="kv" style="margin-top:14px">
+        <dt>Client</dt><dd>{{ invitation.client_name }}</dd>
+        <dt>Category</dt><dd>{{ invitation.category or 'Not stated' }}</dd>
+        <dt>Skills wanted</dt><dd>{{ skills(invitation.required_skills) }}</dd>
+        <dt>Engagement</dt><dd>{{ engagement(invitation) }}</dd>
+        <dt>Budget range</dt><dd class="num">{{ budget(invitation) }}</dd>
+        <dt>Location</dt><dd>{{ invitation.location or 'Not stated' }}</dd>
+        <dt>Preferred start</dt><dd>{{ invitation.start_date|date }}</dd>
+        <dt>Expected duration</dt><dd>{{ invitation.duration or 'Not stated' }}</dd>
+        <dt>Bids close</dt><dd>{{ closes(invitation.bids_close_at, invitation.bids_closing_soon) }}</dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Scope</h2>
+      <p style="margin-top:12px; white-space:pre-line">{{ invitation.job_description }}</p>
+    </section>
+
+    {# --- The decision ------------------------------------------------- #}
+    <section class="card card-accent">
+      {% if invitation.state == 'SENT' and not is_expired %}
+        <h2>Your response</h2>
+        <p style="margin-top:10px">
+          Accepting tells the client's Staff contact that you intend to bid. It
+          is a signal of interest and nothing more: it does not commit you to
+          lodging a bid, to a price, or to the work.
+        </p>
+
+        <form method="post" action="/invitations/{{ invitation.id }}/accept"
+              style="margin-top:18px">
+          <button type="submit" class="btn btn-big btn-solid">
+            Accept: I intend to bid
+          </button>
+        </form>
+
+        <details style="margin-top:24px; border-top:1px solid var(--ln); padding-top:18px">
+          <summary style="cursor:pointer; font-weight:600">
+            Decline this invitation instead
+          </summary>
+          <form method="post" action="/invitations/{{ invitation.id }}/decline"
+                style="margin-top:16px">
+            <div class="field">
+              <label for="f-reason_code">Reason (optional)</label>
+              <select id="f-reason_code" name="reason_code"
+                      aria-describedby="reason-hint">
+                <option value="">Prefer not to say</option>
+                {% for code, description in decline_reasons.items() %}
+                  <option value="{{ code }}">{{ description }}</option>
+                {% endfor %}
+              </select>
+              <span class="hint" id="reason-hint">
+                Declining is not held against you. A reason helps Staff match you
+                to better work next time, and the client never sees it.
+              </span>
+            </div>
+            <button type="submit" class="btn">Decline invitation</button>
+          </form>
+        </details>
+
+      {% elif invitation.state == 'ACCEPTED' and not bidding_closed %}
+        <h2>You accepted this invitation</h2>
+        <p style="margin-top:10px">
+          You responded on {{ invitation.responded_at|date }}. You can lodge or
+          revise your bid until bidding closes.
+        </p>
+        <p class="row" style="margin-top:18px">
+          <a class="btn btn-big btn-solid" href="/jobs/{{ invitation.job_id }}/bid">
+            {{ 'Revise your bid' if invitation.bid_state == 'SUBMITTED' else ('Continue your bid' if invitation.bid_id else 'Start your bid') }}
+          </a>
+          {% if invitation.bid_id %}
+            <a class="btn" href="/bids/{{ invitation.bid_id }}">View your bid</a>
+          {% endif %}
+        </p>
+
+      {% elif invitation.state == 'DECLINED' %}
+        <h2>You declined this invitation</h2>
+        <p style="margin-top:10px">
+          Declined on {{ invitation.responded_at|date }}.
+          {% if invitation.decline_reason %}
+            You gave the reason: {{ invitation.decline_reason }}
+          {% endif %}
+          A declined invitation cannot be reopened, but Staff can issue a fresh
+          one while the job is still taking bids.
+        </p>
+
+      {% elif is_expired or invitation.state == 'EXPIRED' %}
+        <h2>This invitation has lapsed</h2>
+        <p style="margin-top:10px">
+          It expired on {{ invitation.expires_at|datetime }} and no bid can be
+          lodged against it now. Letting an invitation lapse costs you nothing
+          beyond the opportunity: nothing is recorded against your account and
+          Staff can reissue it while the job is still open.
+        </p>
+
+      {% else %}
+        <h2>This invitation is closed</h2>
+        <p style="margin-top:10px">
+          Its current state is
+          {{ invitation_state_label(invitation.state)|lower }}, so no response is
+          possible. Staff can tell you why if you need to know.
+        </p>
+      {% endif %}
+    </section>
+  </div>
+
+  {# --- Sidebar ------------------------------------------------------- #}
+  <aside class="stack-sm">
+    <div class="card">
+      <h3 class="card-title">Expiry</h3>
+      <dl class="kv" style="margin-top:10px">
+        <dt>Invited</dt><dd>{{ invitation.sent_at|datetime }}</dd>
+        <dt>Expires</dt><dd>{{ invitation.expires_at|datetime }}</dd>
+        <dt>Time left</dt>
+        <dd>{% if is_expired %}<span class="pill">Lapsed</span>
+            {% else %}<span class="pill {{ 'pill-danger' if invitation.closing_soon else 'pill-info' }}">
+              {% if invitation.closing_soon %}Closing soon &#183; {% endif %}{{ invitation.expires_at|relative }}</span>
+            {% endif %}</dd>
+      </dl>
+      <p class="small muted" style="margin-top:12px">
+        Each invitation carries its own expiry, defaulting to the job's bid
+        closing date (FR-402). If you do nothing it lapses on its own, recorded
+        as a scheduled system action rather than as a decision by you.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">Who else is bidding?</h3>
+      <p class="small" style="margin-top:8px">
+        We do not disclose that. You cannot see the number or identity of the
+        other contractors invited, and they cannot see yours. You are competing
+        on your proposal, not on a visible count.
+      </p>
+    </div>
+
+    <div class="card card-quiet">
+      <h3 class="card-title">Client contact details</h3>
+      <p class="small" style="margin-top:8px">
+        The client is a verified Australian business. Their contact details are
+        released to you if you win the work, and yours to them at the same
+        moment. Until then, please keep contact details out of your bid: we
+        scan for them and flag them to Staff.
+      </p>
+    </div>
+  </aside>
+</div>
+{% endblock %}

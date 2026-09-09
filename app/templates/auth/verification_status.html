@@ -1,0 +1,202 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import org_pill %}
+{% block title %}Your verification &#183; AB-Verified{% endblock %}
+
+{# S-03. FR-110, FR-205, FR-206.
+
+   Four outcomes are rendered from the one page: waiting, information
+   requested, rejected and suspended. The rejected and suspended wordings come
+   from reasons.applicant_safe_reason(), so a SUSPECTED_FRAUD decision reads
+   as a generic ineligibility message and never as its true reason code. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<ol class="steps">
+  <li class="done">1. Your details</li>
+  <li class="done">2. Verify email and mobile</li>
+  <li class="current">3. Staff verification</li>
+</ol>
+
+<div class="page-head">
+  <div>
+    <p class="label">{{ organisation.legal_name }}</p>
+    <h1>Your verification</h1>
+  </div>
+  <div class="row">
+    {{ org_pill(organisation.status) }}
+    {% if case %}<span class="pill">{{ case_state_label(case.state) }}</span>{% endif %}
+  </div>
+</div>
+
+<div class="split">
+  <div class="stack">
+
+    {# ------------------------------------------------------------ rejected #}
+    {% if organisation.status == 'REJECTED' %}
+      <div class="notice notice-error" role="status">
+        <h3>This registration was not approved</h3>
+        <p style="margin-top:6px">{{ safe_reason }}</p>
+      </div>
+      <div class="card">
+        <h3>What you can do</h3>
+        <p class="small muted" style="margin-top:8px">
+          A rejection is final for this registration. If your circumstances
+          change, or you believe the decision was made in error, contact
+          support and we will look again.
+        </p>
+      </div>
+
+    {# ----------------------------------------------------------- suspended #}
+    {% elif organisation.status == 'SUSPENDED' %}
+      <div class="notice notice-warn" role="status">
+        <h3>This account is suspended</h3>
+        <p style="margin-top:6px">{{ safe_reason }}</p>
+        <p style="margin-top:6px">
+          Your history is preserved. New jobs, invitations and bids are not
+          available while the suspension stands.
+        </p>
+      </div>
+
+    {# -------------------------------------------- information requested #}
+    {% elif case and case.state == 'INFO_REQUESTED' %}
+      <div class="card card-accent">
+        <div class="id-inline-head">
+          <h2 class="card-title">More information needed</h2>
+          <span class="pill pill-warn">Information requested</span>
+        </div>
+        {% if latest_decision %}
+          <p class="small muted">
+            A note from our verification team, {{ latest_decision.decided_at|date }}:
+          </p>
+          <div class="id-quote" style="margin-top:10px">
+            <p>{{ latest_decision.note_to_applicant or 'Please supply the documents we have asked for.' }}</p>
+          </div>
+        {% endif %}
+      </div>
+
+      <form method="post" action="/verification-status/resubmit" class="card">
+        <h2 class="card-title" style="margin-bottom:14px">Answer and resubmit</h2>
+
+        <div class="field">
+          <label for="f-trading_name">Trading name</label>
+          <input id="f-trading_name" name="trading_name" type="text"
+                 value="{{ organisation.trading_name or '' }}">
+          <span class="hint">
+            Where the name you registered differs from the entity name held
+            against your ABN, this is where you reconcile the two.
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="f-note">Your reply to the team</label>
+          <textarea id="f-note" name="note" rows="5"
+                    aria-describedby="h-note"></textarea>
+          <span class="hint" id="h-note">
+            Optional. This is recorded against your case and read by the
+            person who reviews it.
+          </span>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-solid">Resubmit for review</button>
+          <a class="btn" href="/account">Save and finish later</a>
+        </div>
+      </form>
+
+    {# ------------------------------------------------------------ verified #}
+    {% elif organisation.status == 'VERIFIED' %}
+      <div class="notice notice-ok" role="status">
+        <h3>Your business is verified</h3>
+        <p style="margin-top:6px">
+          You have full access to the marketplace.
+          <a href="/dashboard">Go to your dashboard</a>.
+        </p>
+      </div>
+
+    {# ------------------------------------------------------------- waiting #}
+    {% else %}
+      <div class="notice" role="status">
+        <h3>Your registration is with our team</h3>
+        <p style="margin-top:6px">
+          There is nothing for you to do. We will email you as soon as a
+          decision is made, and this page shows the current position in the
+          meantime.
+        </p>
+      </div>
+    {% endif %}
+
+    {# ----------------------------------------------------------- documents #}
+    <div>
+      <h2>Supporting documents</h2>
+      {% if documents %}
+        <div class="table-wrap" style="margin-top:14px">
+          <table>
+            <caption class="visually-hidden">Documents supplied with this registration</caption>
+            <thead>
+              <tr><th scope="col">Document</th><th scope="col">File</th><th scope="col">Supplied</th></tr>
+            </thead>
+            <tbody>
+              {% for document in documents %}
+                <tr>
+                  <td>{{ document.kind }}</td>
+                  <td class="small muted">{{ document.filename }}</td>
+                  <td class="nowrap">{{ document.uploaded_at|date }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p class="small muted" style="margin-top:10px">
+          Nothing supplied yet. Documents are optional unless our team has
+          asked for one.
+        </p>
+      {% endif %}
+
+      {% if organisation.status in ('PENDING', 'SUSPENDED') %}
+        {% include "account/_document_form.html" %}
+      {% endif %}
+    </div>
+  </div>
+
+  <aside class="stack-sm">
+    <div class="card card-quiet">
+      <h3>What happens next</h3>
+      <p class="small muted" style="margin-top:8px">
+        Our team reviews every business by hand. Most reviews finish within
+        one business day. You will be emailed the outcome.
+      </p>
+    </div>
+    <div class="card card-quiet">
+      <h3>Why we verify</h3>
+      <p class="small muted" style="margin-top:8px">
+        Clients and contractors on AB-Verified are checked against the
+        Australian Business Register, so you are only ever dealing with real,
+        trading businesses.
+      </p>
+    </div>
+    {% if case %}
+      <div class="card card-quiet">
+        <h3>Your case</h3>
+        <dl class="kv" style="margin-top:10px">
+          <dt>Opened</dt><dd>{{ case.opened_at|date }}</dd>
+          <dt>State</dt><dd>{{ case_state_label(case.state) }}</dd>
+          <dt>ABN</dt><dd class="mono">{{ organisation.abn or 'Not recorded' }}</dd>
+          <dt>Register</dt>
+          <dd>
+            {% if organisation.lookup_state == 'OK' %}
+              Checked {{ organisation.checked_at|date }}
+            {% elif organisation.lookup_state == 'ABR_UNAVAILABLE' %}
+              The register was unavailable. We will retry.
+            {% elif organisation.lookup_state == 'NOT_FOUND' %}
+              Not found on the register.
+            {% else %}
+              Queued for lookup.
+            {% endif %}
+          </dd>
+        </dl>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

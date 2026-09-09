@@ -1,0 +1,105 @@
+{# S-04 The client dashboard. The client's home: what they have posted, where
+   each job stands, and the one thing actually waiting on them. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, stat, empty, job_pill %}
+{% from "client/_macros.html" import job_meta, bids_visible, closing %}
+
+{% block title %}Your jobs &#183; AB-Verified{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/jobs.css">
+
+{% call page_head(
+     "Your jobs",
+     "Every job you post is reviewed by our team, matched to verified contractors and
+      bid on privately. Nothing here is ever published or indexed.",
+     "Verified client" if me.org_is_verified else "Client") %}
+  <a class="btn btn-solid" href="/jobs/new">Post a job</a>
+{% endcall %}
+
+{% if jobs %}
+  {# The one job that is waiting on the client, said plainly and once. #}
+  {% if awaiting_selection %}
+    <section class="callout" aria-labelledby="awaiting-heading">
+      <p class="label">Waiting on you</p>
+      {% for job in awaiting_selection %}
+        <h2 id="awaiting-heading" class="callout-title">{{ job.title }}</h2>
+        <p class="callout-lead">
+          Our team screened the bids on this job and released
+          <strong>{{ job.released_bid_count }}</strong> of them to you. Compare them
+          side by side and choose the one you want to work with.
+        </p>
+        <p><a class="btn btn-solid btn-big" href="/jobs/{{ job.id }}/bids">
+          Compare {{ job.released_bid_count }} bids and select a winner</a></p>
+      {% endfor %}
+    </section>
+  {% endif %}
+
+  <section aria-labelledby="tiles-heading">
+    <h2 id="tiles-heading" class="visually-hidden">Your jobs by stage</h2>
+    <div class="grid grid-tiles">
+      {% for key, label, states in groups %}
+        {% if key == "selection" and awaiting_selection|length == 1 %}
+          {{ stat(counts[key], label, "/jobs/" ~ awaiting_selection[0].id ~ "/bids") }}
+        {% else %}
+          {{ stat(counts[key], label) }}
+        {% endif %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section aria-labelledby="jobs-heading" class="stack">
+    <h2 id="jobs-heading">All jobs</h2>
+    <div>
+    {% for job in jobs %}
+      <article class="card jobcard {% if job.state == 'BIDS_RELEASED' %}card-accent{% endif %}">
+        <div class="card-head">
+          <div>
+            <h3 class="card-title"><a href="/jobs/{{ job.id }}">{{ job.title }}</a></h3>
+            <p class="small muted">{{ job_meta(job) }}</p>
+          </div>
+          {{ job_pill(job.state) }}
+        </div>
+
+        <dl class="factrow">
+          <div>
+            <dt>Bids</dt>
+            <dd>{{ bids_visible(job) }}</dd>
+          </div>
+          <div>
+            <dt>Bidding closes</dt>
+            <dd>{{ closing(job) }}</dd>
+          </div>
+          <div>
+            <dt>Posted</dt>
+            <dd>{{ job.created_at|date }}</dd>
+          </div>
+        </dl>
+
+        <div class="row">
+          {% if job.state == "BIDS_RELEASED" %}
+            <a class="btn btn-sm btn-solid" href="/jobs/{{ job.id }}/bids">
+              Compare {{ job.released_bid_count }} bids</a>
+            <a class="btn btn-sm btn-ghost" href="/jobs/{{ job.id }}">View job</a>
+          {% elif job.state == "DRAFT" %}
+            <a class="btn btn-sm" href="/jobs/{{ job.id }}/edit">Continue editing</a>
+            <a class="btn btn-sm btn-ghost" href="/jobs/{{ job.id }}">View draft</a>
+          {% else %}
+            <a class="btn btn-sm" href="/jobs/{{ job.id }}">View job</a>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+    </div>
+  </section>
+{% else %}
+  <section aria-labelledby="empty-heading">
+    <h2 id="empty-heading" class="visually-hidden">No jobs yet</h2>
+    {{ empty(
+        "You have not posted a job yet. Describe the work once and our team reviews it,
+         invites verified Australian contractors who match, and releases their bids to
+         you privately. There is no public job board and no inbox full of cold calls.",
+        "/jobs/new", "Post your first job") }}
+  </section>
+{% endif %}
+{% endblock %}

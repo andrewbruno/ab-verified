@@ -1,0 +1,137 @@
+{# S-07 the contractor dashboard.
+
+   Work reaches a contractor only through a Staff invitation (§1, FR-401), so
+   this page leads with the invitations that need an answer, then the ones
+   already accepted, then the ones that are finished. There is deliberately no
+   job board, no search and no bid count.
+#}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, stat, empty %}
+{% from "contractor/_macros.html" import invitation_card %}
+
+{% block title %}Invitations &#183; AB-Verified{% endblock %}
+
+{% block content %}
+{{ page_head(
+     "Invitations",
+     "Work reaches you by invitation. Staff match verified contractors to each approved job, so everything below was chosen for you rather than found by you.",
+     kicker="Contractor") }}
+
+<div class="grid grid-4">
+  {{ stat(counts.respond, "Awaiting your response") }}
+  {{ stat(counts.active, "Accepted, bid open") }}
+  {{ stat(counts.awaiting, "Bids awaiting an outcome", href="/bids") }}
+  {{ stat(counts.won, "Jobs won", href="/bids") }}
+</div>
+
+{# --- 1. Needing a response ------------------------------------------- #}
+<section class="stack" style="margin-top:var(--sp-2)">
+  {% if groups.respond or groups.active or groups.closed %}
+    <div>
+      <h2>Needing your response</h2>
+      <p class="muted small">
+        Accepting signals an intent to bid. It does not commit you to bidding, and
+        declining is not held against you.
+      </p>
+    </div>
+  {% endif %}
+
+  {% if groups.respond %}
+    {% for inv in groups.respond %}{{ invitation_card(inv, accent=true) }}{% endfor %}
+  {% elif groups.active or groups.closed %}
+    {{ empty("No invitations are waiting on you right now. Everything you have been invited to is below.") }}
+  {% else %}
+    {# The empty state is the product, not a failure. A contractor with nothing
+       here has simply not been matched to an open job yet. #}
+    <div class="card card-accent">
+      <h3 class="card-title">You have no invitations yet</h3>
+      <p style="margin-top:10px">
+        AB-Verified is a curated marketplace, not a job board. Contractors do not
+        browse open work and bid on whatever looks promising. Instead, Staff read
+        each approved job and invite a small number of verified businesses whose
+        skills, category and region fit the work.
+      </p>
+      <p style="margin-top:10px">
+        That is why this page is empty rather than showing you a list to search.
+        Nothing is hidden behind a filter you have not found: a job you have not
+        been invited to genuinely does not exist for your account.
+      </p>
+      <p style="margin-top:10px">
+        The best thing you can do is keep your capability profile current. Your
+        skills, categories and region are what Staff match against, and an
+        invitation arrives by email and SMS the moment one is issued.
+      </p>
+      <p class="row" style="margin-top:18px">
+        <a class="btn btn-solid" href="/account">Review your capability profile</a>
+      </p>
+    </div>
+  {% endif %}
+</section>
+
+{# --- 2. Accepted, bidding under way ---------------------------------- #}
+{% if groups.active %}
+<section class="stack" style="margin-top:var(--sp-2)">
+  <div>
+    <h2>Accepted, bid in progress</h2>
+    <p class="muted small">
+      You may revise a bid until the closing date. Every version is kept, and the
+      client sees only the latest one, after Staff release it.
+    </p>
+  </div>
+  {% for inv in groups.active %}{{ invitation_card(inv) }}{% endfor %}
+</section>
+{% endif %}
+
+{# --- 3. Closed, declined or lapsed ------------------------------------ #}
+{% if groups.closed %}
+<section class="stack" style="margin-top:var(--sp-2)">
+  <div>
+    <h2>Closed, declined or lapsed</h2>
+    <p class="muted small">
+      Invitations lapse automatically at their expiry, recorded as a system
+      action (FR-413). Staff can reissue one while the job is still open.
+    </p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <caption class="visually-hidden">Invitations that are no longer open to you</caption>
+      <thead>
+        <tr>
+          <th scope="col">Job</th>
+          <th scope="col">Client</th>
+          <th scope="col" class="num">Budget</th>
+          <th scope="col">Invitation</th>
+          <th scope="col">Your bid</th>
+          <th scope="col">Closed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inv in groups.closed %}
+        <tr>
+          <td><a href="/invitations/{{ inv.id }}">{{ inv.job_title }}</a>
+            {% if inv.location %}<div class="small muted">{{ inv.location }}</div>{% endif %}</td>
+          <td>{{ inv.client_name }}</td>
+          <td class="num">{{ budget_range(inv.budget_min, inv.budget_max) }}</td>
+          <td>{{ invitation_state_label(inv.state) }}
+            {% if inv.decline_reason %}<div class="small muted">{{ inv.decline_reason }}</div>{% endif %}</td>
+          <td>{% if inv.bid_id %}<a href="/bids/{{ inv.bid_id }}">{{ bid_state_label(inv.bid_state) }}</a>
+              {% else %}<span class="muted">None lodged</span>{% endif %}</td>
+          <td class="nowrap">{{ inv.bids_close_at|date }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endif %}
+
+<aside class="card card-quiet" style="margin-top:var(--sp-2)">
+  <h3 class="card-title">Who else was invited?</h3>
+  <p style="margin-top:8px">
+    We do not disclose that, and we never will. You cannot see how many
+    contractors were invited to a job, who they are, or what they bid, and they
+    cannot see that about you. You are competing on your proposal, not on a
+    visible count.
+  </p>
+</aside>
+{% endblock %}

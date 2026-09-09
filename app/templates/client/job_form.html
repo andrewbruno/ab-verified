@@ -1,0 +1,159 @@
+{# S-05 Post a job (FR-301, FR-302, FR-303). One form, two buttons: save the
+   draft, or save it and send it to our team for approval. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, field, textarea, job_pill %}
+
+{% set editing = job is not none %}
+{% block title %}{{ "Edit draft" if editing else "Post a job" }} &#183; AB-Verified{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/jobs.css">
+
+{{ page_head(
+     "Edit your draft" if editing else "Post a job",
+     "Describe the work once. Our team reviews it, then invites verified Australian
+      contractors whose skills and region match.",
+     "Draft" if editing else "New job") }}
+
+{% if form.errors %}
+  <div class="notice notice-error" role="alert" tabindex="-1" id="errors">
+    <h3>{{ form.error_count }} thing{{ "" if form.error_count == 1 else "s" }} to fix</h3>
+    <ul>
+      {% for name, message in form.errors.items() %}
+        <li><a href="#f-{{ name }}">{{ message }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+
+<div class="split">
+  <form method="post" action="{{ action_url }}">
+    {{ field("title", "Job title", form.values.title, required=True,
+             error=form.errors.title,
+             hint="Say what needs doing, in the words you would use to a colleague.") }}
+
+    {{ textarea("description", "What needs doing", form.values.description,
+                error=form.errors.description, rows=10,
+                hint="Scope, constraints, sites, anything a contractor needs in order to
+                      price the work. Please leave out email addresses and phone numbers:
+                      jobs containing contact details are held back by our team.") }}
+
+    <div class="field {% if form.errors.category %}field-error{% endif %}">
+      <label for="f-category">Category</label>
+      <select id="f-category" name="category"
+              {% if form.errors.category %}aria-invalid="true" aria-describedby="e-category"{% endif %}>
+        <option value="">Choose a category</option>
+        {% for option in categories %}
+          <option value="{{ option }}" {% if form.values.category == option %}selected{% endif %}>{{ option }}</option>
+        {% endfor %}
+      </select>
+      {% if form.errors.category %}
+        <span class="error-text" id="e-category">{{ form.errors.category }}</span>
+      {% endif %}
+    </div>
+
+    {{ field("required_skills", "Required skills", form.values.required_skills,
+             error=form.errors.required_skills,
+             placeholder="Microsoft 365, Exchange, Identity",
+             hint="Separate them with commas. Our team uses these to shortlist
+                   contractors, so be specific.") }}
+
+    <fieldset>
+      <legend>Engagement type</legend>
+      <div class="check">
+        <input type="radio" id="f-engagement_type" name="engagement_type" value="FIXED"
+               {% if form.values.engagement_type != "DAY_RATE" %}checked{% endif %}>
+        <label for="f-engagement_type">Fixed price for the whole job</label>
+      </div>
+      <div class="check">
+        <input type="radio" id="f-engagement_type_day" name="engagement_type" value="DAY_RATE"
+               {% if form.values.engagement_type == "DAY_RATE" %}checked{% endif %}>
+        <label for="f-engagement_type_day">Day rate</label>
+      </div>
+      {% if form.errors.engagement_type %}
+        <span class="error-text">{{ form.errors.engagement_type }}</span>
+      {% endif %}
+    </fieldset>
+
+    <div class="grid grid-2">
+      {{ field("budget_min", "Budget from", form.values.budget_min,
+               error=form.errors.budget_min, placeholder="18000",
+               hint="In dollars. For a day rate, give the daily figure.") }}
+      {{ field("budget_max", "Budget to", form.values.budget_max,
+               error=form.errors.budget_max, placeholder="32000",
+               hint="Contractors bid against this range, so keep it realistic.") }}
+    </div>
+
+    <fieldset>
+      <legend>Where the work happens</legend>
+      <div class="check">
+        <input type="radio" id="f-location_mode" name="location_mode" value="ONSITE"
+               {% if form.values.location_mode != "REMOTE" %}checked{% endif %}>
+        <label for="f-location_mode">On site, at the address below</label>
+      </div>
+      <div class="check">
+        <input type="radio" id="f-location_mode_remote" name="location_mode" value="REMOTE"
+               {% if form.values.location_mode == "REMOTE" %}checked{% endif %}>
+        <label for="f-location_mode_remote">Remote</label>
+      </div>
+      {{ field("location", "Suburb and state", form.values.location,
+               error=form.errors.location, placeholder="Sydney, NSW",
+               hint="Ignored if you chose remote.") }}
+    </fieldset>
+
+    <div class="grid grid-2">
+      {{ field("start_date", "Preferred start", form.values.start_date, type="date",
+               error=form.errors.start_date,
+               hint="Roughly when you would like the work to begin.") }}
+      {{ field("duration", "Expected duration", form.values.duration,
+               error=form.errors.duration, placeholder="6 weeks",
+               hint="Your estimate. Contractors give theirs in their bid.") }}
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-solid" type="submit" name="action" value="submit">
+        Submit for approval</button>
+      <button class="btn" type="submit" name="action" value="draft" formnovalidate>
+        Save draft</button>
+      {% if editing %}
+        <span class="spacer"></span>
+        <a class="btn btn-ghost btn-sm" href="/jobs/{{ job.id }}">Back to the job</a>
+      {% endif %}
+    </div>
+  </form>
+
+  <aside class="stack-sm" aria-label="Before you submit">
+    <div class="card">
+      <h3>Before you submit</h3>
+      <p class="small muted">
+        Our team reviews every job before any contractor is approached. We may come
+        back to you if the scope or the budget needs tightening. Once a job is
+        submitted you cannot edit it, so read it through first.
+      </p>
+    </div>
+    <div class="card card-quiet">
+      <h3>Who will see this</h3>
+      <p class="small muted">
+        Only our team, and the contractors we invite. Jobs are never published
+        publicly, never listed on an open board and never indexed by a search engine.
+      </p>
+    </div>
+    <div class="card card-quiet">
+      <h3>Contact details</h3>
+      <p class="small muted">
+        Please keep email addresses and phone numbers out of the description. We hold
+        contact details back until the work is awarded, which is what keeps bidding
+        honest for everyone. If we spot any, we will flag the job rather than reject
+        it out of hand.
+      </p>
+    </div>
+    {% if editing %}
+      <div class="card card-quiet">
+        <h3>Current state</h3>
+        <p>{{ job_pill(job.state) }}</p>
+        <p class="small muted">Drafts are visible to nobody but you until you submit them.</p>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

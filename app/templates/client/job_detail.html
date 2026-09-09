@@ -1,0 +1,201 @@
+{# The client's view of one job: what it says, where it is in its lifecycle,
+   who was invited, and the actions still open to the client. #}
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, job_pill, invitation_pill, empty, reason_select, textarea %}
+{% from "client/_macros.html" import job_meta, budget, engagement, bids_visible, closing, skills %}
+
+{% block title %}{{ job.title }} &#183; AB-Verified{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="/static/css/jobs.css">
+
+<p class="small"><a href="/jobs">Back to your jobs</a></p>
+
+{% call page_head(job.title, job_meta(job), job.category or "Job") %}
+  {% if can_compare and job.released_bid_count %}
+    <a class="btn btn-solid" href="/jobs/{{ job.id }}/bids">
+      {{ "Compare bids" if job.state != "BIDS_RELEASED" else "Compare " ~ job.released_bid_count ~ " bids" }}</a>
+  {% endif %}
+  {% if can_edit %}
+    <a class="btn" href="/jobs/{{ job.id }}/edit">Edit draft</a>
+  {% endif %}
+{% endcall %}
+
+<div class="split">
+  <div class="stack">
+    <section aria-labelledby="state-heading" class="card">
+      <div class="card-head">
+        <h2 id="state-heading" class="card-title">Current state</h2>
+        {{ job_pill(job.state) }}
+      </div>
+      <p>
+        {% if job.state == "DRAFT" %}
+          This job is a draft. Nobody else can see it. Edit it as much as you like,
+          then submit it when you are happy with it.
+        {% elif job.state == "PENDING_APPROVAL" %}
+          Submitted for approval. Our team is reviewing it, and the job is locked
+          against edits until they come back to you.
+        {% elif job.state == "APPROVED" %}
+          Approved. Our team is choosing which verified contractors to invite.
+        {% elif job.state == "INVITING" %}
+          Invitations are out with contractors who match the work.
+        {% elif job.state == "BIDDING" %}
+          Bidding is open. You will see the bids after our team has screened them,
+          which is what keeps the pricing honest.
+        {% elif job.state == "BIDS_CLOSED" %}
+          Bidding has closed and our team is screening what came in.
+        {% elif job.state == "BIDS_RELEASED" %}
+          {{ job.released_bid_count }} bids have been released to you. Compare them and
+          select the one you want to work with.
+        {% elif job.state == "AWARD_PENDING" %}
+          You have selected a bid. Our team confirms the award before contact details
+          are released to either side.
+        {% elif job.state == "AWARDED" %}
+          Awarded. Contact details have been released to both parties.
+        {% elif job.state == "CANCELLED" %}
+          This job was cancelled. Everyone holding an invitation was notified.
+        {% else %}
+          This job is closed.
+        {% endif %}
+      </p>
+      {% if job.staff_feedback %}
+        <p class="notice notice-warn" role="status">
+          <strong>Feedback from our team:</strong> {{ job.staff_feedback }}
+        </p>
+      {% endif %}
+      {% if job.cancel_reason %}
+        <p class="notice notice-error" role="status">
+          <strong>Cancellation reason:</strong> {{ job.cancel_reason }}
+        </p>
+      {% endif %}
+    </section>
+
+    <section aria-labelledby="brief-heading" class="card">
+      <h2 id="brief-heading" class="card-title">The brief</h2>
+      <p style="white-space: pre-line">{{ job.description }}</p>
+      {{ skills(job.required_skills) }}
+    </section>
+
+    <section aria-labelledby="facts-heading" class="card">
+      <h2 id="facts-heading" class="card-title">Key facts</h2>
+      <dl class="kv">
+        <dt>Engagement</dt><dd>{{ engagement(job) }}</dd>
+        <dt>Budget</dt><dd>{{ budget(job) }}</dd>
+        <dt>Location</dt><dd>{{ job.location or "Not stated" }}</dd>
+        <dt>Preferred start</dt><dd>{{ job.start_date|date }}</dd>
+        <dt>Expected duration</dt><dd>{{ job.duration or "Not stated" }}</dd>
+        <dt>Bids</dt><dd>{{ bids_visible(job) }}</dd>
+        <dt>Bidding closes</dt><dd>{{ closing(job) }}</dd>
+        <dt>Posted</dt><dd>{{ job.created_at|date }}</dd>
+        {% if job.submitted_at %}<dt>Submitted</dt><dd>{{ job.submitted_at|date }}</dd>{% endif %}
+      </dl>
+    </section>
+
+    {% if is_owner %}
+      <section aria-labelledby="actions-heading" class="card">
+        <h2 id="actions-heading" class="card-title">Actions</h2>
+        <div class="row">
+          {% if can_submit %}
+            <form method="post" action="/jobs/{{ job.id }}/submit">
+              <button class="btn btn-solid" type="submit">Submit for approval</button>
+            </form>
+          {% endif %}
+          {% if can_edit %}
+            <a class="btn" href="/jobs/{{ job.id }}/edit">Edit draft</a>
+          {% endif %}
+          {% if can_compare and job.released_bid_count %}
+            <a class="btn" href="/jobs/{{ job.id }}/bids">Compare released bids</a>
+          {% endif %}
+        </div>
+
+        {% if can_cancel %}
+          {# FR-308: cancel at any pre-award state, with a reason. Kept behind a
+             disclosure so it is deliberate, and it works with JavaScript off. #}
+          <details class="danger-zone">
+            <summary>Cancel this job</summary>
+            <p class="small muted">
+              Cancelling is final. Every contractor holding an invitation is told the
+              job will not proceed, so please give a reason they can be told.
+            </p>
+            <form method="post" action="/jobs/{{ job.id }}/cancel">
+              {{ reason_select("reason_code", cancellation_reasons, label="Why are you cancelling?") }}
+              {{ textarea("note", "Anything to add", rows=3,
+                          hint="Optional. This wording is what is recorded against the job.") }}
+              <button class="btn btn-sm" type="submit">Cancel this job</button>
+            </form>
+          </details>
+        {% endif %}
+      </section>
+    {% endif %}
+  </div>
+
+  <aside class="stack-sm" aria-label="Job lifecycle and invitations">
+    <div class="card">
+      <h3>Lifecycle</h3>
+      <ol class="lifecycle">
+        {% for step in lifecycle %}
+          <li class="step-{{ step.status }}">
+            <span class="step-label">{{ step.label }}</span>
+            <span class="step-state">
+              {% if step.status == "done" %}Done{% elif step.status == "current" %}Now{% else %}To come{% endif %}
+            </span>
+            {% if step.at %}<span class="step-at small muted">{{ step.at|date }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    {% if award %}
+      <div class="card card-accent">
+        <h3>Your selection</h3>
+        <p class="small">
+          You selected a bid on {{ award.selected_at|date }}.
+          {% if award.state == "PENDING" %}
+            Our team is confirming the award. Contact details are released to both
+            sides only once they do.
+          {% elif award.state == "CONFIRMED" %}
+            The award is confirmed and contact details have been released.
+          {% else %}
+            Our team did not confirm this selection. The bids are back with you.
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+
+    <div class="card">
+      <h3>Invitations</h3>
+      {% if invitations %}
+        <p class="small muted">
+          Our team invited {{ invitations|length }} verified
+          contractor{{ "" if invitations|length == 1 else "s" }} to bid on this job.
+        </p>
+        <ul class="plainlist">
+          {% for invitation in invitations %}
+            <li>
+              {% if reveal_contractors %}
+                <strong>{{ invitation.contractor_name }}</strong>
+                <span class="small muted">{{ invitation.contractor_region }}</span>
+              {% else %}
+                <span>Verified contractor
+                  <span class="small muted">{{ invitation.contractor_region }}</span></span>
+              {% endif %}
+              <br>{{ invitation_pill(invitation.state) }}
+            </li>
+          {% endfor %}
+        </ul>
+        {% if not reveal_contractors %}
+          <p class="small muted">
+            Contractor names appear here once bids are released to you. Contact
+            details are released only after our team confirms an award.
+          </p>
+        {% endif %}
+      {% else %}
+        <p class="small muted">
+          No invitations yet. Our team issues them once the job is approved, choosing
+          contractors by skill, category and region.
+        </p>
+      {% endif %}
+    </div>
+  </aside>
+</div>
+{% endblock %}

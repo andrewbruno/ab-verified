@@ -1,0 +1,55 @@
+{% extends "layout/base.html" %}
+{% block title %}Check your inbox &#183; AB-Verified{% endblock %}
+{% block wrapclass %}wrap-narrow{% endblock %}
+
+{#
+  §13, enumeration resistance.
+
+  This page is what a registration returns whether or not the address already
+  has an account, and the words are chosen so that it is true either way. It
+  never says an account was created, and it carries nothing that only exists
+  when one was.
+#}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<ol class="steps">
+  <li class="done">1. Your details</li>
+  <li class="current">2. Verify email and mobile</li>
+  <li>3. Staff verification</li>
+</ol>
+
+<div class="stack">
+  <div>
+    <p class="label">Registration received</p>
+    <h1>Check your inbox</h1>
+    <p class="lead" style="margin-top:8px">
+      If <strong>{{ email }}</strong> can be registered, a confirmation link is
+      on its way to it. The link is good for 24 hours and can be used once.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Then confirm your mobile</h3>
+    <p class="small muted" style="margin-top:8px">
+      We have also sent a six-digit code by text message. Sign in with the
+      email address and password you just chose, and you can enter it there.
+      Your registration reaches our verification team once both are confirmed.
+    </p>
+    <p style="margin-top:16px"><a class="btn btn-solid" href="/signin">Sign in to continue</a></p>
+  </div>
+
+  {% if environment != 'production' %}
+    <div class="id-dev">
+      <p class="label">Development affordance</p>
+      <p class="small" style="margin-top:6px">
+        No email or SMS provider is configured in this environment, so nothing
+        was actually delivered anywhere. Sign in and the confirmation link and
+        the six-digit code are both shown on the verification page. Every
+        message raised is also recorded in the
+        <a href="/outbox">in-app outbox</a>.
+      </p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

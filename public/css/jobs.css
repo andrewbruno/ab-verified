@@ -1,0 +1,119 @@
+/* ---------------------------------------------------------------------------
+   Client job screens (S-04, S-05, S-06).
+
+   An extension of public/css/app.css, not a replacement: everything here is a
+   class app.css does not already provide. Same rules as the parent sheet,
+   square corners, Roboto only, red as a single accent per viewport, and no
+   state signalled by colour alone.
+   --------------------------------------------------------------------------- */
+
+/* Five dashboard tiles sit more comfortably than the four .grid-4 assumes. */
+.grid-tiles { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+/* --- The one thing waiting on the client (S-04) --------------------------- */
+.callout {
+  border: 1px solid var(--ln);
+  border-left: 3px solid var(--orange);
+  background: var(--grey);
+  padding: clamp(20px, 3vw, 30px);
+  margin-bottom: var(--sp-1);
+}
+.callout-title {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  font-weight: 700;
+  margin: 6px 0 10px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.callout-lead { max-width: 62ch; margin-bottom: 18px; }
+
+/* --- Job cards (S-04) ----------------------------------------------------- */
+.jobcard .card-title a:hover { color: var(--orange); }
+
+.factrow {
+  display: grid;
+  gap: 12px 24px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  margin: 16px 0;
+  padding: 14px 0;
+  border-top: 1px solid var(--ln);
+  border-bottom: 1px solid var(--ln);
+}
+.factrow dt {
+  font-family: var(--font-m); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mut);
+  margin-bottom: 3px;
+}
+.factrow dd { margin: 0; font-size: 14.5px; }
+
+/* --- Skills --------------------------------------------------------------- */
+.taglist { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.tag {
+  border: 1px solid var(--ln); padding: 4px 10px;
+  font-size: 12.5px; color: var(--mut); background: var(--grey);
+}
+
+/* --- Lifecycle rail (job detail) ------------------------------------------ */
+.lifecycle { list-style: none; margin-top: 10px; }
+.lifecycle li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 10px;
+  padding: 8px 0 8px 18px;
+  border-left: 2px solid var(--ln);
+  position: relative;
+  font-size: 14px;
+}
+.lifecycle li::before {
+  content: ""; position: absolute; left: -5px; top: 14px;
+  width: 8px; height: 8px; background: var(--bg); border: 2px solid var(--ln);
+}
+.lifecycle .step-label { font-weight: 600; }
+.lifecycle .step-state {
+  font-family: var(--font-m); font-size: 10px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--mut);
+  white-space: nowrap;
+}
+.lifecycle .step-at { grid-column: 1 / -1; }
+.lifecycle .step-done { border-left-color: rgba(var(--sky-ink-rgb), .55); }
+.lifecycle .step-done::before { background: var(--sky-ink); border-color: var(--sky-ink); }
+.lifecycle .step-current { border-left-color: var(--orange); }
+.lifecycle .step-current::before { background: var(--orange); border-color: var(--orange); }
+.lifecycle .step-current .step-label { color: var(--fg); }
+.lifecycle .step-current .step-state { color: var(--orange); }
+.lifecycle .step-todo .step-label { color: var(--mut); font-weight: 400; }
+
+/* --- Plain lists ---------------------------------------------------------- */
+.plainlist { list-style: none; margin-top: 12px; }
+.plainlist > li + li { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--ln); }
+
+.numbered { margin: 10px 0 0 20px; font-size: 14.5px; }
+.numbered li + li { margin-top: 8px; }
+
+/* --- Cancel, kept behind a disclosure ------------------------------------- */
+.danger-zone { margin-top: 22px; border-top: 1px solid var(--ln); padding-top: 16px; }
+.danger-zone > summary {
+  cursor: pointer;
+  font-family: var(--font-m); font-size: 11px; font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--red);
+}
+.danger-zone > summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.danger-zone > * + * { margin-top: 14px; }
+
+/* --- The comparison table (S-06) ------------------------------------------ */
+.compare th[scope="row"] { background: var(--grey); min-width: 190px; vertical-align: top; }
+.compare td { vertical-align: top; }
+.compare .approach { min-width: 280px; max-width: 420px; font-size: 14px; color: var(--mut); }
+.compare .num strong { font-size: 1.05rem; }
+
+/* Marked in words as well as position, never by colour alone. */
+.compare .flag {
+  display: inline-block; margin-top: 6px;
+  font-family: var(--font-m); font-size: 10px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--ln); padding: 2px 7px; color: var(--mut);
+}
+
+@media (max-width: 700px) {
+  .callout-lead { font-size: 15px; }
+}

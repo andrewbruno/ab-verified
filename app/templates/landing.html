@@ -1,0 +1,118 @@
+{% extends "layout/base.html" %}
+{% block title %}AB-Verified &#183; a curated Australian IT marketplace{% endblock %}
+{% block wrapclass %}id-page{% endblock %}
+
+{#
+  S-00. The front door.
+
+  Four bands: the hero on navy, the curated model on white, the demo persona
+  picker on the alternate surface, and a closing band back on navy. Red is
+  used once, as the rule beside the hero paragraph.
+#}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<section class="id-band id-hero surf-deep">
+  <div class="id-band-inner">
+    <p class="label">Curated Australian IT marketplace</p>
+    <h1 class="id-hero-title">IT work, between verified Australian businesses</h1>
+    <div class="kicker-block">
+      <p class="id-lede">
+        Clients post work. Our team verifies every business against the
+        Australian Business Register, approves each job, and invites the
+        contractors best suited to it. No open job board, and no bid spam.
+      </p>
+    </div>
+    <div class="id-hero-actions">
+      <a class="btn btn-big" href="/register">Register your business</a>
+      <a class="btn btn-big" href="/signin">Sign in</a>
+      {% if personas %}<a class="btn btn-big" href="#demo">Try it as a demo persona</a>{% endif %}
+    </div>
+  </div>
+</section>
+
+<section class="id-band">
+  <div class="id-band-inner">
+    <h2 class="id-section-title">Curated, not listed</h2>
+    <p class="id-lede" style="margin-top:12px">
+      Work is pushed to a short list of suitable contractors rather than
+      pulled from an open board. Three things happen before a contractor ever
+      sees a job, and a person does each of them.
+    </p>
+
+    <div class="id-steps-3">
+      <div class="id-step">
+        <p class="id-step-num">Step one</p>
+        <h3>Staff verify the business</h3>
+        <p>
+          Every registering business supplies an ABN. We check it against the
+          Australian Business Register, compare the entity name with the name
+          supplied, and read the supporting documents. A person makes the
+          decision; the automation only assembles the evidence.
+        </p>
+      </div>
+      <div class="id-step">
+        <p class="id-step-num">Step two</p>
+        <h3>Staff approve the job</h3>
+        <p>
+          A posted job is reviewed before it goes anywhere: scope, budget and
+          closing date. Contact details are held back until the work is
+          awarded, so the marketplace is not a route around itself.
+        </p>
+      </div>
+      <div class="id-step">
+        <p class="id-step-num">Step three</p>
+        <h3>Staff invite the contractors</h3>
+        <p>
+          We choose the contractors the job actually suits and invite them.
+          Nobody else can see it. A contractor who was not invited cannot find
+          the job at all, because the database refuses the read.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if personas %}
+<section class="id-band surf-alt" id="demo">
+  <div class="id-band-inner">
+    <div class="id-inline-head">
+      <h2 class="id-section-title">Try it: sign in as a demo persona</h2>
+      <span class="pill pill-warn">Non-production only</span>
+    </div>
+    <p class="id-lede" style="margin-bottom:var(--sp-1)">
+      Each card signs you in as a real seeded user with an ordinary session.
+      Every page you then see is filtered by the same database policies that
+      protect live data, so the demo cannot show you more than the persona is
+      entitled to.
+    </p>
+
+    {% include "demo/_persona_cards.html" %}
+
+    <div class="notice" style="margin-top:var(--sp-1)">
+      <h3>The third card is the point</h3>
+      <p>
+        Sign in as the contractor who was not invited and the demo client's
+        jobs are simply absent, not greyed out. That is a Row Level Security
+        policy refusing the row, not a hidden menu item.
+      </p>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="id-band paper-band">
+  <div class="id-band-inner">
+    <h2 class="id-section-title">Registering takes a few minutes</h2>
+    <p class="id-lede" style="margin-top:12px">
+      Give us your business name, ABN and a contact. We confirm your email and
+      mobile, check the ABN against the register, and a member of our team
+      reviews the registration. Most reviews finish within one business day.
+    </p>
+    <div class="id-hero-actions">
+      <a class="btn btn-big" href="/register">Register your business</a>
+      <a class="btn btn-big" href="/signin">I already have an account</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,72 @@
+{#
+  Client-side macros. Small pieces of job vocabulary that appear on more than
+  one of S-04, S-05, S-06, kept here so the three screens stay consistent.
+#}
+
+{% macro engagement(job) -%}
+{{ "Day rate" if job.engagement_type == "DAY_RATE" else "Fixed price" }}
+{%- endmacro %}
+
+{% macro budget(job) -%}
+{%- if job.budget_min is none and job.budget_max is none -%}
+Budget not stated
+{%- else -%}
+{{ budget_range(job.budget_min, job.budget_max) }}{{ " per day" if job.engagement_type == "DAY_RATE" else "" }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro job_meta(job) -%}
+{{ engagement(job) }} &#183; {{ budget(job) }} &#183; {{ job.location or "Location not stated" }}
+{%- endmacro %}
+
+{#
+  What the client is allowed to know about the bids on a job. Before Staff
+  release anything the honest answer is a sentence, not a number: the count of
+  submitted bids is not the client's to see (FR-407, FR-409).
+#}
+{% macro bids_visible(job) -%}
+{%- if job.state in ("BIDS_RELEASED", "AWARD_PENDING", "AWARDED") -%}
+{{ job.released_bid_count }} released to you
+{%- elif job.state in ("APPROVED", "INVITING", "BIDDING", "BIDS_CLOSED") -%}
+Released once Staff have screened them
+{%- else -%}
+Not open for bidding yet
+{%- endif -%}
+{%- endmacro %}
+
+{% macro closing(job) -%}
+{%- if job.bids_close_at -%}
+{{ job.bids_close_at|date }} <span class="muted">({{ job.bids_close_at|relative }})</span>
+{%- else -%}
+<span class="muted">Set by Staff at approval</span>
+{%- endif -%}
+{%- endmacro %}
+
+{#
+  One comparable figure per bid. A fixed price bid states it; a day rate bid
+  is rate times estimated days, and the screen says so rather than quietly
+  presenting it as a price.
+#}
+{% macro bid_price(bid) -%}
+{%- if bid.amount is not none -%}
+<strong class="num">{{ bid.amount|money }}</strong><br>
+<span class="small muted">Fixed price</span>
+{%- elif bid.day_rate is not none -%}
+<strong class="num">{{ bid.day_rate|money }}</strong> <span class="small muted">per day</span><br>
+<span class="small muted">
+  {%- if bid.estimated_days %}{{ bid.estimated_days }} days &#183; {{ bid.comparable_total|money }} indicative total
+  {%- else %}Days not stated{% endif -%}
+</span>
+{%- else -%}
+<span class="muted">Not priced</span>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro skills(raw) %}
+{% set list = raw|json_load %}
+{% if list %}
+<ul class="taglist">
+  {% for skill in list %}<li class="tag">{{ skill }}</li>{% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}

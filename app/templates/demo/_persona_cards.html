@@ -1,0 +1,24 @@
+{#
+  The demo persona picker (FR-151). Included by the landing page and by
+  /demo, so both places offer exactly the same four cards and exactly the
+  same one-click sign-in.
+
+  Each card is a form of its own posting a persona key. The key is matched
+  against the hard-coded allowlist in app/demo/personas.py, so nothing here
+  can be pointed at an arbitrary account (§10.2).
+#}
+<div class="persona-grid">
+  {% for persona in personas %}
+    <div class="persona-card">
+      <h3>{{ persona.card_title }}</h3>
+      <p class="label">{{ persona.role|lower }} &#183; {{ persona.name }}</p>
+      <p>{{ persona.blurb }}</p>
+      <form method="post" action="/demo/login">
+        <input type="hidden" name="persona" value="{{ persona.key }}">
+        <button type="submit" class="btn btn-sm btn-block">
+          Sign in as {{ persona.card_title }}
+        </button>
+      </form>
+    </div>
+  {% endfor %}
+</div>

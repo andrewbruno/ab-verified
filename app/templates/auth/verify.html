@@ -1,0 +1,149 @@
+{% extends "layout/base.html" %}
+{% block title %}Confirm your contact details &#183; AB-Verified{% endblock %}
+
+{# S-02. FR-102 (email link, 24 hour TTL) and FR-103 (mobile OTP, six digits,
+   ten minutes, five attempts, three resends an hour).
+
+   State is never signalled by colour alone: each channel carries a word, a
+   pill and a mark. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+<ol class="steps">
+  <li class="done">1. Your details</li>
+  <li class="current">2. Verify email and mobile</li>
+  <li>3. Staff verification</li>
+</ol>
+
+<p class="label">Registration</p>
+<h1>Confirm your contact details</h1>
+<p class="lead" style="margin-top:8px">
+  Both have to be confirmed before your registration reaches our verification
+  team. You can do them in either order.
+</p>
+
+<div class="grid grid-2" style="margin-top:var(--sp-1)">
+
+  {# ---------------------------------------------------------------- email #}
+  <div class="card">
+    <div class="id-inline-head">
+      <span class="id-tick {{ 'id-tick-done' if email_verified else 'id-tick-todo' }}"
+            aria-hidden="true">{{ '&#10003;'|safe if email_verified else '1' }}</span>
+      <h2 class="card-title">Email address</h2>
+      <span class="pill {{ 'pill-ok' if email_verified else 'pill-warn' }}">
+        {{ 'Confirmed' if email_verified else 'Not yet confirmed' }}
+      </span>
+    </div>
+
+    <p class="small muted">{{ profile.email }}</p>
+
+    {% if email_verified %}
+      <p class="small" style="margin-top:12px">
+        This address is confirmed. Nothing more to do here.
+      </p>
+    {% else %}
+      <p class="small" style="margin-top:12px">
+        Open the link we sent you. It is good for 24 hours and works once.
+        {% if email_expires_at %}The current link expires {{ email_expires_at|relative }}.{% endif %}
+      </p>
+
+      <form method="post" action="/verify/email/resend" style="margin-top:16px">
+        <button type="submit" class="btn btn-sm"
+                {% if not email_resend_allowed %}disabled aria-disabled="true"{% endif %}>
+          Send the link again
+        </button>
+        {% if not email_resend_allowed %}
+          <span class="hint">You have asked for this too many times in the last hour.</span>
+        {% endif %}
+      </form>
+
+      {% if environment != 'production' and email_token %}
+        <div class="id-dev">
+          <p class="label">Development affordance</p>
+          <p class="small" style="margin-top:6px">
+            No mail provider is configured here, so the link is printed rather
+            than sent. In production this appears only in the email.
+          </p>
+          <a class="id-dev-value" href="/verify/email/{{ email_token.secret }}">
+            /verify/email/{{ email_token.secret }}
+          </a>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+
+  {# --------------------------------------------------------------- mobile #}
+  <div class="card">
+    <div class="id-inline-head">
+      <span class="id-tick {{ 'id-tick-done' if mobile_verified else 'id-tick-todo' }}"
+            aria-hidden="true">{{ '&#10003;'|safe if mobile_verified else '2' }}</span>
+      <h2 class="card-title">Mobile number</h2>
+      <span class="pill {{ 'pill-ok' if mobile_verified else 'pill-warn' }}">
+        {{ 'Confirmed' if mobile_verified else 'Not yet confirmed' }}
+      </span>
+    </div>
+
+    <p class="small muted">{{ profile.mobile_e164 or 'No number on file' }}</p>
+
+    {% if mobile_verified %}
+      <p class="small" style="margin-top:12px">
+        This number is confirmed. Nothing more to do here.
+      </p>
+    {% else %}
+      {% if otp_error %}
+        <p class="notice notice-error" id="otp-error" role="alert"
+           style="margin:12px 0">{{ otp_error }}</p>
+      {% endif %}
+
+      <p class="id-meter" style="margin-top:12px">
+        <span>Six digits</span>
+        <span>{% if mobile_expires_at %}Expires {{ mobile_expires_at|relative }}{% else %}No code outstanding{% endif %}</span>
+        <span>Attempt {{ attempts_used + 1 }} of {{ attempts_allowed }}</span>
+      </p>
+
+      <form method="post" action="/verify/mobile">
+        <div class="field {% if otp_error %}field-error{% endif %}">
+          <label for="f-code">Enter the code we sent you</label>
+          <input id="f-code" name="code" type="text" class="id-otp"
+                 inputmode="numeric" autocomplete="one-time-code"
+                 pattern="[0-9]{6}" maxlength="6" required aria-required="true"
+                 {% if otp_error %}aria-invalid="true" aria-describedby="otp-error"{% endif %}>
+        </div>
+        <div class="row">
+          <button type="submit" class="btn btn-solid">Confirm mobile</button>
+        </div>
+      </form>
+
+      <form method="post" action="/verify/mobile/resend" style="margin-top:12px">
+        <button type="submit" class="btn btn-sm"
+                {% if not mobile_resend_allowed %}disabled aria-disabled="true"{% endif %}>
+          Send a new code
+        </button>
+        {% if not mobile_resend_allowed %}
+          <span class="hint">Three codes an hour is the limit. Try again shortly.</span>
+        {% endif %}
+      </form>
+
+      {% if environment != 'production' and mobile_token %}
+        <div class="id-dev">
+          <p class="label">Development affordance</p>
+          <p class="small" style="margin-top:6px">
+            No SMS provider is configured here, so the code is printed rather
+            than sent. In production this appears only in the text message.
+          </p>
+          <span class="id-dev-value id-dev-code">{{ mobile_token.secret }}</span>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</div>
+
+<div class="card card-quiet" style="margin-top:var(--sp-1)">
+  <h3>Why both</h3>
+  <p class="small muted" style="margin-top:8px">
+    A registration only reaches our verification queue once both channels are
+    confirmed and the Australian Business Register has been queried, so that
+    the person our team is reviewing can actually be reached.
+  </p>
+</div>
+{% endblock %}

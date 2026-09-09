@@ -1,0 +1,55 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head, empty %}
+{% block title %}Outbox &#183; AB-Verified{% endblock %}
+
+{# §10.2. The messages this account would have received.
+
+   The list is whatever policies.notification_select allows: your own
+   messages, or every message if you are staff. Nothing is filtered in the
+   template. #}
+{% block content %}
+<link rel="stylesheet" href="/static/css/identity.css">
+
+{{ page_head(
+    "Outbox",
+    lead="Email and SMS raised by the application. A message addressed to the reserved demo domain is marked suppressed and is never handed to a provider, so a demo session can never reach a real person.",
+    kicker="Messages") }}
+
+{% if messages %}
+  <div class="stack-sm">
+    {% for message in messages %}
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <p class="label">
+              {{ message.channel }} &#183; {{ message.created_at|datetime }}
+              {% if me.is_staff and message.recipient_name %}
+                &#183; {{ message.recipient_name }}
+              {% endif %}
+            </p>
+            <p class="card-title" style="margin-top:4px">
+              {{ message.subject or 'Text message' }}
+            </p>
+          </div>
+          <span class="pill {{ {
+              'SENT': 'pill-ok', 'QUEUED': 'pill-info',
+              'SUPPRESSED': 'pill-warn', 'FAILED': 'pill-danger'
+            }.get(message.state, '') }}">
+            {{ message.state|lower|capitalize }}
+          </span>
+        </div>
+        <p class="small muted">To {{ message.to_address }}</p>
+        <p class="id-msg-body">{{ message.body }}</p>
+        {% if message.state == 'SUPPRESSED' %}
+          <p class="hint">
+            Suppressed: this address is on the reserved demo domain, so the
+            message was recorded here and never sent (FR-157).
+          </p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  {{ empty("No messages yet. Anything the application sends to this account will appear here.") }}
+{% endif %}
+{% endblock %}
