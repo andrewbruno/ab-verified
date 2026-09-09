@@ -74,5 +74,5 @@ Two things close that gap:
 Either route can also be invoked by hand at any time with the shared secret:
 
 ```bash
-curl -X POST -H "X-Cron-Secret: $CRON_SECRET" https://<deployment>/internal/cron/expire
+curl -X POST -H "X-Cron-Secret: $CRON_SECRET" https://ab-verified-one.vercel.app/internal/cron/expire
 ```

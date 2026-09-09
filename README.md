@@ -9,6 +9,10 @@ explicitly invite Contractors to bid.
 The specification is [`docs/SPEC.md`](docs/SPEC.md). This repository is the
 implementation of it.
 
+**Production:** <https://ab-verified-one.vercel.app>. Note the `-one`:
+`ab-verified.vercel.app` belongs to someone else and returns
+`DEPLOYMENT_DISABLED`, so it is not this application.
+
 ## Running it locally
 
 No Docker, no Node.js, no external accounts needed.
@@ -28,7 +32,38 @@ account is verified and entirely empty, because a Contractor can never see a
 job they were not invited to. That emptiness is the authorisation model
 working, not a bug.
 
-Run the tests with `python -m pytest -q`.
+## Testing
+
+| Command | What it covers |
+|---|---|
+| `python -m pytest` | 436 unit and integration tests: every state machine transition, and an allow and a deny test for every Row Level Security policy (NFR-15, R2). |
+| `python -m pytest e2e` | The full lifecycle through a real browser: one job carried from pending approval to a confirmed award, plus the authorisation boundary asserted from outside the application. |
+| `ruff check app scripts tests e2e` | Lint. The rules are pinned in `ruff.toml` and the version in CI, because an unpinned linter with implicit rules turns each upstream release into a possible red build. |
+
+The end-to-end suite needs one extra install, and is the only place Node.js
+appears anywhere near this project:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m playwright install chromium
+python -m pytest e2e
+```
+
+Playwright's Python package embeds a Node-based driver. That is a deliberate
+and contained exception to PC1: `requirements-dev.txt` is never installed on
+Vercel, so no part of the runtime or the build toolchain touches it. A failing
+end-to-end test leaves a Playwright trace in `e2e/artifacts/`; open one with
+`python -m playwright show-trace e2e/artifacts/<name>.zip` to replay the run
+frame by frame.
+
+### The walkthrough video
+
+`python scripts/record_demo.py` films the journey and writes
+`public/static/demo/journey.webm`, which the application serves at
+[`/demo/walkthrough`](http://localhost:8000/demo/walkthrough). The recording
+drives `e2e/journey.py`, the same sequence the end-to-end test asserts, so the
+video cannot show a flow the application no longer has: if the journey breaks,
+the test goes red and the recording fails with it.
 
 ## The two database backends
 
@@ -91,10 +126,35 @@ Three principles do most of the work:
 
 ## Deploying
 
+Production is <https://ab-verified-one.vercel.app>, Vercel project
+`ab-verified`, functions in `syd1`.
+
+Nothing in this repository performs the deploy: there is no deploy workflow and
+no Vercel CLI step, because Vercel's own Git integration is meant to build each
+push to `main`. **That integration is not connected yet**, so pushing to `main`
+currently deploys nothing and the site only moves when someone runs
+`vercel deploy --prod` by hand. Connecting it is a one-time authorisation:
+
+> Vercel dashboard → project `ab-verified` → Settings → Git → Connect Git
+> Repository → GitHub → install the Vercel GitHub App on `andrewbruno` and
+> grant it this repository.
+
+`vercel git connect` from a linked checkout does the same thing, but only once
+that authorisation exists; until then it fails with "make sure you have access
+to the repository". Once connected, `main` builds to production and every pull
+request gets a preview deployment, which is the trunk-based flow this project
+is set up for.
+
 See [`docs/ENVIRONMENT.md`](docs/ENVIRONMENT.md) for the environment variables
-and [`supabase/README.md`](supabase/README.md) for the migrations. Production
-sets `DEMO_MODE=false`, and `scripts/check_no_demo_rows.py` fails the deploy if
-demo seed data is present in the production database (FR-158).
+and [`supabase/README.md`](supabase/README.md) for the migrations, which are
+applied by hand and are not run by CI. Production sets `DEMO_MODE=false`, and
+`scripts/check_no_demo_rows.py` fails the build if demo seed data is present in
+the production database (FR-158).
+
+Note that GitHub Actions does not gate the deploy. Vercel and Actions both
+trigger off the same push and run in parallel, so a red suite would not stop a
+release, and the FR-158 check runs after the code is already live. Requiring
+the `lint` and `test` checks through branch protection is the cheap fix.
 
 ## Documentation
 
