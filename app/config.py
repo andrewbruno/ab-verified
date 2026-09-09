@@ -38,6 +38,13 @@ class Settings:
         return self.environment == "production"
 
     @property
+    def cookies_secure(self) -> bool:
+        """Every hosted environment is served over TLS (NFR-04), so the session
+        cookie is marked secure everywhere except local development, where
+        there is no certificate to satisfy it."""
+        return self.environment != "development"
+
+    @property
     def uses_postgres(self) -> bool:
         return self.database_url.startswith("postgres")
 

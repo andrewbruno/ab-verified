@@ -147,7 +147,7 @@ def sign_in_response(url: str, user_id: str, *, flash: str | None = None) -> Res
         path="/",
         httponly=True,
         samesite="lax",
-        secure=get_settings().is_production,
+        secure=get_settings().cookies_secure,
     )
     return response
 
