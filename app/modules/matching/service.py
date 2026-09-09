@@ -79,7 +79,8 @@ def score_candidate(job: dict[str, Any], org: dict[str, Any]) -> dict[str, Any]:
     org_categories: set[str] = set()
     for category in json_load(org.get("categories"), []):
         org_categories |= _words(str(category))
-    if job_category & org_categories:
+    category_hit = bool(job_category & org_categories)
+    if category_hit:
         score += CATEGORY_WEIGHT
         reasons.append("same category (" + (job.get("category") or "") + ")")
 
@@ -94,10 +95,14 @@ def score_candidate(job: dict[str, Any], org: dict[str, Any]) -> dict[str, Any]:
     elif job_state and org_state:
         reasons.append(f"different state ({org_state} against {job_state})")
 
+    total = int(round(min(100.0, score)))
     return {
-        "score": int(round(min(100.0, score))),
+        "score": total,
         "matched_skills": matched,
         "missing_skills": sorted(s for s in required if s not in held),
+        # A region bonus alone is not a suggestion: every contractor would
+        # qualify on a remote job. The shortlist wants a real reason.
+        "suggested": bool(matched) or category_hit or total >= 50,
         "explanation": ", ".join(reasons) if reasons else "no overlap recorded",
     }
 
@@ -196,7 +201,7 @@ def suggest(
         })
 
     candidates.sort(key=lambda c: (-c["score"], c["legal_name"]))
-    shortlist = [c for c in candidates if c["score"] > 0 or include_unmatched]
+    shortlist = [c for c in candidates if c["suggested"] or include_unmatched]
     return {
         "job": job,
         "candidates": shortlist[:limit],
@@ -210,6 +215,7 @@ def suggest(
             {(o.get("region") or "").upper() for o in contractors if o.get("region")}
         ),
         "default_expiry": local_field(job.get("bids_close_at")),
+        "hidden_count": len(candidates) - len(shortlist[:limit]),
     }
 
 

@@ -27,9 +27,9 @@
     <h2 id="glance-heading" class="visually-hidden">The bids at a glance</h2>
     <div class="grid grid-tiles">
       {{ stat(bids|length, "Bids released to you") }}
-      {{ stat(lowest|money, "Lowest") }}
-      {{ stat(highest|money, "Highest") }}
-      {{ stat(spread|money, "Spread") }}
+      {{ stat(lowest|money, "Lowest", tone="ink") }}
+      {{ stat(highest|money, "Highest", tone="ink") }}
+      {{ stat(spread|money, "Spread", tone="ink") }}
     </div>
   </section>
 

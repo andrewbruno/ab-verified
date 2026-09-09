@@ -1162,6 +1162,8 @@ ENTITY_LABELS = {
     "invitation": "Invitation",
     "bid": "Bid",
     "award": "Award",
+    "verification_decision": "Verification decision",
+    "user_profile": "User",
     "user": "User",
 }
 

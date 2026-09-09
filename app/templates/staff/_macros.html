@@ -13,7 +13,6 @@
 {#- base.html exposes no head block, so the console stylesheet is linked at
     the top of the content. Browsers honour it and the page still works with
     JavaScript disabled. -#}
-<link rel="stylesheet" href="/static/css/staff.css">
 {% endmacro %}
 
 {% macro age(value) %}<span class="nowrap">{{ value|relative }}</span>{% endmacro %}
@@ -31,9 +30,10 @@
 {% endif %}
 {% endmacro %}
 
-{% macro flag_pills(flags) %}
-{% if flags %}
-  {% for flag in flags %}<span class="pill pill-flag" title="{{ flag.detail }}">{{ flag.code }}</span>{% endfor %}
+{% macro flag_pills(flags, skip=['NO DOCUMENTS']) %}
+{% set shown = flags|rejectattr('code', 'in', skip)|list %}
+{% if shown %}
+  {% for flag in shown %}<span class="pill pill-flag" title="{{ flag.detail }}">{{ flag.code }}</span>{% endfor %}
 {% else %}
   <span class="muted small">No flags</span>
 {% endif %}
@@ -114,9 +114,14 @@
 {% else %}<span class="muted small">{{ empty }}</span>{% endif %}
 {% endmacro %}
 
-{% macro match_chips(matched, missing) %}
+{% macro match_chips(matched, held) %}
+{#- Skills this contractor holds. The ones the job asked for are marked, the
+    rest are shown plain, so the reviewer sees the whole capability and not
+    only the overlap. -#}
 <span class="chips">
-  {% for skill in matched %}<span class="chip chip-on">{{ skill }}</span>{% endfor %}
-  {% for skill in missing %}<span class="chip chip-off">{{ skill }}</span>{% endfor %}
+  {% for skill in held %}
+    {% if skill|lower in matched %}<span class="chip chip-on">{{ skill }}</span>
+    {% else %}<span class="chip">{{ skill }}</span>{% endif %}
+  {% endfor %}
 </span>
 {% endmacro %}

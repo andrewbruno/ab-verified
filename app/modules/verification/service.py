@@ -119,7 +119,7 @@ def risk_flags(case: dict[str, Any]) -> list[dict[str, str]]:
                       "attached to at most one active organisation (FR-106).",
         })
     score = case.get("name_match_score")
-    if score is not None and score < 60:
+    if case.get("abr_entity_name") and score is not None and score < 60:
         flags.append({
             "code": "NAME MISMATCH",
             "detail": f"The name similarity score is {score} out of 100. The submitted "
@@ -143,9 +143,14 @@ def risk_flags(case: dict[str, Any]) -> list[dict[str, str]]:
 def _decorate(case: dict[str, Any]) -> dict[str, Any]:
     case = dict(case)
     score = case.get("name_match_score")
-    if score is None and case.get("abr_entity_name"):
+    if not case.get("abr_entity_name"):
+        # Nothing came back from the register, so there is nothing to compare
+        # the submitted name against. A stored zero would read as a damning
+        # score rather than as an absent one.
+        score = None
+    elif score is None:
         score = abn_mod.name_match_score(case.get("legal_name", ""), case["abr_entity_name"])
-        case["name_match_score"] = score
+    case["name_match_score"] = score
     case["score_reading"] = score_reading(score)
     case["flags"] = risk_flags(case)
     case["waiting_hours"] = hours_between(case.get("opened_at"), now_iso())
@@ -160,7 +165,8 @@ FLAG_TESTS = {
     "duplicate": lambda c: bool(c.get("duplicate_abn_flag")),
     "abr": lambda c: c.get("lookup_state") in ("ABR_UNAVAILABLE", "PENDING"),
     "cancelled": lambda c: c.get("abr_status") == "CANCELLED",
-    "mismatch": lambda c: (c.get("name_match_score") or 0) < 60,
+    "mismatch": lambda c: c.get("name_match_score") is not None
+    and c["name_match_score"] < 60,
 }
 
 

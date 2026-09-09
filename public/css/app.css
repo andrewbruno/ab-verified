@@ -104,21 +104,27 @@ p { max-width: 68ch; }
 /* --- Layout -------------------------------------------------------------- */
 .topbar {
   position: sticky; top: 0; z-index: 40;
-  height: var(--topbar-h);
-  display: flex; align-items: center; gap: 24px;
+  min-height: var(--topbar-h);
+  display: flex; align-items: center; gap: clamp(12px, 2vw, 24px);
   padding: 0 var(--pad-x);
   background: rgba(var(--navy-rgb), .97);
   backdrop-filter: blur(8px);
-  color: var(--bone);
   border-bottom: 1px solid rgba(var(--bone-rgb), .16);
+  /* The bar is an inverted band, so it rewrites the role variables for its
+     own subtree. Without this, .btn-ghost inherits the light theme's muted
+     and hairline colours and renders dark on dark. */
+  --fg: var(--bone); --fg-rgb: var(--bone-rgb);
+  --mut: rgba(var(--bone-rgb), .72);
+  --ln: rgba(var(--bone-rgb), .34);
+  color: var(--fg);
 }
 .topbar a { color: inherit; }
 .brand {
   font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
-  font-size: 15px; white-space: nowrap;
+  font-size: 15px; white-space: nowrap; flex: 0 0 auto;
 }
-.brand .dot { color: var(--red); }
-.topnav { display: flex; gap: 4px; flex: 1; flex-wrap: wrap; overflow: hidden; }
+.brand .dot { color: var(--red); font-weight: 900; }
+.topnav { display: flex; gap: 4px; flex: 1 1 auto; min-width: 0; flex-wrap: wrap; }
 .topnav a {
   font-family: var(--font-m); font-size: 11px; font-weight: 600;
   letter-spacing: .14em; text-transform: uppercase;
@@ -127,9 +133,13 @@ p { max-width: 68ch; }
 }
 .topnav a:hover { color: var(--bone); text-decoration: none; }
 .topnav a[aria-current="page"] { color: var(--bone); border-bottom-color: var(--red); }
-.topbar-right { display: flex; align-items: center; gap: 14px; font-size: 12px; }
-.whoami { color: rgba(var(--bone-rgb), .7); font-size: 12px; }
+.topbar-right {
+  display: flex; align-items: center; gap: 12px; font-size: 12px;
+  flex: 0 0 auto; margin-left: auto;
+}
+.whoami { color: rgba(var(--bone-rgb), .7); font-size: 12px; white-space: nowrap; }
 .whoami strong { color: var(--bone); font-weight: 600; }
+@media (max-width: 1080px) { .whoami { display: none; } }
 
 main { padding: var(--sp-1) var(--pad-x) var(--sp-2); }
 .wrap { max-width: 1180px; margin: 0 auto; }
@@ -142,6 +152,9 @@ main { padding: var(--sp-1) var(--pad-x) var(--sp-2); }
 }
 .page-head .lead { margin-top: 6px; }
 .stack > * + * { margin-top: var(--sp-1); }
+/* Sibling sections need air between them; without it a heading sits flush
+   against the block above and the page reads as one undifferentiated run. */
+main section + section { margin-top: var(--sp-2); }
 .stack-sm > * + * { margin-top: 12px; }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .row-end { justify-content: flex-end; }
@@ -177,6 +190,13 @@ main { padding: var(--sp-1) var(--pad-x) var(--sp-2); }
   color: var(--orange); font-variant-numeric: tabular-nums;
 }
 .stat-label { margin-top: 8px; }
+/* Red is a single accent per viewport, so a tile that reports a neutral fact
+   (a price, a spread) takes the ink colour and leaves the accent to the tile
+   that actually asks for action. */
+.stat-ink .stat-num { color: var(--fg); }
+/* A zero is not urgent, so it does not take the accent. */
+.stat-zero .stat-num { color: rgba(var(--fg-rgb), .3); }
+.stat-zero:hover { border-color: var(--ln); }
 
 /* --- Tables -------------------------------------------------------------- */
 .table-wrap { overflow-x: auto; border: 1px solid var(--ln); }
@@ -292,7 +312,14 @@ legend { padding: 0 8px; font-family: var(--font-m); font-size: 11px; font-weigh
   border: 1px solid var(--ln); padding: 20px; display: flex; flex-direction: column;
   gap: 10px; background: var(--bg); text-align: left; height: 100%;
 }
-.persona-card h3 { font-size: 1.05rem; text-transform: uppercase; letter-spacing: .02em; }
+/* The four titles and the four role lines wrap to different numbers of lines,
+   so both are given a floor. That keeps the blurbs starting on the same
+   baseline across the row instead of stepping down card by card. */
+.persona-card h3 {
+  font-size: 1.05rem; text-transform: uppercase; letter-spacing: .02em;
+  min-height: 2.5em;
+}
+.persona-card > .label { min-height: 2.6em; letter-spacing: .12em; }
 .persona-card p { font-size: 14px; color: var(--mut); flex: 1; }
 .persona-card form { margin-top: auto; }
 

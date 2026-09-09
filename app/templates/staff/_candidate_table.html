@@ -5,7 +5,11 @@
   on its own to an htmx request so filtering does not lose the page.
 #}
 <div id="candidates">
-  <p class="label" role="status">{{ candidates|length }} contractor(s) listed, {{ already_invited|length }} already invited</p>
+  <p class="label" role="status">
+    {{ candidates|length }} contractor(s) listed, {{ already_invited|length }} already invited{% if hidden_count %},
+    {{ hidden_count }} more with no skill or category overlap, listed under
+    "every verified contractor" above{% endif %}
+  </p>
 
   {% if candidates %}
   <div class="table-wrap">
@@ -43,7 +47,7 @@
           </td>
           <td>
             <span class="why" style="color:var(--fg)">{{ candidate.explanation }}</span>
-            {{ match_chips(candidate.matched_skills, candidate.missing_skills) }}
+            {{ match_chips(candidate.matched_skills, candidate.skill_list) }}
           </td>
           <td>{{ candidate.region or 'Not stated' }}</td>
           <td class="small muted nowrap">

@@ -15,9 +15,16 @@
 </div>
 {% endmacro %}
 
-{% macro stat(number, label, href=None) %}
-{% if href %}<a class="stat" href="{{ href }}">{% else %}<div class="stat">{% endif %}
-  <div class="stat-num num">{{ number }}</div>
+{#
+  A count tile. Red is the accent and the palette asks for it sparingly, so a
+  zero is muted: an empty queue is good news and should not shout.
+#}
+{% macro stat(number, label, href=None, tone='accent') %}
+{% set is_zero = (number == 0 or number == '0' or number is none) %}
+{% set classes = 'stat' ~ (' stat-zero' if is_zero else '') ~ ('' if tone == 'accent' else ' stat-ink') %}
+{% if href %}<a class="{{ classes }}" href="{{ href }}">
+{% else %}<div class="{{ classes }}">{% endif %}
+  <div class="stat-num num">{{ number if number is not none else 0 }}</div>
   <div class="stat-label label">{{ label }}</div>
 {% if href %}</a>{% else %}</div>{% endif %}
 {% endmacro %}
