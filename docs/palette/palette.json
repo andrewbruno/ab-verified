@@ -1,0 +1,38 @@
+{
+  "source": "https://forward-deployed-engineer.ai/",
+  "extractedFrom": "/_next/static/css/ac690a9aaf3e82a2.css",
+  "extractedOn": "2026-09-09",
+  "defaultTheme": "dark",
+  "colors": {
+    "red":    { "hex": "#fa0d0d", "rgb": [250, 13, 13],   "role": "accent / CTA / Kinetic IT brand red" },
+    "sky":    { "hex": "#29ccff", "rgb": [41, 204, 255],  "role": "bright cyan — links & highlights on dark" },
+    "skyMid": { "hex": "#32a4cf", "rgb": [50, 164, 207],  "role": "mid cyan — gradients, secondary fills" },
+    "skyInk": { "hex": "#0f6394", "rgb": [15, 99, 148],   "role": "deep cyan — links on light, blue band on dark" },
+    "navy":   { "hex": "#1a2e4a", "rgb": [26, 46, 74],    "role": "primary dark surface / text on light" },
+    "bone":   { "hex": "#ffffff", "rgb": [255, 255, 255], "role": "text on dark / light surface" },
+    "grey":   { "hex": "#f2f2f2", "rgb": [242, 242, 242], "role": "alternate light surface" },
+    "navyAlt":{ "hex": "#15263d", "rgb": [21, 38, 61],    "role": "alternate dark surface (.surf-alt on dark)" }
+  },
+  "alphaTokens": {
+    "muted":     "rgba(fg, 0.62)  — 0.64 on light, 0.66 on inverted bands, 0.72 on cyan band",
+    "hairline":  "rgba(fg, 0.16)  — 0.12 on light, 0.20-0.22 on inverted/cyan bands",
+    "paperCard": "rgba(255,255,255,0.06)"
+  },
+  "typography": {
+    "family": "Roboto",
+    "fallbacks": ["Roboto Fallback", "Arial", "Helvetica Neue", "sans-serif"],
+    "delivery": "next/font self-hosted woff2, font-display: swap",
+    "googleFonts": "https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap",
+    "roles": { "--font-d": "display", "--font-b": "body", "--font-m": "mono/label" },
+    "note": "All three roles resolve to Roboto — one family, differentiated by weight, size, letter-spacing and case.",
+    "weightsUsed": [400, 550, 560, 600, 650, 700, 800, 900],
+    "baseBody": { "fontSize": "18px", "lineHeight": 1.6 }
+  },
+  "spacing": {
+    "--sp-1": "clamp(20px, 3vh, 40px)",
+    "--sp-2": "clamp(36px, 5vh, 60px)",
+    "--sp-3": "clamp(72px, 10vh, 120px)",
+    "--topbar-h": "53px"
+  },
+  "shape": { "borderRadius": "0 — every corner is square across the entire site" }
+}

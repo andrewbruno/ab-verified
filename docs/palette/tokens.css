@@ -1,0 +1,107 @@
+/* ------------------------------------------------------------------
+   forward-deployed-engineer.ai — design tokens
+   Extracted 2026-09-09 from the live stylesheet
+   (/_next/static/css/ac690a9aaf3e82a2.css). Dark is the default theme.
+   ------------------------------------------------------------------ */
+
+:root {
+  /* --- Brand primitives --- */
+  --red:         #fa0d0d;  --red-rgb:      250,13,13;   /* Kinetic IT accent  */
+  --sky:         #29ccff;  --sky-rgb:      41,204,255;  /* bright cyan        */
+  --sky-mid:     #32a4cf;  --sky-mid-rgb:  50,164,207;  /* mid cyan           */
+  --sky-ink:     #0f6394;  --sky-ink-rgb:  15,99,148;   /* deep cyan          */
+  --bone:        #ffffff;  --bone-rgb:     255,255,255;
+  --navy:        #1a2e4a;  --navy-rgb:     26,46,74;    /* primary dark       */
+  --grey:        #f2f2f2;                               /* light alt surface  */
+
+  /* --- Semantic roles (dark default) --- */
+  --ink:         var(--navy);        --ink-rgb:  var(--navy-rgb);
+  --bg:          var(--ink);         --bg-rgb:   var(--ink-rgb);
+  --fg:          var(--bone);        --fg-rgb:   var(--bone-rgb);
+  --mut:         rgba(var(--fg-rgb), 0.62);   /* muted / secondary text */
+  --ln:          rgba(var(--fg-rgb), 0.16);   /* hairline borders       */
+  --accent:      var(--red);         --accent-rgb: var(--red-rgb);
+  --orange:      var(--accent);      /* legacy alias — still the accent hook */
+  --blue:        var(--sky);         --blue-rgb: var(--sky-rgb);
+
+  /* --- Paper band (always-navy inverted section) --- */
+  --paper:       var(--navy);
+  --paper-ink:   var(--bone);        --paper-ink-rgb: var(--bone-rgb);
+  --paper-card:  rgba(255,255,255,0.06);
+
+  /* --- Typography --- */
+  --font-roboto: "Roboto", "Roboto Fallback";
+  --font-d:      var(--font-roboto), Arial, "Helvetica Neue", sans-serif; /* display */
+  --font-m:      var(--font-roboto), Arial, "Helvetica Neue", sans-serif; /* mono/label */
+  --font-b:      var(--font-roboto), Arial, "Helvetica Neue", sans-serif; /* body */
+
+  /* --- Layout rhythm --- */
+  --topbar-h: 53px;
+  --sp-1: clamp(20px, 3vh, 40px);
+  --sp-2: clamp(36px, 5vh, 60px);
+  --sp-3: clamp(72px, 10vh, 120px);
+}
+
+/* --- Light theme --- */
+[data-theme="light"] {
+  --bg:   #ffffff;              --bg-rgb: 255,255,255;
+  --fg:   var(--navy);          --fg-rgb: var(--navy-rgb);
+  --mut:  rgba(var(--fg-rgb), 0.64);
+  --ln:   rgba(var(--fg-rgb), 0.12);
+  --blue: var(--sky-ink);       --blue-rgb: var(--sky-ink-rgb);
+}
+
+/* --- Surface variants (per-section band overrides) --- */
+
+/* Subtle alternate surface */
+[data-theme="light"] .surf-alt { --bg: var(--grey); --bg-rgb: 242,242,242; }
+[data-theme="dark"]  .surf-alt { --bg: #15263d;    --bg-rgb: 21,38,61;    }
+
+/* Cyan feature band */
+[data-theme="light"] .surf-blue {
+  --bg: var(--sky);   --bg-rgb: var(--sky-rgb);
+  --fg: var(--navy);  --fg-rgb: var(--navy-rgb);
+  --mut: rgba(var(--navy-rgb), 0.72);
+  --ln:  rgba(var(--navy-rgb), 0.22);
+  --orange: var(--navy);
+  --blue:   var(--navy);
+}
+[data-theme="dark"] .surf-blue {
+  --bg: var(--sky-ink); --bg-rgb: var(--sky-ink-rgb);
+  --fg: var(--bone);    --fg-rgb: var(--bone-rgb);
+  --mut: rgba(var(--bone-rgb), 0.66);
+  --ln:  rgba(var(--bone-rgb), 0.2);
+  --blue: var(--sky);   --blue-rgb: var(--sky-rgb);
+  --orange: #ffffff;    --accent-rgb: 255,255,255;
+}
+
+/* Always-navy inverted bands, regardless of theme */
+.paper-band, .surf-deep {
+  --bg: var(--navy);  --bg-rgb: var(--navy-rgb);
+  --fg: var(--bone);  --fg-rgb: var(--bone-rgb);
+  --mut: rgba(var(--bone-rgb), 0.66);
+  --ln:  rgba(var(--bone-rgb), 0.2);
+  --blue: var(--sky); --blue-rgb: var(--sky-rgb);
+}
+.paper-band {
+  --bg: var(--paper);
+  --fg: var(--paper-ink);
+  --mut: rgba(var(--paper-ink-rgb), 0.66);
+  --ln:  rgba(var(--paper-ink-rgb), 0.2);
+}
+
+/* --- Base --- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-b);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; }
+::selection { background: var(--orange); color: var(--bg); }
+.mono { font-family: var(--font-m); letter-spacing: .1em; }
