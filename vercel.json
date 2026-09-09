@@ -6,8 +6,8 @@
   },
   "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
   "crons": [
-    { "path": "/internal/cron/drain-queue", "schedule": "*/5 * * * *" },
-    { "path": "/internal/cron/expire", "schedule": "*/15 * * * *" }
+    { "path": "/internal/cron/drain-queue", "schedule": "0 18 * * *" },
+    { "path": "/internal/cron/expire", "schedule": "30 18 * * *" }
   ],
   "github": { "silent": false }
 }

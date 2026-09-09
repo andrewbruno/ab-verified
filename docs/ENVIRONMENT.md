@@ -49,3 +49,30 @@ The key is read inside the request handler, used to call the API server side,
 and the polished text comes back as HTML for the form field. The browser never
 sees the key, and the call happens on the server where the rest of the
 application's secrets already live.
+
+## Scheduled work on the Hobby plan
+
+`vercel.json` schedules both worker routes once a day (18:00 and 18:30 UTC,
+which is 4am and 4:30am in Sydney), because Vercel's Hobby plan allows a cron
+job to run at most once per day. The specification wants a much tighter
+cadence: FR-413 closes bidding and expires invitations at the scheduled
+datetime, and A4 drains the outbound queue continuously.
+
+Two things close that gap:
+
+- **`pg_cron` does the time-critical work.** SPEC.md §11.1 puts the in-database
+  transitions (closing bidding, expiring invitations) on `pg_cron` inside
+  Supabase, at whatever interval is wanted, and leaves Vercel Cron only to
+  invoke the outbound worker routes. See `supabase/migrations/0004_queues_and_cron.sql`.
+- **On the Pro plan**, restore the original cadence in `vercel.json`:
+
+  ```json
+  { "path": "/internal/cron/drain-queue", "schedule": "*/5 * * * *" },
+  { "path": "/internal/cron/expire",      "schedule": "*/15 * * * *" }
+  ```
+
+Either route can also be invoked by hand at any time with the shared secret:
+
+```bash
+curl -X POST -H "X-Cron-Secret: $CRON_SECRET" https://<deployment>/internal/cron/expire
+```
