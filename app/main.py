@@ -32,7 +32,15 @@ def create_app() -> FastAPI:
 
     init_db()
 
-    app.mount("/static", StaticFiles(directory=str(ROOT / "public")), name="static")
+    # Assets live at public/static/... so that the single path `/static/...`
+    # works in both places: on Vercel the CDN serves everything under public/
+    # from the root and the directory is not bundled into the function at all,
+    # which is why this mount is conditional rather than assumed.
+    assets = ROOT / "public" / "static"
+    if assets.is_dir():
+        app.mount("/static", StaticFiles(directory=str(assets)), name="static")
+    else:
+        log.info("static assets served by the CDN, not by the application")
 
     from app.modules.identity.routes import router as identity_router
     from app.modules.organisations.routes import router as organisations_router
