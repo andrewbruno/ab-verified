@@ -10,7 +10,7 @@
 
   /* ---------- theme ---------------------------------------------- */
   function currentTheme() {
-    return root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
   function setTheme(t) {
     root.setAttribute('data-theme', t);

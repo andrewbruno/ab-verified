@@ -379,9 +379,11 @@ FAVICON = (
     "%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E"
 )
 
+# The application has no dark theme, so a reader arriving from it should not
+# land in one. Dark stays available, but as a stored choice rather than a
+# default inferred from the operating system.
 THEME_BOOT = (
-    "(function(){try{var t=localStorage.getItem('abv-docs-theme');"
-    "if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';"
+    "(function(){try{var t=localStorage.getItem('abv-docs-theme')||'light';"
     "document.documentElement.setAttribute('data-theme',t);}catch(e){}})();"
 )
 
@@ -389,7 +391,7 @@ THEME_BOOT = (
 def shell(title: str, description: str, body: str, pages: list[dict], active: str, has_rail: bool = False) -> str:
     return "\n".join([
         "<!doctype html>",
-        '<html lang="en-AU" data-theme="dark">',
+        '<html lang="en-AU" data-theme="light">',
         "<head>",
         '<meta charset="utf-8">',
         '<meta name="viewport" content="width=device-width, initial-scale=1">',
