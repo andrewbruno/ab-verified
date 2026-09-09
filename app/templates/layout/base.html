@@ -64,6 +64,9 @@
 <footer class="site">
   <div class="wrap">
     <span>AB-Verified &#183; a curated Australian IT marketplace</span>
+    {# The specification site. Served from public/docs by the CDN, so this is
+       a link out of the application rather than a route through it. #}
+    <a href="/docs/">Documentation</a>
     <span class="mono">{{ environment }}{% if demo_mode %} &#183; demo mode{% endif %}</span>
   </div>
 </footer>
