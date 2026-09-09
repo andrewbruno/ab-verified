@@ -51,4 +51,6 @@ Locally, use any Mermaid-aware Markdown viewer.
 
 ## Status
 
-Draft v0.2, 9 September 2026. Specification only, no implementation exists in this repository.
+Specification at draft v0.2, 9 September 2026. The application is now implemented
+against it: see the repository [`README.md`](../README.md) for how to run it, and
+[`CONTRACTS.md`](CONTRACTS.md) for the interfaces the modules are built against.
