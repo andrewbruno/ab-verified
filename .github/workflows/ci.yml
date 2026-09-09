@@ -200,11 +200,31 @@ jobs:
           set -e
           url="https://ab-verified-one.vercel.app"
           echo "Deployment: ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
-          for path in / /docs /static/css/app.css; do
-            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url$path")
-            echo "$path -> $code"
-            [ "$code" = "200" ] || { echo "::error::$path returned $code"; exit 1; }
+
+          # Retry each path. Assigning the production alias is not atomic
+          # across the CDN, so a check that starts the instant the deploy
+          # returns can see a 404 on a deployment that is in fact healthy.
+          # Paths are the canonical ones, with the trailing slash a directory
+          # index actually lives at.
+          check() {
+            local path="$1" code=""
+            for attempt in 1 2 3 4 5 6; do
+              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url$path" || echo 000)
+              if [ "$code" = "200" ]; then
+                echo "  $path -> 200 (attempt $attempt)"
+                return 0
+              fi
+              sleep 5
+            done
+            echo "::error::$path returned $code after 6 attempts"
+            return 1
+          }
+
+          failed=0
+          for path in / /docs/ /demo/walkthrough /static/css/app.css; do
+            check "$path" || failed=1
           done
+          exit $failed
 
   # FR-158: a deployment check fails the build if demo seed data is present in
   # the production database. It runs only for pushes to main, where the
