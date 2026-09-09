@@ -1,0 +1,4 @@
+# Development and CI only. Nothing here is installed on Vercel.
+pytest==9.1.1
+ruff==0.16.6
+playwright==1.62.0

@@ -108,3 +108,10 @@ var/
 
 .vercel
 .env*
+
+# End-to-end failure traces and screenshots
+e2e/artifacts/
+
+# Synthesised by `vercel build` from requirements.txt, not project files
+pyproject.toml
+uv.lock
