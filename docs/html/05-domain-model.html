@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>5. Domain Model · AB-Verified Specification</title>
+<meta name="description" content="The entity relationship model and the modelling decisions behind it, including why the organisation is the verified unit.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html" class="on"><span class="n">5</span><span>Domain Model</span></a>
+<div class="subs">
+<a href="#5-1-key-modelling-decisions">5.1 Key modelling decisions</a>
+</div>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 5. Domain Model</nav><h1 class="page"><span class="num">5</span>Domain Model</h1><p class="lede">The entity relationship model and the modelling decisions behind it, including why the organisation is the verified unit.</p><hr class="rule"><div class="prose"><figure class="diagram"><div class="d-bar"><span class="lang">Entity relationship</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">erDiagram
+    ORGANISATION ||--o{ USER_PROFILE : employs
+    ORGANISATION ||--|| ABN_RECORD : &quot;identified by&quot;
+    ORGANISATION ||--o{ VERIFICATION_CASE : &quot;subject of&quot;
+    ORGANISATION ||--o{ DOCUMENT : uploads
+    VERIFICATION_CASE ||--o{ VERIFICATION_DECISION : &quot;resolved by&quot;
+    USER_PROFILE ||--o{ VERIFICATION_DECISION : makes
+    ORGANISATION ||--o{ JOB : &quot;posts as client&quot;
+    JOB ||--o{ INVITATION : issues
+    JOB ||--o{ BID : receives
+    JOB ||--o| AWARD : &quot;concludes in&quot;
+    ORGANISATION ||--o{ INVITATION : &quot;invited as contractor&quot;
+    INVITATION ||--o| BID : authorises
+    BID ||--o{ BID_VERSION : &quot;revised as&quot;
+    BID ||--o| AWARD : wins
+    USER_PROFILE ||--o{ AUDIT_EVENT : triggers
+    NOTIFICATION }o--|| USER_PROFILE : &quot;addressed to&quot;
+
+    ORGANISATION {
+        uuid id PK
+        string legal_name
+        string trading_name
+        enum kind &quot;CLIENT CONTRACTOR BOTH&quot;
+        enum status &quot;PENDING VERIFIED REJECTED SUSPENDED&quot;
+        jsonb skills
+        string region
+        boolean is_demo
+        timestamp created_at
+    }
+    ABN_RECORD {
+        uuid id PK
+        uuid organisation_id FK
+        string abn UK
+        string abr_entity_name
+        string abr_entity_type
+        enum abr_status &quot;ACTIVE CANCELLED UNKNOWN&quot;
+        boolean gst_registered
+        jsonb raw_response
+        timestamp checked_at
+    }
+    USER_PROFILE {
+        uuid id PK &quot;= auth.users.id&quot;
+        uuid organisation_id FK &quot;null for staff&quot;
+        string email UK
+        string mobile_e164
+        enum role &quot;CLIENT CONTRACTOR STAFF&quot;
+        boolean email_verified
+        boolean mobile_verified
+        boolean is_demo
+        timestamp created_at
+    }
+    VERIFICATION_CASE {
+        uuid id PK
+        uuid organisation_id FK
+        enum state &quot;AWAITING_CONTACT IN_REVIEW INFO_REQUESTED APPROVED REJECTED&quot;
+        int name_match_score
+        boolean duplicate_abn_flag
+        uuid assigned_staff_id FK
+        timestamp opened_at
+        timestamp closed_at
+    }
+    VERIFICATION_DECISION {
+        uuid id PK
+        uuid case_id FK
+        uuid staff_user_id FK
+        enum outcome &quot;APPROVE REJECT REQUEST_INFO&quot;
+        string reason_code
+        text note_to_applicant
+        text internal_note
+        timestamp decided_at
+    }
+    JOB {
+        uuid id PK
+        uuid client_org_id FK
+        string title
+        text description
+        string category
+        jsonb required_skills
+        enum engagement_type &quot;FIXED DAY_RATE&quot;
+        numeric budget_min
+        numeric budget_max
+        string location
+        date start_date
+        enum state
+        timestamp bids_close_at
+        timestamp created_at
+    }
+    INVITATION {
+        uuid id PK
+        uuid job_id FK
+        uuid contractor_org_id FK
+        uuid invited_by_staff_id FK
+        enum state &quot;SENT ACCEPTED DECLINED EXPIRED WITHDRAWN&quot;
+        text decline_reason
+        timestamp sent_at
+        timestamp expires_at
+    }
+    BID {
+        uuid id PK
+        uuid job_id FK
+        uuid invitation_id FK
+        uuid contractor_org_id FK
+        numeric amount
+        int estimated_days
+        date proposed_start
+        text approach
+        enum state &quot;DRAFT SUBMITTED WITHDRAWN RELEASED REJECTED NOT_SELECTED WON&quot;
+        int version
+        timestamp submitted_at
+    }
+    AWARD {
+        uuid id PK
+        uuid job_id FK
+        uuid bid_id FK
+        uuid selected_by_client_user_id FK
+        uuid confirmed_by_staff_id FK
+        timestamp awarded_at
+    }
+    AUDIT_EVENT {
+        uuid id PK
+        uuid actor_user_id FK &quot;null for system&quot;
+        string actor_role
+        string entity_type
+        uuid entity_id
+        string action
+        jsonb before_state
+        jsonb after_state
+        string reason_code
+        inet ip
+        timestamp occurred_at
+    }</pre></figure>
+<h2 id="5-1-key-modelling-decisions"><span class="hn">5.1</span>Key modelling decisions<a class="anchor" href="#5-1-key-modelling-decisions" aria-label="Link to this heading">#</a></h2>
+<ol>
+<li><strong>The organisation is the verified unit, not the user.</strong> An ABN belongs to a business; people come and go. This makes FR-107 (one organisation, both roles) natural and avoids re-verifying every new employee. It is also the unit RLS policies pivot on: almost every policy reduces to "does this row belong to my organisation?"</li>
+<li><strong><code>USER_PROFILE.id</code> is the Supabase <code>auth.users.id</code>.</strong> Identity lives in Supabase Auth; application attributes (role and organisation) live in a profile table that policies can read.</li>
+<li><strong><code>VERIFICATION_CASE</code> is separate from <code>ORGANISATION.status</code>.</strong> The case is the workflow record with its own history; the status column is the denormalised, queryable current answer, and the one RLS reads.</li>
+<li><strong><code>INVITATION</code> authorises <code>BID</code>.</strong> A foreign key from bid to invitation turns "may this contractor bid?" into a schema-level constraint rather than application logic that can be forgotten.</li>
+<li><strong>Bids are versioned.</strong> FR-406 permits edits, and disputes require knowing what was offered and when.</li>
+<li><strong><code>AWARD</code> is a distinct entity</strong> requiring both a client selector and a staff confirmer, encoding FR-410 in the schema instead of implying it.</li>
+<li><strong><code>is_demo</code> is a column, not a separate database.</strong> Demo rows live alongside real ones so they exercise the same policies; the flag exists so the reset routine and the production deployment check can find them (FR-156, FR-158).</li>
+</ol>
+<hr /></div><nav class="pager" aria-label="Section"><a href="04-non-functional-requirements.html"><div class="dir">Previous</div><div class="ttl">4. Non-Functional Requirements</div></a><a class="next" href="06-state-machines.html"><div class="dir">Next</div><div class="ttl">6. State Machines</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#5-1-key-modelling-decisions">5.1 Key modelling decisions</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

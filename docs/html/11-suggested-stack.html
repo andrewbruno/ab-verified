@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>11. Suggested Stack · AB-Verified Specification</title>
+<meta name="description" content="The recommended stack given no Node.js, Vercel and Supabase, what it gives up, and the alternatives that were weighed.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html" class="on"><span class="n">11</span><span>Suggested Stack</span></a>
+<div class="subs">
+<a href="#11-1-recommended">11.1 Recommended</a>
+<a href="#11-2-what-this-stack-gives-up-honestly">11.2 What this stack gives up, honestly</a>
+<a href="#11-3-alternatives-considered">11.3 Alternatives considered</a>
+</div>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 11. Suggested Stack</nav><h1 class="page"><span class="num">11</span>Suggested Stack</h1><p class="lede">The recommended stack given no Node.js, Vercel and Supabase, what it gives up, and the alternatives that were weighed.</p><hr class="rule"><div class="prose"><p>Fixed by constraint: <strong>no Node.js</strong> (PC1), <strong>Vercel</strong> (PC2), <strong>Supabase with RLS</strong> (PC3, PC4). Those three decide most of the rest.</p>
+<h2 id="11-1-recommended"><span class="hn">11.1</span>Recommended<a class="anchor" href="#11-1-recommended" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Choice</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td><strong>Python 3.12</strong></td>
+<td>Supported first-class by the Vercel Python runtime; large Australian hiring pool; good ABR/SOAP and document tooling.</td>
+</tr>
+<tr>
+<td>Web framework</td>
+<td><strong>FastAPI</strong> (ASGI) exported from <code>api/index.py</code>, with <code>vercel.json</code> rewriting all paths to it</td>
+<td>Fast cold starts, native ASGI, minimal dependency weight. Serverless rewards a small import graph.</td>
+</tr>
+<tr>
+<td>Templating</td>
+<td><strong>Jinja2</strong>, server-rendered HTML fragments</td>
+<td>Full pages and htmx partials come from the same templates.</td>
+</tr>
+<tr>
+<td>Interactivity</td>
+<td><strong>htmx</strong> + <strong>Alpine.js</strong>, vendored as static files under <code>/public</code></td>
+<td>Inline approvals, queue filtering and modals with no JavaScript build step (PC1).</td>
+</tr>
+<tr>
+<td>CSS</td>
+<td><strong>Tailwind CSS standalone CLI</strong>, a single Go binary, run locally with the compiled stylesheet committed</td>
+<td>Tailwind's standalone binary needs no Node. Committing the output keeps the Vercel build free of any JS toolchain. A hand-written stylesheet is an equally valid fallback.</td>
+</tr>
+<tr>
+<td>Database</td>
+<td><strong>Supabase PostgreSQL 15+</strong>, project region <code>ap-southeast-2</code></td>
+<td>NFR-06 data residency. Transactional integrity for the state machines, JSONB for ABR payloads, full-text search for contractor matching.</td>
+</tr>
+<tr>
+<td>Authorisation</td>
+<td><strong>Row Level Security</strong> + a custom access token hook adding <code>app_role</code> and <code>org_id</code> claims</td>
+<td>§9. The security model of the product.</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td><strong>Supabase Auth</strong>: email/password, magic link, and phone OTP</td>
+<td>Delivers FR-102 and FR-103 without hand-rolling token and OTP handling. TOTP MFA for Staff (FR-109).</td>
+</tr>
+<tr>
+<td>DB connection</td>
+<td><strong>Supavisor transaction pooler</strong> (port 6543), prepared statements disabled, one short-lived connection per invocation</td>
+<td>Serverless functions must not hold direct Postgres connections; transaction-mode pooling is the supported pattern and the pooler does not support prepared statements.</td>
+</tr>
+<tr>
+<td>Queue</td>
+<td><strong>pgmq</strong> (Supabase Queues)</td>
+<td>The queue lives in the database, so enqueue is transactional with the state change that caused it. No external broker to run.</td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td><strong>pg_cron</strong> for in-database transitions (close bidding, expire invitations) and <strong>Vercel Cron</strong> to invoke worker routes for outbound work</td>
+<td>Serverless has no resident worker (A5); cron invocation is the substitute.</td>
+</tr>
+<tr>
+<td>Object storage</td>
+<td><strong>Supabase Storage</strong>, private buckets with path-prefix policies and signed URLs</td>
+<td>Verification documents and bid attachments, under the same RLS model.</td>
+</tr>
+<tr>
+<td>Email</td>
+<td><strong>Resend</strong> or <strong>Amazon SES</strong> (<code>ap-southeast-2</code>)</td>
+<td>Transactional deliverability with webhook delivery status (FR-503).</td>
+</tr>
+<tr>
+<td>SMS</td>
+<td><strong>Twilio</strong></td>
+<td>Backs both Supabase phone OTP and the platform's own invitation and award notices.</td>
+</tr>
+<tr>
+<td>ABN validation</td>
+<td>Local modulus-89 checksum, then the <strong>ABR ABN Lookup web service</strong> (<code>zeep</code> for SOAP, or the JSON endpoint)</td>
+<td>FR-104 and FR-105. Requires a free registered GUID, held in Vercel environment variables.</td>
+</tr>
+<tr>
+<td>Migrations</td>
+<td><strong>Supabase CLI</strong>, installed as the standalone binary rather than from npm</td>
+<td>Keeps schema, policies and seed data in version control and reproducible locally (NFR-14).</td>
+</tr>
+<tr>
+<td>Local dev</td>
+<td><code>supabase start</code> (Docker) + <code>uvicorn</code></td>
+<td>The full stack, including RLS policies, runs locally against the same migrations as production.</td>
+</tr>
+<tr>
+<td>Testing</td>
+<td>pytest, <code>pytest-asyncio</code>, Playwright for Python, plus a dedicated RLS policy test suite</td>
+<td>Transition tests and the paired allow/deny policy tests of R2.</td>
+</tr>
+<tr>
+<td>Quality</td>
+<td>ruff, mypy, bandit, pip-audit</td>
+<td>In CI on every pull request.</td>
+</tr>
+<tr>
+<td>Observability</td>
+<td>Vercel logs, Supabase logs, Sentry (Python SDK)</td>
+<td>NFR-10.</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions → Vercel preview per PR, with <code>supabase db push</code> gated on review</td>
+<td>Preview deployments run with <code>DEMO_MODE=true</code>; production does not.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-2-what-this-stack-gives-up-honestly"><span class="hn">11.2</span>What this stack gives up, honestly<a class="anchor" href="#11-2-what-this-stack-gives-up-honestly" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Trade-off</th>
+<th>Detail</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>No batteries-included admin</strong></td>
+<td>Django's admin would have delivered much of the Staff console for free; on Vercel's serverless Python runtime with Supabase Auth and RLS, Django's session, ORM and permission layers largely duplicate what Supabase provides, and its cold start is heavier. The Staff console is therefore hand-built.</td>
+<td>The Staff console is the product's core surface (S-10 to S-16), so it warrants purpose-built screens rather than generic CRUD. Budget for it explicitly in M2.</td>
+</tr>
+<tr>
+<td><strong>Cold starts</strong></td>
+<td>A Python function that has been idle adds latency to the first request.</td>
+<td>Keep the import graph small; enable Fluid compute; the Staff console is used in bursts, which warms it naturally.</td>
+</tr>
+<tr>
+<td><strong>Function timeouts</strong></td>
+<td>Long operations cannot run in a request.</td>
+<td>All external calls are queued (A4). No worker route processes an unbounded batch: each drains a fixed number of messages and re-arms.</td>
+</tr>
+<tr>
+<td><strong>Connection limits</strong></td>
+<td>Serverless concurrency can exhaust Postgres connections.</td>
+<td>Supavisor transaction mode, no prepared statements, no connection held across an await boundary.</td>
+</tr>
+<tr>
+<td><strong>RLS complexity</strong></td>
+<td>Policy bugs are silent: they return fewer or more rows rather than raising.</td>
+<td>R2's paired allow/deny tests, and policy review treated as security review.</td>
+</tr>
+<tr>
+<td><strong>Two places to reason about access</strong></td>
+<td>Policies in SQL, checks in Python.</td>
+<td>R4 makes the precedence explicit: the database decides, the application explains.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-3-alternatives-considered"><span class="hn">11.3</span>Alternatives considered<a class="anchor" href="#11-3-alternatives-considered" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Django on Vercel</strong></td>
+<td>Viable and would shorten M2 via the admin. Rejected as the default because its auth, ORM session model and migration story overlap awkwardly with Supabase Auth and RLS, and cold starts are heavier. Reconsider if the Staff console proves larger than estimated.</td>
+</tr>
+<tr>
+<td><strong>Go + templ + htmx on Vercel</strong></td>
+<td>Excellent cold starts and a single binary. Rejected on team familiarity and the weaker ABR/SOAP tooling story.</td>
+</tr>
+<tr>
+<td><strong>Supabase Edge Functions for workers</strong></td>
+<td>They run on Deno, i.e. a JavaScript runtime, which sits against the spirit of PC1. <code>pg_cron</code> plus Vercel Cron keeps everything Python and SQL.</td>
+</tr>
+<tr>
+<td><strong>PostgREST direct from the browser</strong></td>
+<td>Supabase makes this easy, and RLS would hold. Rejected: it requires a client-side JavaScript application (PC1) and would expose the data model directly to the browser.</td>
+</tr>
+<tr>
+<td><strong>Any SPA framework</strong></td>
+<td>Excluded by PC1, and unjustified regardless: this application is forms, queues and tables.</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div><nav class="pager" aria-label="Section"><a href="10-demo-mode.html"><div class="dir">Previous</div><div class="ttl">10. Demo Mode</div></a><a class="next" href="12-route-sketch.html"><div class="dir">Next</div><div class="ttl">12. Route Sketch</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#11-1-recommended">11.1 Recommended</a><a href="#11-2-what-this-stack-gives-up-honestly">11.2 What this stack gives up, honestly</a><a href="#11-3-alternatives-considered">11.3 Alternatives considered</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

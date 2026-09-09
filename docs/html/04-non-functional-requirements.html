@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4. Non-Functional Requirements · AB-Verified Specification</title>
+<meta name="description" content="Availability, performance, security, privacy, accessibility and the other qualities the build is measured against.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html" class="on"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 4. Non-Functional Requirements</nav><h1 class="page"><span class="num">4</span>Non-Functional Requirements</h1><p class="lede">Availability, performance, security, privacy, accessibility and the other qualities the build is measured against.</p><hr class="rule"><div class="prose"><div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Category</th>
+<th>Requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr id="NFR-01">
+<td class="rid">NFR-01<a class="anchor" href="#NFR-01" aria-label="Link to NFR-01">#</a></td>
+<td>Availability</td>
+<td>99.5% monthly for the authenticated application; a single region is acceptable at launch.</td>
+</tr>
+<tr id="NFR-02">
+<td class="rid">NFR-02<a class="anchor" href="#NFR-02" aria-label="Link to NFR-02">#</a></td>
+<td>Performance</td>
+<td>P95 server response under 500 ms warm; P95 cold start under 1.5 s; Staff queue pages under 1 s with 1,000 rows.</td>
+</tr>
+<tr id="NFR-03">
+<td class="rid">NFR-03<a class="anchor" href="#NFR-03" aria-label="Link to NFR-03">#</a></td>
+<td>Scale target</td>
+<td>5,000 organisations, 20,000 jobs, 100,000 bids within three years, comfortably a single Supabase instance.</td>
+</tr>
+<tr id="NFR-04">
+<td class="rid">NFR-04<a class="anchor" href="#NFR-04" aria-label="Link to NFR-04">#</a></td>
+<td>Security</td>
+<td>OWASP ASVS Level 2. TLS 1.2+ everywhere. Password hashing and session issuance delegated to Supabase Auth.</td>
+</tr>
+<tr id="NFR-05">
+<td class="rid">NFR-05<a class="anchor" href="#NFR-05" aria-label="Link to NFR-05">#</a></td>
+<td>Authorisation</td>
+<td>Deny by default, enforced by Row Level Security in PostgreSQL and re-checked in the application. See §9.</td>
+</tr>
+<tr id="NFR-06">
+<td class="rid">NFR-06<a class="anchor" href="#NFR-06" aria-label="Link to NFR-06">#</a></td>
+<td>Privacy</td>
+<td>Privacy Act 1988 and the Australian Privacy Principles. Database and object storage hosted in <code>ap-southeast-2</code> (Sydney); serverless functions pinned to <code>syd1</code>.</td>
+</tr>
+<tr id="NFR-07">
+<td class="rid">NFR-07<a class="anchor" href="#NFR-07" aria-label="Link to NFR-07">#</a></td>
+<td>Retention</td>
+<td>Verification documents purged seven years after account closure; audit records retained seven years; OTPs and tokens purged on use or expiry.</td>
+</tr>
+<tr id="NFR-08">
+<td class="rid">NFR-08<a class="anchor" href="#NFR-08" aria-label="Link to NFR-08">#</a></td>
+<td>Rate limiting</td>
+<td>Per-IP and per-account limits on login, OTP request, ABN lookup and registration.</td>
+</tr>
+<tr id="NFR-09">
+<td class="rid">NFR-09<a class="anchor" href="#NFR-09" aria-label="Link to NFR-09">#</a></td>
+<td>Accessibility</td>
+<td>WCAG 2.2 AA across all Client- and Contractor-facing pages.</td>
+</tr>
+<tr id="NFR-10">
+<td class="rid">NFR-10<a class="anchor" href="#NFR-10" aria-label="Link to NFR-10">#</a></td>
+<td>Observability</td>
+<td>Structured logs, error tracking, and a Staff-visible dashboard covering queue depth, time-to-verify and bids per job.</td>
+</tr>
+<tr id="NFR-11">
+<td class="rid">NFR-11<a class="anchor" href="#NFR-11" aria-label="Link to NFR-11">#</a></td>
+<td>Backup &amp; DR</td>
+<td>Supabase daily backups plus point-in-time recovery. RPO 5 minutes, RTO 4 hours. Restores rehearsed quarterly.</td>
+</tr>
+<tr id="NFR-12">
+<td class="rid">NFR-12<a class="anchor" href="#NFR-12" aria-label="Link to NFR-12">#</a></td>
+<td>Data integrity</td>
+<td>No hard deletes on domain entities; soft-delete with tombstones.</td>
+</tr>
+<tr id="NFR-13">
+<td class="rid">NFR-13<a class="anchor" href="#NFR-13" aria-label="Link to NFR-13">#</a></td>
+<td>Localisation</td>
+<td>en-AU, Australia/Sydney for display, UTC in storage, AUD currency.</td>
+</tr>
+<tr id="NFR-14">
+<td class="rid">NFR-14<a class="anchor" href="#NFR-14" aria-label="Link to NFR-14">#</a></td>
+<td>Maintainability</td>
+<td>One command brings up the full stack locally, including the database, against the same migrations used in production.</td>
+</tr>
+<tr id="NFR-15">
+<td class="rid">NFR-15<a class="anchor" href="#NFR-15" aria-label="Link to NFR-15">#</a></td>
+<td>Testability</td>
+<td>Every state machine has exhaustive transition tests, and every RLS policy has a test asserting both the permitted and the denied case.</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div><nav class="pager" aria-label="Section"><a href="03-functional-requirements.html"><div class="dir">Previous</div><div class="ttl">3. Functional Requirements</div></a><a class="next" href="05-domain-model.html"><div class="dir">Next</div><div class="ttl">5. Domain Model</div></a></nav></main>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

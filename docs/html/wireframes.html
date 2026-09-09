@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<!-- Copied from docs/wireframes/index.html by scripts/build_docs_html.py. Do not edit. -->
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<title>AB-Verified UI Wireframes</title>
+<style>
+  :root{
+    --ink:#1a2e4a; --mute:#5d6b7d; --faint:#93a0af;
+    --line:#c9c9c9; --line-strong:#8f8f8f;
+    --accent:#fa0d0d; --paper:#ffffff; --ground:#f2f2f2; --fill:#ececea; --fill-2:#f8f8f7;
+    --note:#b00707; --note-bg:#fff1f1; --note-line:#f3a9a9;
+    --staff:#0f6394; --staff-bg:#e6f1f8;
+    --font: "Roboto", Arial, "Helvetica Neue", sans-serif;   /* labels and figures */
+    --sans: "Roboto", Arial, "Helvetica Neue", sans-serif;   /* one family, per the palette */
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:1rem}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+
+  /* ---------- page shell ---------- */
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:0;min-height:100vh}
+  nav.toc{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--paper);border-right:1px solid var(--line);padding:20px 16px}
+  nav.toc h1{font-size:15px;margin:0 0 2px;letter-spacing:.06em;text-transform:uppercase;font-weight:800}
+  nav.toc .sub{font-size:11px;color:var(--mute);margin-bottom:16px}
+  nav.toc h2{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin:18px 0 6px;font-weight:600}
+  nav.toc a{display:block;padding:3px 6px;margin-left:-6px;color:var(--ink);text-decoration:none;font-size:12.5px}
+  nav.toc a:hover{background:var(--fill)}
+  nav.toc a .id{color:var(--faint);font-family:var(--font);font-size:11px;margin-right:6px}
+
+  main{padding:28px 32px 96px;max-width:1180px}
+  header.doc{border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:28px}
+  header.doc h1{margin:0 0 6px;font-size:24px;letter-spacing:-.01em}
+  header.doc p{margin:0;color:var(--mute);max-width:70ch}
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;font-size:11.5px}
+  .legend span{border:1px solid var(--line);background:var(--paper);padding:3px 8px;color:var(--mute)}
+
+  section.screen{margin:0 0 44px;scroll-margin-top:16px}
+  section.screen > h2{font-size:15px;margin:0 0 3px;letter-spacing:-.01em}
+  section.screen > h2 .id{font-family:var(--font);color:var(--faint);font-weight:400;margin-right:8px;font-size:13px}
+  section.screen > .meta{font-size:12px;color:var(--mute);margin:0 0 12px}
+  section.screen > .meta b{color:var(--ink);font-weight:600}
+  .reqs{font-family:var(--font);font-size:11px;color:var(--mute)}
+
+  /* ---------- browser frame ---------- */
+  .frame{background:var(--paper);border:1px solid var(--line-strong);overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .chrome{display:flex;align-items:center;gap:8px;background:var(--fill);border-bottom:1px solid var(--line);padding:7px 10px}
+  .dots{display:flex;gap:5px}
+  .dots i{width:9px;height:9px;background:var(--line-strong);display:block}
+  .url{flex:1;background:var(--paper);border:1px solid var(--line);padding:2px 8px;font-family:var(--font);font-size:11px;color:var(--mute)}
+  .frame.staff .chrome{background:var(--staff-bg)}
+
+  /* ---------- app chrome ---------- */
+  .appbar{display:flex;align-items:center;gap:14px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--fill-2)}
+  .logo{font-weight:700;letter-spacing:-.02em}
+  .logo .tag{font-family:var(--font);font-size:10px;color:var(--faint);font-weight:400;margin-left:6px}
+  .appnav{display:flex;gap:14px;font-size:12.5px;color:var(--mute);margin-left:8px}
+  .appnav .on{color:var(--ink);font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:2px}
+  .spacer{flex:1}
+  .avatar{width:26px;height:26px;background:var(--fill);border:1px solid var(--line);display:grid;place-items:center;font-size:10px;color:var(--mute)}
+  .body{padding:18px}
+  .body.two{display:grid;grid-template-columns:1fr 300px;gap:18px}
+  .body.side{display:grid;grid-template-columns:190px 1fr;gap:18px;padding:0}
+  .sidebar{border-right:1px solid var(--line);background:var(--fill-2);padding:14px 12px;min-height:340px}
+  .sidebar .grp{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin:12px 0 5px}
+  .sidebar a{display:flex;justify-content:space-between;gap:8px;padding:4px 7px;color:var(--ink);text-decoration:none;font-size:12.5px}
+  .sidebar a.on{background:var(--fill);font-weight:600}
+  .sidebar .count{font-family:var(--font);font-size:11px;color:var(--mute)}
+  .pane{padding:18px}
+
+  h3.sec{font-size:13px;margin:0 0 10px;letter-spacing:.01em}
+  h4.sub{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);margin:18px 0 8px;font-weight:600}
+  p.help{font-size:12px;color:var(--mute);margin:0 0 12px;max-width:66ch}
+
+  /* ---------- form primitives ---------- */
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:11px;color:var(--mute);margin-bottom:3px}
+  .field label .req{color:var(--note)}
+  .input{border:1px solid var(--line);background:var(--paper);padding:7px 9px;font-family:var(--font);font-size:12px;color:var(--faint);min-height:32px}
+  .input.filled{color:var(--ink)}
+  .input.area{min-height:76px}
+  .input.sel::after{content:"▾";float:right;color:var(--faint)}
+  .hint{font-size:11px;color:var(--faint);margin-top:3px}
+  .otp{display:flex;gap:6px}
+  .otp i{width:34px;height:40px;border:1px solid var(--line-strong);display:grid;place-items:center;font-family:var(--font);font-style:normal;font-size:16px}
+
+  .btn{display:inline-block;border:1px solid var(--line-strong);padding:8px 16px;font-size:11.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;background:transparent;cursor:default}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
+  .btn.danger{border-color:var(--accent);color:var(--accent)}
+  .btn.ghost{border-style:dashed;color:var(--mute)}
+  .btn.sm{padding:4px 10px;font-size:10.5px;letter-spacing:.1em}
+  .actions{display:flex;gap:8px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .actions .spacer{flex:1}
+
+  /* ---------- data display ---------- */
+  table.wf{width:100%;border-collapse:collapse;font-size:12px}
+  table.wf th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);border-bottom:1px solid var(--line);padding:6px 8px;font-weight:600}
+  table.wf td{border-bottom:1px solid var(--fill);padding:8px}
+  table.wf tr.sel td{background:var(--fill-2)}
+  table.wf td.num{font-family:var(--font);text-align:right}
+
+  .card{border:1px solid var(--line);padding:12px;background:var(--paper);margin-bottom:10px}
+  .card.dash{border-style:dashed}
+  .card h5{margin:0 0 4px;font-size:12.5px}
+  .card .sub{font-size:11px;color:var(--mute)}
+
+  .pill{display:inline-block;font-family:var(--font);font-size:10px;letter-spacing:.04em;border:1px solid var(--line-strong);padding:1px 8px;color:var(--mute);white-space:nowrap}
+  .pill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .pill.warn{background:var(--note-bg);border-color:var(--note-line);color:var(--note)}
+
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .kpi .k{border:1px solid var(--line);padding:10px 12px;background:var(--fill-2)}
+  .kpi .k b{display:block;font-size:26px;font-family:var(--font);font-weight:800;line-height:.9;color:var(--accent)}
+  .kpi .k span{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+
+  .steps{display:flex;align-items:center;gap:6px;margin-bottom:16px;font-size:11px;color:var(--faint);flex-wrap:wrap}
+  .steps b{font-weight:600;color:var(--ink)}
+  .steps .done{color:var(--mute);text-decoration:line-through}
+
+  .placeholder{border:1px dashed var(--line-strong);background:repeating-linear-gradient(45deg,var(--fill-2),var(--fill-2) 6px,var(--paper) 6px,var(--paper) 12px);min-height:70px;display:grid;place-items:center;color:var(--faint);font-size:11px;}
+
+  dl.kv{display:grid;grid-template-columns:150px 1fr;gap:5px 14px;margin:0;font-size:12px}
+  dl.kv dt{color:var(--mute)}
+  dl.kv dd{margin:0}
+  dl.kv dd.mono{font-family:var(--font)}
+
+  .timeline{border-left:2px solid var(--line);margin-left:6px;padding-left:14px}
+  .timeline .ev{position:relative;padding-bottom:14px}
+  .timeline .ev::before{content:"";position:absolute;left:-19px;top:5px;width:8px;height:8px;background:var(--line-strong)}
+  .timeline .ev .t{font-family:var(--font);font-size:10.5px;color:var(--faint)}
+  .timeline .ev .a{font-size:12.5px}
+  .timeline .ev .d{font-size:11.5px;color:var(--mute)}
+
+  /* ---------- demo mode chrome ---------- */
+  .demobar{display:flex;align-items:center;gap:10px;background:#e8f3ec;border-bottom:1px solid #a8ccb6;color:#1f5136;padding:6px 14px;font-size:12px}
+  .demobar b{font-weight:700}
+  .demobar .btn{border-color:#5d8f74;color:#1f5136;background:#f4fbf6}
+  .persona-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .persona{border:1px solid var(--line-strong);padding:14px;background:var(--paper);text-align:left}
+  .persona .who{font-size:13px;font-weight:700;margin-bottom:2px}
+  .persona .role{font-family:var(--font);font-size:10px;letter-spacing:.05em;color:var(--faint);text-transform:uppercase;margin-bottom:8px}
+  .persona .desc{font-size:11.5px;color:var(--mute);min-height:62px}
+  @media (max-width:900px){.persona-grid{grid-template-columns:repeat(2,1fr)}}
+
+  /* ---------- annotations ---------- */
+  .note{border-left:3px solid var(--note-line);background:var(--note-bg);color:var(--note);padding:8px 11px;font-size:11.5px;margin:12px 0;}
+  .note b{color:var(--note)}
+  .notes{margin-top:12px}
+  .notes ol{margin:0;padding-left:20px;font-size:12px;color:var(--mute)}
+  .notes li{margin-bottom:4px}
+  .notes li b{color:var(--ink);font-weight:600}
+  .ann{display:inline-grid;place-items:center;width:17px;height:17px;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;vertical-align:middle;margin-right:5px;font-family:var(--sans)}
+
+  @media (max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    nav.toc{position:static;height:auto;border-right:0;border-bottom:1px solid var(--line)}
+    .body.two,.body.side{grid-template-columns:1fr}
+    .sidebar{border-right:0;border-bottom:1px solid var(--line);min-height:0}
+    .kpi{grid-template-columns:repeat(2,1fr)}
+    main{padding:20px}
+  }
+  @media print{
+    nav.toc{display:none}.layout{grid-template-columns:1fr}
+    section.screen{break-inside:avoid;page-break-inside:avoid}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc">
+  <h1>AB-Verified</h1>
+  <div class="sub">UI Wireframes · Draft v0.1</div>
+
+  <h2>Entry</h2>
+  <a href="#s00"><span class="id">S-00</span>Landing &amp; demo personas</a>
+
+  <h2>Onboarding</h2>
+  <a href="#s01"><span class="id">S-01</span>Registration</a>
+  <a href="#s02"><span class="id">S-02</span>Contact verification</a>
+  <a href="#s03"><span class="id">S-03</span>Verification pending</a>
+
+  <h2>Client</h2>
+  <a href="#s04"><span class="id">S-04</span>Client dashboard</a>
+  <a href="#s05"><span class="id">S-05</span>Post a job</a>
+  <a href="#s06"><span class="id">S-06</span>Compare bids</a>
+
+  <h2>Contractor</h2>
+  <a href="#s07"><span class="id">S-07</span>Contractor dashboard</a>
+  <a href="#s08"><span class="id">S-08</span>Invitation detail</a>
+  <a href="#s09"><span class="id">S-09</span>Submit a bid</a>
+
+  <h2>Staff</h2>
+  <a href="#s10"><span class="id">S-10</span>Operations dashboard</a>
+  <a href="#s11"><span class="id">S-11</span>Verification queue</a>
+  <a href="#s12"><span class="id">S-12</span>Verification review</a>
+  <a href="#s13"><span class="id">S-13</span>Job moderation</a>
+  <a href="#s14"><span class="id">S-14</span>Invite contractors</a>
+  <a href="#s15"><span class="id">S-15</span>Bid release</a>
+  <a href="#s16"><span class="id">S-16</span>Award confirmation</a>
+  <a href="#s17"><span class="id">S-17</span>Audit timeline</a>
+</nav>
+
+<main>
+  <header class="doc">
+    <h1>UI Wireframes</h1>
+    <p>Low-fidelity screen sketches for the AB-Verified curated IT marketplace. These describe <b>structure, content and available actions</b>, not visual design. Every screen is server-rendered HTML with htmx-driven partial updates; no client-side framework is implied by any layout here. There are exactly three personas: <b>Client</b>, <b>Contractor</b> and <b>Staff</b>. Requirement identifiers refer to <code>../SPEC.md</code>. Colour, type and the square-cornered geometry follow <code>../palette/</code>: Roboto throughout, Kinetic navy as ink, Kinetic red as the accent, and no rounded corners anywhere.</p>
+    <div class="legend">
+      <span>Grey box = container</span>
+      <span>Hatched box = deferred / placeholder content</span>
+      <span><span class="ann">1</span> = numbered annotation below the screen</span>
+      <span>Amber block = behavioural rule, not visible chrome</span>
+      <span>Green bar = demo-mode chrome, non-production only</span>
+    </div>
+  </header>
+
+  <!-- ================= S-00 ================= -->
+  <section class="screen" id="s00">
+    <h2><span class="id">S-00</span>Landing page &amp; demo persona picker</h2>
+    <p class="meta"><b>Actor:</b> Public visitor &nbsp;·&nbsp; <b>Rendered when:</b> <code>DEMO_MODE=true</code> &nbsp;·&nbsp; <span class="reqs">FR-151, FR-152, FR-153, FR-155, FR-159</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">curated IT marketplace</span></span><span class="spacer"></span><span class="btn sm ghost">Sign in</span><span class="btn sm primary">Register</span></div>
+      <div class="body">
+        <h3 class="sec">IT work, between verified Australian businesses.</h3>
+        <p class="help">Clients post work. Our team verifies every business against the Australian Business Register, approves each job, and invites the contractors best suited to it. No open job board, no bid spam.</p>
+
+        <h4 class="sub">Try it: sign in as a demo persona <span class="pill warn">NON-PRODUCTION ONLY</span></h4>
+        <p class="help">Each card signs you in as a real seeded user with a real session. Every page you then see is filtered by the same database policies that protect live data.</p>
+        <div class="persona-grid">
+          <div class="persona">
+            <div class="who">Demo Client</div>
+            <div class="role">Client · verified</div>
+            <div class="desc">Four jobs across the lifecycle, including three bids released and waiting for your decision.</div>
+            <span class="btn primary sm">Sign in as Client</span>
+          </div>
+          <div class="persona">
+            <div class="who">Demo Contractor</div>
+            <div class="role">Contractor · invited</div>
+            <div class="desc">One open invitation and one accepted invitation with a bid part-drafted.</div>
+            <span class="btn primary sm">Sign in as Contractor</span>
+          </div>
+          <div class="persona">
+            <div class="who">Demo Contractor</div>
+            <div class="role">Contractor · not invited</div>
+            <div class="desc">Verified, but invited to nothing. Shows what a contractor outside the invite list can see: nothing.</div>
+            <span class="btn sm">Sign in as outsider</span>
+          </div>
+          <div class="persona">
+            <div class="who">Demo Staff</div>
+            <div class="role">Staff</div>
+            <div class="desc">A full queue: 7 verifications, 4 jobs to moderate, 11 bids to release, 2 awards to confirm.</div>
+            <span class="btn primary sm">Sign in as Staff</span>
+          </div>
+        </div>
+
+        <h4 class="sub">Or sign in normally</h4>
+        <div class="row" style="max-width:520px">
+          <div class="field"><label>Email</label><div class="input">&nbsp;</div></div>
+          <div class="field"><label>Password</label><div class="input">&nbsp;</div></div>
+        </div>
+        <div class="actions"><span class="btn primary">Sign in</span><span class="btn ghost">Forgot password</span><span class="hint">Staff sign-in additionally prompts for a TOTP code in production.</span></div>
+
+        <div class="note"><span class="ann">1</span><b>The third card is the point.</b> Signing in as the uninvited contractor and finding the client's jobs simply absent is the fastest demonstration that job visibility is enforced by a database policy, not by a hidden menu item.</div>
+      </div>
+    </div>
+    <h4 class="sub">Demo session chrome, shown on every screen while a demo persona is active</h4>
+    <div class="frame">
+      <div class="demobar"><b>Demo mode</b>: signed in as <b>Demo Staff</b>. Nothing here is real; email and SMS are captured to an in-app outbox, not sent. <span class="spacer"></span><span class="btn sm">Switch persona</span><span class="btn sm">Reset demo data</span><span class="btn sm">Outbox (3)</span></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">DS</span></div>
+      <div class="body"><div class="placeholder">Screen content (S-04, S-07, S-10 and so on) unchanged</div></div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>No privileged code path.</b> Demo sign-in performs an ordinary password authentication against a seeded account and receives an ordinary session (FR-153). It never uses the service role key, so a demo session cannot see more than the persona it represents.</li>
+      <li><b>Absent, not disabled, in production.</b> With <code>DEMO_MODE=false</code> the cards are not rendered and <code>POST /demo/login</code> returns 404, so a stale bookmark reaches nothing (FR-152, FR-158).</li>
+      <li><b>The outbox</b> holds the email and SMS a demo run would have sent (FR-157), so a tester can read the invitation without a message reaching a real person.</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-01 ================= -->
+  <section class="screen" id="s01">
+    <h2><span class="id">S-01</span>Registration</h2>
+    <p class="meta"><b>Actor:</b> Public visitor &nbsp;·&nbsp; <b>Entry:</b> Marketing site &nbsp;·&nbsp; <b>Exit:</b> S-02 &nbsp;·&nbsp; <span class="reqs">FR-101, FR-104, FR-106, FR-108</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/register</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">curated IT marketplace</span></span><span class="spacer"></span><span class="btn sm ghost">Sign in</span></div>
+      <div class="body">
+        <div class="steps"><b>1. Your details</b> › <span>2. Verify email &amp; mobile</span> › <span>3. Staff verification</span></div>
+        <h3 class="sec">Create your account</h3>
+        <p class="help">AB-Verified is a verified-only marketplace. Every business is checked against the Australian Business Register before it can post or bid.</p>
+
+        <h4 class="sub">I am registering as</h4>
+        <div class="row">
+          <div class="card"><h5>◉ &nbsp;A Client</h5><div class="sub">I need IT work delivered.</div></div>
+          <div class="card dash"><h5>○ &nbsp;A Contractor</h5><div class="sub">I deliver IT work for clients.</div></div>
+        </div>
+
+        <h4 class="sub">Business</h4>
+        <div class="row">
+          <div class="field"><label>Registered business name <span class="req">*</span></label><div class="input">Exactly as registered with the ABR</div></div>
+          <div class="field"><label>Trading name</label><div class="input">If different</div></div>
+        </div>
+        <div class="field" style="max-width:340px">
+          <label>ABN <span class="req">*</span></label>
+          <div class="input">11 digits</div>
+          <div class="hint"><span class="ann">1</span>Checked instantly for format, then looked up at the ABR.</div>
+        </div>
+
+        <h4 class="sub">Primary contact</h4>
+        <div class="row3">
+          <div class="field"><label>Full name <span class="req">*</span></label><div class="input">&nbsp;</div></div>
+          <div class="field"><label>Email <span class="req">*</span></label><div class="input">name@business.com.au</div></div>
+          <div class="field"><label>Mobile <span class="req">*</span></label><div class="input">04XX XXX XXX</div></div>
+        </div>
+
+        <h4 class="sub">Password</h4>
+        <div class="row">
+          <div class="field"><label>Password <span class="req">*</span></label><div class="input">••••••••••••</div><div class="hint">At least 12 characters. Checked against known breached passwords.</div></div>
+          <div class="field"><label>Confirm password <span class="req">*</span></label><div class="input">••••••••••••</div></div>
+        </div>
+
+        <div class="field"><label>☐ &nbsp;I confirm I am authorised to act for this business and accept the Terms and Privacy Collection Notice.</label></div>
+        <div class="actions"><span class="btn primary">Create account</span><span class="btn">Cancel</span></div>
+      </div>
+    </div>
+    <div class="note"><b>Anti-enumeration:</b> the response is identical whether or not the email or ABN is already registered. A duplicate ABN silently opens a flagged verification case for Staff (FR-106) rather than telling the visitor the ABN is taken.</div>
+    <div class="notes"><ol>
+      <li><b>ABN field</b>: validated client-side against the ATO modulus-89 checksum and again server-side. The ABR lookup happens asynchronously after contact verification, never on this request, so an ABR outage cannot block registration (FR-111).</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-02 ================= -->
+  <section class="screen" id="s02">
+    <h2><span class="id">S-02</span>Contact verification: email &amp; mobile</h2>
+    <p class="meta"><b>Actor:</b> Applicant &nbsp;·&nbsp; <b>Exit:</b> S-03 &nbsp;·&nbsp; <span class="reqs">FR-102, FR-103, FR-201</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/verify</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="spacer"></span><span class="avatar">NC</span></div>
+      <div class="body">
+        <div class="steps"><span class="done">1. Your details</span> › <b>2. Verify email &amp; mobile</b> › <span>3. Staff verification</span></div>
+        <div class="row">
+          <div class="card">
+            <h5>✓ &nbsp;Email verified <span class="pill on">DONE</span></h5>
+            <div class="sub">a•••@northcoast-it.com.au, confirmed 2 minutes ago.</div>
+          </div>
+          <div class="card">
+            <h5>Mobile verification <span class="pill">PENDING</span></h5>
+            <div class="sub" style="margin-bottom:10px">We sent a 6-digit code to 04•• ••• 219.</div>
+            <div class="otp"><i>4</i><i>1</i><i>7</i><i>_</i><i>_</i><i>_</i></div>
+            <div class="hint"><span class="ann">1</span>Expires in 9:12 · Attempt 1 of 5</div>
+            <div class="actions"><span class="btn primary">Verify</span><span class="btn ghost">Resend code</span><span class="btn ghost">Change number</span></div>
+          </div>
+        </div>
+        <div class="placeholder" style="margin-top:14px">Once both channels are confirmed, this page redirects to S-03 automatically.</div>
+      </div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>OTP limits</b>: 6 digits, 10-minute TTL, 5 attempts, 3 resends per hour, rate-limited per account and per IP (FR-103, NFR-08). Lockout messaging never reveals whether the number is registered.</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-03 ================= -->
+  <section class="screen" id="s03">
+    <h2><span class="id">S-03</span>Verification pending / information requested</h2>
+    <p class="meta"><b>Actor:</b> Applicant &nbsp;·&nbsp; <b>States shown:</b> IN_REVIEW, INFO_REQUESTED &nbsp;·&nbsp; <span class="reqs">FR-110, FR-205, FR-206</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/status</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="spacer"></span><span class="avatar">NC</span></div>
+      <div class="body two">
+        <div>
+          <div class="steps"><span class="done">1. Your details</span> › <span class="done">2. Verify email &amp; mobile</span> › <b>3. Staff verification</b></div>
+          <div class="card">
+            <h5>More information needed <span class="pill warn">INFO REQUESTED</span></h5>
+            <div class="sub" style="margin:8px 0">A note from our verification team, 9 Sep 2026:</div>
+            <div class="input filled area">“Your ABR entity name is <i>N C Holdings Pty Ltd</i> but you registered as <i>North Coast IT</i>. Please upload evidence linking the two; a registered business name certificate is ideal.”</div>
+          </div>
+          <h4 class="sub">Supporting documents</h4>
+          <table class="wf">
+            <tr><th>Document</th><th>Uploaded</th><th>Status</th><th></th></tr>
+            <tr><td>Certificate of currency, PI insurance</td><td>7 Sep 2026</td><td><span class="pill">RECEIVED</span></td><td><span class="btn sm ghost">Replace</span></td></tr>
+            <tr><td class="sub" colspan="4"><span class="btn sm ghost">＋ Upload business name certificate</span> &nbsp; <span class="hint">PDF, PNG or JPG · max 10 MB</span></td></tr>
+          </table>
+          <div class="actions"><span class="btn primary">Resubmit for review</span><span class="btn ghost">Save and finish later</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <h5>What happens next</h5>
+            <div class="sub">Our team reviews every business by hand. Most reviews finish within one business day. You will be emailed the outcome.</div>
+          </div>
+          <div class="card dash">
+            <h5>Why we verify</h5>
+            <div class="sub">Clients and contractors on AB-Verified are checked against the Australian Business Register, so you are only ever dealing with real, trading businesses.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><b>Rejection variant:</b> the same screen renders a terminal <span class="pill">REJECTED</span> state with a plain-language reason. A <code>SUSPECTED_FRAUD</code> decision never surfaces its true reason code; the applicant sees a generic ineligibility message (FR-206).</div>
+  </section>
+
+  <!-- ================= S-04 ================= -->
+  <section class="screen" id="s04">
+    <h2><span class="id">S-04</span>Client dashboard</h2>
+    <p class="meta"><b>Actor:</b> Verified Client &nbsp;·&nbsp; <span class="reqs">FR-207, FR-301, FR-309</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/dashboard</div></div>
+      <div class="appbar">
+        <span class="logo">AB-Verified</span>
+        <span class="appnav"><span class="on">Jobs</span><span>Bids</span><span>Business profile</span></span>
+        <span class="spacer"></span><span class="pill on">VERIFIED CLIENT</span><span class="avatar">NC</span>
+      </div>
+      <div class="body">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+          <h3 class="sec" style="margin:0">Your jobs</h3><span class="spacer"></span><span class="btn primary">＋ Post a job</span>
+        </div>
+        <table class="wf">
+          <tr><th>Job</th><th>Status</th><th>Bids</th><th>Bids close</th><th></th></tr>
+          <tr>
+            <td><b>Migrate on-prem file server to SharePoint</b><div class="sub">Fixed price · $12k–$18k · Newcastle NSW</div></td>
+            <td><span class="pill on">BIDS RELEASED</span></td><td class="num">3</td><td>8 Sep</td>
+            <td><span class="btn sm primary">Compare bids</span></td>
+          </tr>
+          <tr>
+            <td><b>Fortnightly managed IT support, 40 seats</b><div class="sub">Day rate · $900–$1,200/day · Remote</div></td>
+            <td><span class="pill">BIDDING</span></td><td class="num">1</td><td>19 Sep</td>
+            <td><span class="btn sm ghost">View</span></td>
+          </tr>
+          <tr>
+            <td><b>Cyber Essentials gap assessment</b><div class="sub">Fixed price · $6k–$9k · Sydney NSW</div></td>
+            <td><span class="pill warn">PENDING APPROVAL</span></td><td class="num">n/a</td><td>n/a</td>
+            <td><span class="btn sm ghost">View</span></td>
+          </tr>
+          <tr>
+            <td><b>Untitled draft</b><div class="sub">Last edited 2 Sep</div></td>
+            <td><span class="pill">DRAFT</span></td><td class="num">n/a</td><td>n/a</td>
+            <td><span class="btn sm ghost">Edit</span></td>
+          </tr>
+        </table>
+        <div class="note"><span class="ann">1</span><b>No open job board.</b> A Client sees only their own jobs; a Contractor sees only jobs they were invited to. There is no route that lists jobs across organisations for a non-staff actor, and the <code>job_select</code> Row Level Security policy would return nothing if one existed (FR-309, NFR-05).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-05 ================= -->
+  <section class="screen" id="s05">
+    <h2><span class="id">S-05</span>Post a job</h2>
+    <p class="meta"><b>Actor:</b> Verified Client &nbsp;·&nbsp; <b>Exit:</b> PENDING_APPROVAL &nbsp;·&nbsp; <span class="reqs">FR-301, FR-302, FR-303, FR-305</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/jobs/new</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="appnav"><span class="on">Jobs</span><span>Bids</span><span>Business profile</span></span><span class="spacer"></span><span class="avatar">NC</span></div>
+      <div class="body two">
+        <div>
+          <h3 class="sec">Post a job <span class="pill">DRAFT · autosaved 14:02</span></h3>
+          <div class="field"><label>Job title <span class="req">*</span></label><div class="input filled">Migrate on-prem file server to SharePoint Online</div></div>
+          <div class="field"><label>What needs doing <span class="req">*</span></label><div class="input area filled">Approx. 1.2 TB across three shares, 40 users, hybrid AD already in place. Need migration planning, execution out of hours, and cutover support…</div>
+            <div class="hint"><span class="ann">1</span>Do not include email addresses or phone numbers; jobs containing contact details are returned by our team.</div></div>
+          <div class="row">
+            <div class="field"><label>Category <span class="req">*</span></label><div class="input sel filled">Cloud &amp; Infrastructure</div></div>
+            <div class="field"><label>Required skills</label><div class="input filled">M365 ✕ &nbsp; SharePoint ✕ &nbsp; Entra ID ✕ &nbsp; +</div></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label>Engagement <span class="req">*</span></label><div class="input sel filled">Fixed price</div></div>
+            <div class="field"><label>Budget from <span class="req">*</span></label><div class="input filled">$12,000</div></div>
+            <div class="field"><label>Budget to <span class="req">*</span></label><div class="input filled">$18,000</div></div>
+          </div>
+          <div class="row3">
+            <div class="field"><label>Location <span class="req">*</span></label><div class="input sel filled">Newcastle, NSW</div></div>
+            <div class="field"><label>Preferred start</label><div class="input filled">6 Oct 2026</div></div>
+            <div class="field"><label>Expected duration</label><div class="input filled">4 weeks</div></div>
+          </div>
+          <div class="actions">
+            <span class="btn primary">Submit for approval</span><span class="btn">Save draft</span><span class="spacer"></span><span class="btn danger">Delete draft</span>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h5>Before you submit</h5>
+            <div class="sub">Our team reviews every job before contractors are approached. We may come back to you if the scope or budget needs tightening. You cannot edit a job once submitted.</div>
+          </div>
+          <div class="card dash">
+            <h5>Who will see this</h5>
+            <div class="sub">Only our staff, plus the contractors we invite. Jobs are never published publicly or indexed by search engines.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>Contact-detail scanning</b>: the description is scanned for email addresses and phone numbers on submit. A hit does not block the Client; it flags the job to Staff with reason code <code>CONTAINS_CONTACT_DETAILS</code> (FR-305), because the contact embargo is otherwise trivially bypassed.</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-06 ================= -->
+  <section class="screen" id="s06">
+    <h2><span class="id">S-06</span>Compare released bids &amp; select a winner</h2>
+    <p class="meta"><b>Actor:</b> Verified Client &nbsp;·&nbsp; <b>Exit:</b> AWARD_PENDING → S-16 &nbsp;·&nbsp; <span class="reqs">FR-409, FR-410, FR-411</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/jobs/8f2c/bids</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="appnav"><span>Jobs</span><span class="on">Bids</span><span>Business profile</span></span><span class="spacer"></span><span class="avatar">NC</span></div>
+      <div class="body">
+        <h3 class="sec">Migrate on-prem file server to SharePoint Online</h3>
+        <p class="help">Bidding closed 8 Sep. Our team screened 5 bids and released 3 to you. Budget $12,000–$18,000.</p>
+        <table class="wf">
+          <tr><th></th><th>Contractor</th><th>Price</th><th>Start</th><th>Duration</th><th>Approach</th><th></th></tr>
+          <tr class="sel">
+            <td>◉</td>
+            <td><b>Meridian Systems</b><div class="sub">Verified · Newcastle · 8 skills matched</div></td>
+            <td class="num">$14,500</td><td>13 Oct</td><td>3 weeks</td>
+            <td class="sub">Two-phase cutover with a pilot group of 8 users…</td>
+            <td><span class="btn sm ghost">Read full bid</span></td>
+          </tr>
+          <tr>
+            <td>○</td>
+            <td><b>Harbourline Technology</b><div class="sub">Verified · Sydney · 6 skills matched</div></td>
+            <td class="num">$16,900</td><td>6 Oct</td><td>4 weeks</td>
+            <td class="sub">Full weekend cutover, ShareGate licensed…</td>
+            <td><span class="btn sm ghost">Read full bid</span></td>
+          </tr>
+          <tr>
+            <td>○</td>
+            <td><b>Ridgeway IT Partners</b><div class="sub">Verified · Remote · 7 skills matched</div></td>
+            <td class="num">$12,200</td><td>20 Oct</td><td>5 weeks</td>
+            <td class="sub">Staged share-by-share migration out of hours…</td>
+            <td><span class="btn sm ghost">Read full bid</span></td>
+          </tr>
+        </table>
+        <div class="actions"><span class="btn primary">Select Meridian Systems</span><span class="btn ghost">Ask our team a question</span></div>
+        <div class="note"><span class="ann">1</span><b>Contact details are withheld here.</b> Contractor business name and capability are shown; email, phone and address are released only after Staff confirm the award (FR-411). The <code>bid_select</code> policy admits a client only to bids in state <code>RELEASED</code>, <code>WON</code> or <code>NOT_SELECTED</code> (FR-409). <span class="ann">2</span>Selecting does not award the job; it moves the job to <span class="pill warn">AWARD PENDING</span> for Staff confirmation (FR-410).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-07 ================= -->
+  <section class="screen" id="s07">
+    <h2><span class="id">S-07</span>Contractor dashboard</h2>
+    <p class="meta"><b>Actor:</b> Verified Contractor &nbsp;·&nbsp; <span class="reqs">FR-403, FR-407, FR-413</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/dashboard</div></div>
+      <div class="appbar">
+        <span class="logo">AB-Verified</span>
+        <span class="appnav"><span class="on">Invitations</span><span>My bids</span><span>Capability profile</span></span>
+        <span class="spacer"></span><span class="pill on">VERIFIED CONTRACTOR</span><span class="avatar">MS</span>
+      </div>
+      <div class="body">
+        <div class="kpi">
+          <div class="k"><b>2</b><span>Open invitations</span></div>
+          <div class="k"><b>1</b><span>Bid awaiting outcome</span></div>
+          <div class="k"><b>4</b><span>Bids submitted, 90 days</span></div>
+          <div class="k"><b>1</b><span>Jobs won, 90 days</span></div>
+        </div>
+        <h3 class="sec">Invitations to bid</h3>
+        <table class="wf">
+          <tr><th>Job</th><th>Client</th><th>Budget</th><th>Invitation</th><th>Closes</th><th></th></tr>
+          <tr>
+            <td><b>Migrate on-prem file server to SharePoint</b><div class="sub">Cloud &amp; Infrastructure · Newcastle NSW</div></td>
+            <td>Verified client<div class="sub">Name shown on award</div></td>
+            <td class="num">$12k–$18k</td><td><span class="pill">SENT</span></td><td>in 3 days</td>
+            <td><span class="btn sm primary">Review</span></td>
+          </tr>
+          <tr>
+            <td><b>Fortnightly managed IT support, 40 seats</b><div class="sub">Managed Services · Remote</div></td>
+            <td>Verified client</td>
+            <td class="num">$900–$1,200/day</td><td><span class="pill on">ACCEPTED</span></td><td>in 10 days</td>
+            <td><span class="btn sm primary">Start bid</span></td>
+          </tr>
+        </table>
+        <div class="note"><span class="ann">1</span><b>There is no "browse jobs" tab.</b> Work reaches a Contractor only through a Staff invitation (FR-401, FR-404). Invitations lapse automatically at the closing date via a scheduled task (FR-413).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-08 ================= -->
+  <section class="screen" id="s08">
+    <h2><span class="id">S-08</span>Invitation detail: accept or decline</h2>
+    <p class="meta"><b>Actor:</b> Verified Contractor &nbsp;·&nbsp; <span class="reqs">FR-403, FR-407</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/invitations/4b91</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="appnav"><span class="on">Invitations</span><span>My bids</span><span>Capability profile</span></span><span class="spacer"></span><span class="avatar">MS</span></div>
+      <div class="body two">
+        <div>
+          <h3 class="sec">Migrate on-prem file server to SharePoint Online</h3>
+          <dl class="kv">
+            <dt>Category</dt><dd>Cloud &amp; Infrastructure</dd>
+            <dt>Skills wanted</dt><dd>M365, SharePoint, Entra ID</dd>
+            <dt>Engagement</dt><dd>Fixed price</dd>
+            <dt>Budget range</dt><dd class="mono">$12,000 – $18,000</dd>
+            <dt>Location</dt><dd>Newcastle NSW · on-site cutover expected</dd>
+            <dt>Preferred start</dt><dd>6 October 2026</dd>
+            <dt>Bids close</dt><dd class="mono">12 Sep 2026, 17:00 AEST</dd>
+          </dl>
+          <h4 class="sub">Scope</h4>
+          <p class="help">Approx. 1.2 TB across three shares, 40 users, hybrid AD already in place. Need migration planning, execution out of hours, and two weeks of cutover support…</p>
+          <div class="actions">
+            <span class="btn primary">Accept: I intend to bid</span>
+            <span class="btn">Decline</span>
+            <span class="spacer"></span>
+            <span class="hint">Declining is not held against you. A reason helps us match you better.</span>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h5>Who else is bidding?</h5>
+            <div class="sub"><span class="ann">1</span>We don’t disclose that. You are competing on your proposal, not on a visible count.</div>
+          </div>
+          <div class="card dash">
+            <h5>Client identity</h5>
+            <div class="sub">The client is a verified Australian business. Their name and contact details are released to you if you win.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>Competitive blindness is a product decision, not an omission</b>: FR-407 forbids showing the identity, count or content of other invitees and bids, and the <code>bid_select</code> policy restricts a contractor to rows where <code>contractor_org_id</code> is their own. It prevents both price anchoring and the leakage of the Staff curation list.</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-09 ================= -->
+  <section class="screen" id="s09">
+    <h2><span class="id">S-09</span>Submit a bid</h2>
+    <p class="meta"><b>Actor:</b> Verified Contractor with a live invitation &nbsp;·&nbsp; <span class="reqs">FR-404, FR-405, FR-406</span></p>
+    <div class="frame">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/jobs/8f2c/bid</div></div>
+      <div class="appbar"><span class="logo">AB-Verified</span><span class="appnav"><span>Invitations</span><span class="on">My bids</span><span>Capability profile</span></span><span class="spacer"></span><span class="avatar">MS</span></div>
+      <div class="body two">
+        <div>
+          <h3 class="sec">Your bid: file server migration <span class="pill">VERSION 2 · DRAFT</span></h3>
+          <p class="help">Bids close 12 Sep 2026, 17:00 AEST. You may revise this bid until then; the client sees only your latest version.</p>
+          <div class="row3">
+            <div class="field"><label>Fixed price, ex GST <span class="req">*</span></label><div class="input filled">$14,500</div></div>
+            <div class="field"><label>Proposed start <span class="req">*</span></label><div class="input filled">13 Oct 2026</div></div>
+            <div class="field"><label>Estimated duration <span class="req">*</span></label><div class="input filled">3 weeks</div></div>
+          </div>
+          <div class="field"><label>Your approach <span class="req">*</span></label>
+            <div class="input area filled">Two-phase cutover. Phase 1 pilots 8 users across one share to validate permissions mapping…</div>
+            <div class="hint"><span class="ann">1</span>No contact details, please; we release them automatically if you win.</div></div>
+          <div class="field"><label>Attachments</label><div class="placeholder">Drop a capability statement or indicative plan · PDF, max 10 MB each</div></div>
+          <div class="actions"><span class="btn primary">Submit bid</span><span class="btn">Save draft</span><span class="spacer"></span><span class="btn danger">Withdraw bid</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <h5>Revision history</h5>
+            <div class="timeline" style="margin-top:8px">
+              <div class="ev"><div class="t">9 Sep 14:20</div><div class="a">Draft v2 started</div></div>
+              <div class="ev"><div class="t">8 Sep 09:04</div><div class="a">v1 submitted, $15,200</div></div>
+            </div>
+          </div>
+          <div class="card dash">
+            <h5>After you submit</h5>
+            <div class="sub">Our team screens every bid before the client sees it. You’ll be notified when your bid is released, and again when the job is awarded.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>Every version is retained</b> (FR-406). The client sees the latest released version; Staff can read the full history, which matters when a price is later disputed.</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-10 ================= -->
+  <section class="screen" id="s10">
+    <h2><span class="id">S-10</span>Staff operations dashboard</h2>
+    <p class="meta"><b>Actor:</b> Staff (MFA enforced) &nbsp;·&nbsp; <span class="reqs">FR-109, FR-505</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="pill on">STAFF · MFA</span><span class="avatar">JR</span></div>
+      <div class="body side">
+        <div class="sidebar">
+          <div class="grp">Queues</div>
+          <a class="on" href="#s10">Dashboard</a>
+          <a href="#s11">Verifications <span class="count">7</span></a>
+          <a href="#s13">Job approvals <span class="count">4</span></a>
+          <a href="#s15">Bids to release <span class="count">11</span></a>
+          <a href="#s16">Awards to confirm <span class="count">2</span></a>
+          <div class="grp">Directory</div>
+          <a href="#s11">Organisations</a>
+          <a href="#s14">Contractors</a>
+          <div class="grp">Oversight</div>
+          <a href="#s17">Audit log</a>
+        </div>
+        <div class="pane">
+          <h3 class="sec">Today</h3>
+          <div class="kpi">
+            <div class="k"><b>7</b><span>Awaiting verification</span></div>
+            <div class="k"><b>4</b><span>Jobs to moderate</span></div>
+            <div class="k"><b>11</b><span>Bids to release</span></div>
+            <div class="k"><b>2</b><span>Awards to confirm</span></div>
+          </div>
+          <div class="row">
+            <div class="card">
+              <h5>Oldest unactioned</h5>
+              <table class="wf" style="margin-top:6px">
+                <tr><td>Verification: Ridgeway IT Partners</td><td class="num">2d 4h</td></tr>
+                <tr><td>Job approval: Cyber Essentials gap assessment</td><td class="num">1d 6h</td></tr>
+                <tr><td>Bid release: managed IT support</td><td class="num">18h</td></tr>
+              </table>
+            </div>
+            <div class="card">
+              <h5>Needs attention</h5>
+              <table class="wf" style="margin-top:6px">
+                <tr><td><span class="pill warn">DUPLICATE ABN</span> Two registrations, ABN 51 824 753 556</td></tr>
+                <tr><td><span class="pill warn">ABR UNAVAILABLE</span> 2 lookups retrying</td></tr>
+                <tr><td><span class="pill warn">CONTACT DETAILS</span> 1 job description flagged</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="note"><b>Staff console is a separate route namespace</b> (<code>/staff/…</code>) behind mandatory TOTP MFA and its own authorisation policy. Staff can never act on records belonging to their own organisation (FR-604).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-11 ================= -->
+  <section class="screen" id="s11">
+    <h2><span class="id">S-11</span>Verification queue</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <span class="reqs">FR-201, FR-202, FR-211</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/verifications</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body side">
+        <div class="sidebar">
+          <div class="grp">Queues</div>
+          <a href="#s10">Dashboard</a>
+          <a class="on" href="#s11">Verifications <span class="count">7</span></a>
+          <a href="#s13">Job approvals <span class="count">4</span></a>
+          <a href="#s15">Bids to release <span class="count">11</span></a>
+          <a href="#s16">Awards to confirm <span class="count">2</span></a>
+        </div>
+        <div class="pane">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+            <h3 class="sec" style="margin:0">Verification queue</h3><span class="spacer"></span>
+            <span class="input sel" style="min-height:28px;padding:3px 9px">All types</span>
+            <span class="input sel" style="min-height:28px;padding:3px 9px">Unassigned</span>
+            <span class="input" style="min-height:28px;padding:3px 9px">Search ABN or name</span>
+          </div>
+          <table class="wf">
+            <tr><th>Applicant</th><th>Type</th><th>ABN / ABR status</th><th>Name match</th><th>Flags</th><th>Waiting</th><th>Assigned</th><th></th></tr>
+            <tr class="sel">
+              <td><b>Ridgeway IT Partners</b><div class="sub">a•••@ridgeway.au · 04•• ••• 118</div></td>
+              <td>Contractor</td>
+              <td class="mono">51 824 753 556<div class="sub">ACTIVE · GST reg.</div></td>
+              <td class="num">98%</td><td>n/a</td><td class="num">2d 4h</td><td>n/a</td>
+              <td><span class="btn sm primary">Review</span></td>
+            </tr>
+            <tr>
+              <td><b>North Coast IT</b><div class="sub">a•••@northcoast-it.com.au</div></td>
+              <td>Client</td>
+              <td class="mono">33 102 417 908<div class="sub">ACTIVE</div></td>
+              <td class="num">41%</td>
+              <td><span class="pill warn">NAME MISMATCH</span></td><td class="num">1d 2h</td><td>JR</td>
+              <td><span class="btn sm ghost">Continue</span></td>
+            </tr>
+            <tr>
+              <td><b>Bluegum Digital</b><div class="sub">i•••@bluegum.io</div></td>
+              <td>Contractor</td>
+              <td class="mono">51 824 753 556<div class="sub">ACTIVE</div></td>
+              <td class="num">88%</td>
+              <td><span class="pill warn">DUPLICATE ABN</span></td><td class="num">22h</td><td>n/a</td>
+              <td><span class="btn sm ghost">Review</span></td>
+            </tr>
+            <tr>
+              <td><b>Tallow Creek Systems</b><div class="sub">o•••@tallowcreek.com.au</div></td>
+              <td>Contractor</td>
+              <td class="mono">19 400 621 733<div class="sub">CANCELLED 2024</div></td>
+              <td class="num">96%</td>
+              <td><span class="pill warn">ABN INACTIVE</span></td><td class="num">6h</td><td>n/a</td>
+              <td><span class="btn sm ghost">Review</span></td>
+            </tr>
+            <tr>
+              <td><b>Kestrel Managed Services</b><div class="sub">d•••@kestrel.net.au</div></td>
+              <td>Both</td>
+              <td class="mono">72 553 019 244<div class="sub">retrying…</div></td>
+              <td class="num">n/a</td>
+              <td><span class="pill warn">ABR UNAVAILABLE</span></td><td class="num">3h</td><td>n/a</td>
+              <td><span class="btn sm ghost">Review</span></td>
+            </tr>
+          </table>
+          <div class="note"><span class="ann">1</span><b>Only fully contactable applicants appear here.</b> A registration enters this queue after email <i>and</i> mobile are confirmed and an ABR lookup has been attempted (FR-201). <span class="ann">2</span>Assignment prevents two Staff reviewing the same applicant at once (FR-211).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-12 ================= -->
+  <section class="screen" id="s12">
+    <h2><span class="id">S-12</span>Verification review &amp; decision</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <b>The central screen of the product.</b> &nbsp;·&nbsp; <span class="reqs">FR-202, FR-203, FR-204, FR-209, FR-605</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/verifications/7c40</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body two" style="padding:18px">
+        <div>
+          <h3 class="sec">North Coast IT <span class="pill warn">IN REVIEW</span> <span class="pill">CLIENT</span></h3>
+          <h4 class="sub">Submitted by applicant</h4>
+          <dl class="kv">
+            <dt>Registered name</dt><dd>North Coast IT</dd>
+            <dt>Trading name</dt><dd>North Coast IT</dd>
+            <dt>ABN</dt><dd class="mono">33 102 417 908</dd>
+            <dt>Contact</dt><dd>A. Nguyen · a•••@northcoast-it.com.au ✓ · 04•• ••• 219 ✓</dd>
+            <dt>Registered</dt><dd>7 Sep 2026, 11:42 AEST · IP 203.0.113.44</dd>
+          </dl>
+
+          <h4 class="sub">Australian Business Register, retrieved 7 Sep 2026, 11:44</h4>
+          <dl class="kv">
+            <dt>Entity name</dt><dd>N C HOLDINGS PTY LTD</dd>
+            <dt>Entity type</dt><dd>Australian Private Company</dd>
+            <dt>ABN status</dt><dd>Active from 12 Mar 2019</dd>
+            <dt>GST</dt><dd>Registered from 1 Apr 2019</dd>
+            <dt>Business names</dt><dd>(none recorded)</dd>
+            <dt>Location</dt><dd>2300 NSW</dd>
+          </dl>
+          <div class="note"><span class="ann">1</span><b>Name match 41%</b>: submitted name does not resemble the ABR entity name and no registered business name is recorded. This is the single most common legitimate cause of a hold: ask for a business name certificate rather than rejecting.</div>
+
+          <h4 class="sub">Documents</h4>
+          <table class="wf">
+            <tr><th>Document</th><th>Uploaded</th><th>Scan</th><th></th></tr>
+            <tr><td>Certificate of currency, PI insurance</td><td>7 Sep 2026</td><td>clean</td><td><span class="btn sm ghost">View</span></td></tr>
+          </table>
+
+          <h4 class="sub">Raw ABR response</h4>
+          <div class="placeholder">Collapsed · stored verbatim as evidence (FR-605) · <span class="btn sm ghost">Expand</span></div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h5>Decision</h5>
+            <div class="field" style="margin-top:8px">
+              <label>Outcome</label>
+              <div class="input sel filled">Request more information</div>
+            </div>
+            <div class="field">
+              <label>Reason code <span class="req">*</span></label>
+              <div class="input sel filled">NAME_MISMATCH</div>
+              <div class="hint">ABN_NOT_FOUND · ABN_INACTIVE · NAME_MISMATCH · DUPLICATE_ENTITY · INSUFFICIENT_DOCUMENTS · SUSPECTED_FRAUD · OUT_OF_SCOPE · OTHER</div>
+            </div>
+            <div class="field">
+              <label>Note to applicant</label>
+              <div class="input area filled">Your ABR entity name is N C Holdings Pty Ltd but you registered as North Coast IT. Please upload a registered business name certificate.</div>
+            </div>
+            <div class="field">
+              <label>Internal note, never shown to the applicant</label>
+              <div class="input area">Visible to Staff only, never to the applicant</div>
+            </div>
+            <div class="actions">
+              <span class="btn primary">Record decision</span><span class="btn ghost">Assign to me</span>
+            </div>
+            <div class="note" style="margin-bottom:0"><span class="ann">2</span>A <code>SUSPECTED_FRAUD</code> outcome suppresses the note and sends a generic message (FR-206).</div>
+          </div>
+          <div class="card">
+            <h5>Case history</h5>
+            <div class="timeline" style="margin-top:8px">
+              <div class="ev"><div class="t">7 Sep 11:44</div><div class="a">ABR lookup succeeded</div><div class="d">system</div></div>
+              <div class="ev"><div class="t">7 Sep 11:43</div><div class="a">Mobile verified</div><div class="d">applicant</div></div>
+              <div class="ev"><div class="t">7 Sep 11:42</div><div class="a">Email verified</div><div class="d">applicant</div></div>
+              <div class="ev"><div class="t">7 Sep 11:40</div><div class="a">Registration submitted</div><div class="d">applicant</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes"><ol>
+      <li><b>Evidence and decision sit side by side.</b> The reviewer never has to leave the screen or open the ABR separately; the decision panel is pinned next to the evidence it depends on, which is what keeps median review time inside a business day.</li>
+      <li><b>Decisions are immutable.</b> Recording a decision appends to the case; a reversal is a new superseding decision, never an edit (FR-209).</li>
+    </ol></div>
+  </section>
+
+  <!-- ================= S-13 ================= -->
+  <section class="screen" id="s13">
+    <h2><span class="id">S-13</span>Job moderation &amp; approval</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <b>Exit:</b> APPROVED → S-14 &nbsp;·&nbsp; <span class="reqs">FR-304, FR-305, FR-306, FR-307</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/jobs/8f2c</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body two" style="padding:18px">
+        <div>
+          <h3 class="sec">Migrate on-prem file server to SharePoint Online <span class="pill warn">PENDING APPROVAL</span></h3>
+          <dl class="kv">
+            <dt>Client</dt><dd>North Coast IT · <span class="pill on">VERIFIED</span> · 2 previous jobs</dd>
+            <dt>Category</dt><dd>Cloud &amp; Infrastructure</dd>
+            <dt>Engagement</dt><dd>Fixed price · <span class="mono">$12,000 – $18,000</span></dd>
+            <dt>Location</dt><dd>Newcastle NSW</dd>
+            <dt>Submitted</dt><dd>8 Sep 2026, 09:15 AEST</dd>
+          </dl>
+          <h4 class="sub">Description, editable by Staff before approval</h4>
+          <div class="input area filled">Approx. 1.2 TB across three shares, 40 users, hybrid AD already in place. Need migration planning, execution out of hours, and two weeks of cutover support. Call me on 0412 <span style="background:var(--note-bg);border-bottom:2px solid var(--note-line)">345 678</span> to discuss.</div>
+          <div class="note"><span class="ann">1</span><b>Contact details detected.</b> Redact before approving, or reject with <code>CONTAINS_CONTACT_DETAILS</code>. The original text is preserved in the audit log either way (FR-306).</div>
+          <h4 class="sub">Budget sanity</h4>
+          <p class="help">Comparable jobs in this category settled at $11,400–$19,800 over the last 12 months. This range is realistic.</p>
+        </div>
+        <div>
+          <div class="card">
+            <h5>Decision</h5>
+            <div class="field" style="margin-top:8px"><label>Outcome</label><div class="input sel filled">Approve</div></div>
+            <div class="field"><label>Bids close <span class="req">*</span></label><div class="input filled">12 Sep 2026 · 17:00 AEST</div>
+              <div class="hint"><span class="ann">2</span>Set at approval; becomes the default expiry for every invitation.</div></div>
+            <div class="field"><label>Note to client</label><div class="input area">Optional feedback</div></div>
+            <div class="actions"><span class="btn primary">Approve &amp; go to invitations</span><span class="btn danger">Reject</span></div>
+          </div>
+          <div class="card dash">
+            <h5>Rejection reason codes</h5>
+            <div class="sub"><code>INCOMPLETE · OUT_OF_SCOPE · UNREALISTIC_BUDGET · CONTAINS_CONTACT_DETAILS · DUPLICATE · POLICY_BREACH · OTHER</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-14 ================= -->
+  <section class="screen" id="s14">
+    <h2><span class="id">S-14</span>Curate &amp; invite contractors</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <b>The curation step that defines the product.</b> &nbsp;·&nbsp; <span class="reqs">FR-401, FR-402, FR-403</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/jobs/8f2c/candidates</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body" style="padding:18px">
+        <h3 class="sec">Invite contractors: file server migration <span class="pill on">APPROVED</span> <span class="pill">BIDS CLOSE 12 SEP</span></h3>
+        <p class="help">Suggested by skill, category, region and recent activity. <b>Suggestions are advisory; the invitation list is a staff decision</b> (FR-401).</p>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <span class="input sel" style="min-height:28px;padding:3px 9px">Skills: M365, SharePoint</span>
+          <span class="input sel" style="min-height:28px;padding:3px 9px">Region: NSW + remote</span>
+          <span class="input sel" style="min-height:28px;padding:3px 9px">Verified only</span>
+          <span class="spacer"></span><span class="input" style="min-height:28px;padding:3px 9px">Search by name</span>
+        </div>
+        <table class="wf">
+          <tr><th>☐</th><th>Contractor</th><th>Match</th><th>Skills</th><th>Region</th><th>Last 90 days</th><th>Status</th></tr>
+          <tr class="sel"><td>☑</td><td><b>Meridian Systems</b><div class="sub">ABN 84 119 002 771</div></td><td class="num">92%</td><td class="sub">M365, SharePoint, Entra ID, Intune</td><td>Newcastle</td><td class="sub">4 invited · 3 bid · 1 won</td><td><span class="pill on">VERIFIED</span></td></tr>
+          <tr class="sel"><td>☑</td><td><b>Harbourline Technology</b><div class="sub">ABN 27 640 118 355</div></td><td class="num">88%</td><td class="sub">M365, SharePoint, Azure</td><td>Sydney</td><td class="sub">6 invited · 4 bid · 1 won</td><td><span class="pill on">VERIFIED</span></td></tr>
+          <tr class="sel"><td>☑</td><td><b>Ridgeway IT Partners</b><div class="sub">ABN 51 824 753 556</div></td><td class="num">81%</td><td class="sub">SharePoint, migration tooling</td><td>Remote</td><td class="sub">2 invited · 1 bid · 0 won</td><td><span class="pill on">VERIFIED</span></td></tr>
+          <tr><td>☐</td><td><b>Bluegum Digital</b><div class="sub">ABN 51 824 753 556</div></td><td class="num">74%</td><td class="sub">M365, endpoint</td><td>Brisbane</td><td class="sub">n/a</td><td><span class="pill warn">IN REVIEW</span></td></tr>
+          <tr><td>☐</td><td><b>Tallow Creek Systems</b><div class="sub">ABN 19 400 621 733</div></td><td class="num">69%</td><td class="sub">Infrastructure, backup</td><td>Newcastle</td><td class="sub">1 invited · 0 bid</td><td><span class="pill warn">SUSPENDED</span></td></tr>
+        </table>
+        <div class="actions">
+          <span class="btn primary">Invite 3 selected contractors</span>
+          <span class="input" style="min-height:28px;padding:3px 9px">Invitation expires: 12 Sep 17:00 <span style="color:var(--faint)">(job default)</span></span>
+          <span class="spacer"></span>
+          <span class="btn ghost">Preview invitation email</span>
+        </div>
+        <div class="note"><span class="ann">1</span><b>Unverified and suspended contractors are listed but not selectable</b>: the checkbox is disabled and the reason is visible, so Staff understand why a plausible match cannot be invited (FR-207, FR-208). <span class="ann">2</span>Each invitation is delivered by email <i>and</i> SMS, because responsiveness inside the bid window is the platform's core value to Clients (FR-502).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-15 ================= -->
+  <section class="screen" id="s15">
+    <h2><span class="id">S-15</span>Bid screening &amp; release</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <b>Exit:</b> BIDS_RELEASED → S-06 &nbsp;·&nbsp; <span class="reqs">FR-408, FR-409</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/jobs/8f2c/bids</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body" style="padding:18px">
+        <h3 class="sec">Screen bids: file server migration <span class="pill">BIDS CLOSED 12 SEP 17:00</span></h3>
+        <p class="help">5 bids received from 3 invitations accepted and 2 direct. Budget $12,000–$18,000. Release the bids the client should see; reject the rest with a reason.</p>
+        <table class="wf">
+          <tr><th>☐</th><th>Contractor</th><th>Price</th><th>Start</th><th>Duration</th><th>Versions</th><th>Checks</th><th>Action</th></tr>
+          <tr class="sel"><td>☑</td><td><b>Meridian Systems</b></td><td class="num">$14,500</td><td>13 Oct</td><td>3 wks</td><td class="num">2</td><td class="sub">in budget · no contact details</td><td><span class="btn sm ghost">Read</span></td></tr>
+          <tr class="sel"><td>☑</td><td><b>Harbourline Technology</b></td><td class="num">$16,900</td><td>6 Oct</td><td>4 wks</td><td class="num">1</td><td class="sub">in budget · no contact details</td><td><span class="btn sm ghost">Read</span></td></tr>
+          <tr class="sel"><td>☑</td><td><b>Ridgeway IT Partners</b></td><td class="num">$12,200</td><td>20 Oct</td><td>5 wks</td><td class="num">1</td><td class="sub">in budget · no contact details</td><td><span class="btn sm ghost">Read</span></td></tr>
+          <tr><td>☐</td><td><b>Kestrel Managed Services</b></td><td class="num">$41,000</td><td>2 Nov</td><td>11 wks</td><td class="num">1</td><td><span class="pill warn">2.3× BUDGET</span></td><td><span class="btn sm danger">Reject</span></td></tr>
+          <tr><td>☐</td><td><b>Bluegum Digital</b></td><td class="num">$9,900</td><td>1 Oct</td><td>2 wks</td><td class="num">3</td><td><span class="pill warn">EMAIL IN APPROACH TEXT</span></td><td><span class="btn sm danger">Reject</span></td></tr>
+        </table>
+        <div class="actions">
+          <span class="btn primary">Release 3 bids to client</span>
+          <span class="btn">Reject 2 with reason</span>
+          <span class="spacer"></span>
+          <span class="btn ghost">Re-open bidding</span>
+        </div>
+        <div class="note"><span class="ann">1</span>A rejected bid is <b>never shown to the Client</b> and the Contractor is told it was not put forward, with a reason (FR-408). <span class="ann">2</span>Screening is the mechanism behind goal G3: the Client compares three considered bids, not five raw ones.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-16 ================= -->
+  <section class="screen" id="s16">
+    <h2><span class="id">S-16</span>Award confirmation</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <b>Exit:</b> AWARDED, contact details released &nbsp;·&nbsp; <span class="reqs">FR-410, FR-411, FR-412</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/jobs/8f2c/award</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="avatar">JR</span></div>
+      <div class="body two" style="padding:18px">
+        <div>
+          <h3 class="sec">Confirm award <span class="pill warn">AWARD PENDING</span></h3>
+          <p class="help">North Coast IT selected a bid on 13 Sep 2026 at 10:22. Confirming releases contact details to both parties and closes the job.</p>
+          <div class="card">
+            <h5>Winning bid: Meridian Systems</h5>
+            <dl class="kv" style="margin-top:8px">
+              <dt>Price</dt><dd class="mono">$14,500 ex GST</dd>
+              <dt>Start</dt><dd>13 October 2026</dd>
+              <dt>Duration</dt><dd>3 weeks</dd>
+              <dt>Bid version</dt><dd>v2, submitted 9 Sep 14:38</dd>
+              <dt>Contractor status</dt><dd><span class="pill on">VERIFIED</span> · ABN active · insurance current</dd>
+            </dl>
+          </div>
+          <div class="card dash">
+            <h5>On confirmation</h5>
+            <div class="sub">
+              · Meridian Systems bid → <span class="pill on">WON</span><br>
+              · Harbourline, Ridgeway bids → <span class="pill">NOT SELECTED</span>, contractors notified<br>
+              · Contact details exchanged between North Coast IT and Meridian Systems<br>
+              · Job → <span class="pill on">AWARDED</span>, audit event written
+            </div>
+          </div>
+          <div class="actions"><span class="btn primary">Confirm award</span><span class="btn">Return to client for reconsideration</span><span class="spacer"></span><span class="btn ghost">Re-open bidding</span></div>
+        </div>
+        <div>
+          <div class="card">
+            <h5>Pre-award checks</h5>
+            <table class="wf" style="margin-top:6px">
+              <tr><td>Contractor still verified</td><td>✓</td></tr>
+              <tr><td>ABN active at ABR today</td><td>✓</td></tr>
+              <tr><td>PI insurance in date</td><td>✓</td></tr>
+              <tr><td>No open suspension</td><td>✓</td></tr>
+              <tr><td>Client not suspended</td><td>✓</td></tr>
+            </table>
+            <div class="note" style="margin-bottom:0"><span class="ann">1</span>Confirmation is blocked if any check fails, because the award is the point at which two businesses start dealing with each other directly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= S-17 ================= -->
+  <section class="screen" id="s17">
+    <h2><span class="id">S-17</span>Staff audit timeline</h2>
+    <p class="meta"><b>Actor:</b> Staff &nbsp;·&nbsp; <span class="reqs">FR-601, FR-602, FR-603, FR-604</span></p>
+    <div class="frame staff">
+      <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url">https://ab-verified.vercel.app/staff/audit/job/8f2c</div></div>
+      <div class="appbar"><span class="logo">AB-Verified<span class="tag">staff console</span></span><span class="spacer"></span><span class="pill on">STAFF · MFA</span><span class="avatar">JR</span></div>
+      <div class="body" style="padding:18px">
+        <h3 class="sec">Audit timeline: Job 8f2c “Migrate on-prem file server to SharePoint Online”</h3>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <span class="input sel" style="min-height:28px;padding:3px 9px">All actors</span>
+          <span class="input sel" style="min-height:28px;padding:3px 9px">All actions</span>
+          <span class="input" style="min-height:28px;padding:3px 9px">Date range</span>
+          <span class="spacer"></span><span class="btn sm ghost">Export CSV</span>
+        </div>
+        <div class="timeline">
+          <div class="ev"><div class="t">13 Sep 2026 10:41:07 AEST · 198.51.100.9</div><div class="a"><b>J. Reyes (Staff)</b> confirmed award → <span class="pill on">AWARDED</span></div><div class="d">bid 4d1a WON · bids 9c02, 3fe1 NOT_SELECTED · contact details released</div></div>
+          <div class="ev"><div class="t">13 Sep 2026 10:22:55 AEST · 203.0.113.44</div><div class="a"><b>A. Nguyen (Client)</b> selected bid 4d1a → <span class="pill warn">AWARD_PENDING</span></div></div>
+          <div class="ev"><div class="t">12 Sep 2026 17:31:02 AEST · 198.51.100.9</div><div class="a"><b>J. Reyes (Staff)</b> released 3 bids, rejected 2</div><div class="d">Kestrel: UNREALISTIC_BUDGET · Bluegum: CONTAINS_CONTACT_DETAILS</div></div>
+          <div class="ev"><div class="t">12 Sep 2026 17:00:00 AEST</div><div class="a"><b>System</b> closed bidding at scheduled time → <span class="pill">BIDS_CLOSED</span></div></div>
+          <div class="ev"><div class="t">9 Sep 2026 14:38:19 AEST · 192.0.2.71</div><div class="a"><b>Meridian Systems (Contractor)</b> revised bid to v2</div><div class="d">amount $15,200 → $14,500 · duration 4 wks → 3 wks</div></div>
+          <div class="ev"><div class="t">8 Sep 2026 12:05:44 AEST · 198.51.100.9</div><div class="a"><b>J. Reyes (Staff)</b> invited 3 contractors</div><div class="d">Meridian Systems, Harbourline Technology, Ridgeway IT Partners · expiry 12 Sep 17:00</div></div>
+          <div class="ev"><div class="t">8 Sep 2026 11:58:10 AEST · 198.51.100.9</div><div class="a"><b>J. Reyes (Staff)</b> approved job, redacted description → <span class="pill on">APPROVED</span></div><div class="d">removed phone number from paragraph 1 · original retained</div></div>
+          <div class="ev"><div class="t">8 Sep 2026 09:15:33 AEST · 203.0.113.44</div><div class="a"><b>A. Nguyen (Client)</b> submitted job → <span class="pill warn">PENDING_APPROVAL</span></div></div>
+        </div>
+        <div class="note"><span class="ann">1</span><b>Append-only.</b> Records cannot be edited or deleted; a correction is a new record (FR-602). Every row carries actor, role, before and after state, reason code, IP and user agent. <span class="ann">2</span>The same view exists for organisations, users, invitations and bids (FR-603).</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+<a href="index.html" style="position:fixed;left:12px;bottom:12px;z-index:99;background:#1a2e4a;color:#fff;font:600 11px/1 Roboto,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;text-decoration:none;border:1px solid #fa0d0d">&#8592; Specification</a>
+</body>
+</html>

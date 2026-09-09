@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AB-Verified documentation · AB-Verified Specification</title>
+<meta name="description" content="The AB-Verified curated IT marketplace specification.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html" class="on"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content">
+<main id="main"><div class="hero"><h1>Curated IT marketplace</h1><p>A curated IT marketplace for the Australian market: Clients post jobs, Contractors bid, and Staff verify every business, approve every job and choose who is invited to bid.</p></div><div class="meta-strip"><span>Status <b>Draft v0.2</b></span><span>Date <b>9 September 2026</b></span><span>Scope <b>Specification only</b></span><span>Sections <b>15</b></span></div><div class="h2home">Specification</div><div class="cards"><a href="01-overview.html"><span class="c-num">1</span><span class="c-ttl">Overview</span><span class="c-sub">What the platform is, why every transition is staff gated, and the constraints the design starts from.</span></a><a href="02-personas-roles.html"><span class="c-num">2</span><span class="c-ttl">Personas &amp; Roles</span><span class="c-sub">The three personas, what each may do, and the permission matrix that the database enforces.</span></a><a href="03-functional-requirements.html"><span class="c-num">3</span><span class="c-ttl">Functional Requirements</span><span class="c-sub">Numbered functional requirements for registration, demo mode, verification, jobs, bidding, notifications and audit.</span></a><a href="04-non-functional-requirements.html"><span class="c-num">4</span><span class="c-ttl">Non-Functional Requirements</span><span class="c-sub">Availability, performance, security, privacy, accessibility and the other qualities the build is measured against.</span></a><a href="05-domain-model.html"><span class="c-num">5</span><span class="c-ttl">Domain Model</span><span class="c-sub">The entity relationship model and the modelling decisions behind it, including why the organisation is the verified unit.</span></a><a href="06-state-machines.html"><span class="c-num">6</span><span class="c-ttl">State Machines</span><span class="c-sub">Verification, job and bidding lifecycles drawn as explicit state machines.</span></a><a href="07-key-flows.html"><span class="c-num">7</span><span class="c-ttl">Key Flows</span><span class="c-sub">Sequence and flow diagrams for registration, job posting through to award, the staff operating loop and demo sign-in.</span></a><a href="08-architecture.html"><span class="c-num">8</span><span class="c-ttl">Architecture</span><span class="c-sub">System context, the modular monolith deployed as one serverless application, and the principles that hold it together.</span></a><a href="09-authorisation-with-row-level-security.html"><span class="c-num">9</span><span class="c-ttl">Authorisation with Row Level Security</span><span class="c-sub">Row Level Security as the authorisation boundary: identity plumbing, baseline, representative policies and rules of engagement.</span></a><a href="10-demo-mode.html"><span class="c-num">10</span><span class="c-ttl">Demo Mode</span><span class="c-sub">Seeded personas that make the whole staff-gated workflow explorable in one click, under the same policies as real users.</span></a><a href="11-suggested-stack.html"><span class="c-num">11</span><span class="c-ttl">Suggested Stack</span><span class="c-sub">The recommended stack given no Node.js, Vercel and Supabase, what it gives up, and the alternatives that were weighed.</span></a><a href="12-route-sketch.html"><span class="c-num">12</span><span class="c-ttl">Route Sketch</span><span class="c-sub">Every server-rendered route, who may call it and what it does.</span></a><a href="13-security-privacy-notes.html"><span class="c-num">13</span><span class="c-ttl">Security &amp; Privacy Notes</span><span class="c-sub">Contact detail embargo, enumeration resistance, staff privilege, secrets and personal information handling.</span></a><a href="14-delivery-plan.html"><span class="c-num">14</span><span class="c-ttl">Delivery Plan</span><span class="c-sub">Six milestones from foundation to launch, with exit criteria and an indicative schedule.</span></a><a href="15-open-questions.html"><span class="c-num">15</span><span class="c-ttl">Open Questions</span><span class="c-sub">The decisions still outstanding and what each one would change.</span></a></div><div class="home-cols"><div><div class="h2home">Fixed platform constraints</div><ul><li><span class="pill">PC1</span> No Node.js, in the runtime or the build toolchain.</li><li><span class="pill">PC2</span> Deployed on Vercel as a stateless serverless application.</li><li><span class="pill">PC3</span> Supabase for the database, auth and storage.</li><li><span class="pill">PC4</span> Row Level Security as the authorisation layer.</li><li><span class="pill">PC5</span> Exactly three personas: Client, Contractor, Staff.</li></ul></div><div><div class="h2home">Companion documents</div><ul><li><a href="wireframes.html"><b>Wireframes</b></a>: Low-fidelity screens for all 18 views, cross-referenced to the requirement IDs.</li><li><a href="palette.html"><b>Design tokens</b></a>: The colour, type and component reference this site is built from.</li><li><a href="01-overview.html"><b>Start reading</b></a>: Section 1 opens the specification and explains the curated model.</li></ul></div></div></main>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

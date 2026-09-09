@@ -1,0 +1,90 @@
+{#
+  Shared UI macros. Import with:
+      {% from "components/macros.html" import page_head, stat, empty, reason_select %}
+  Keep every screen built from these so the console reads as one product.
+#}
+
+{% macro page_head(title, lead=None, kicker=None) %}
+<div class="page-head">
+  <div>
+    {% if kicker %}<p class="label">{{ kicker }}</p>{% endif %}
+    <h1>{{ title }}</h1>
+    {% if lead %}<p class="lead">{{ lead }}</p>{% endif %}
+  </div>
+  <div class="row">{{ caller() if caller is defined and caller }}</div>
+</div>
+{% endmacro %}
+
+{% macro stat(number, label, href=None) %}
+{% if href %}<a class="stat" href="{{ href }}">{% else %}<div class="stat">{% endif %}
+  <div class="stat-num num">{{ number }}</div>
+  <div class="stat-label label">{{ label }}</div>
+{% if href %}</a>{% else %}</div>{% endif %}
+{% endmacro %}
+
+{% macro empty(message, action_href=None, action_label=None) %}
+<div class="empty">
+  <p>{{ message }}</p>
+  {% if action_href %}<p style="margin-top:14px"><a class="btn" href="{{ action_href }}">{{ action_label }}</a></p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro field(name, label, value='', type='text', required=False, hint=None, error=None, placeholder='') %}
+<div class="field {% if error %}field-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span aria-hidden="true">*</span>{% endif %}</label>
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value or '' }}"
+         placeholder="{{ placeholder }}" {% if required %}required aria-required="true"{% endif %}
+         {% if error %}aria-invalid="true" aria-describedby="e-{{ name }}"{% endif %}>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+  {% if error %}<span class="error-text" id="e-{{ name }}">{{ error }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro textarea(name, label, value='', required=False, hint=None, error=None, rows=6) %}
+<div class="field {% if error %}field-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span aria-hidden="true">*</span>{% endif %}</label>
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}"
+            {% if required %}required aria-required="true"{% endif %}
+            {% if error %}aria-invalid="true" aria-describedby="e-{{ name }}"{% endif %}>{{ value or '' }}</textarea>
+  {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+  {% if error %}<span class="error-text" id="e-{{ name }}">{{ error }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro reason_select(name, codes, label='Reason code', required=True, selected=None) %}
+<div class="field">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span aria-hidden="true">*</span>{% endif %}</label>
+  <select id="f-{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+    <option value="">Choose a reason</option>
+    {% for code, description in codes.items() %}
+      <option value="{{ code }}" {% if selected == code %}selected{% endif %}>{{ code }} &#183; {{ description }}</option>
+    {% endfor %}
+  </select>
+</div>
+{% endmacro %}
+
+{% macro job_pill(state) %}
+<span class="pill {{ {
+  'DRAFT': '', 'PENDING_APPROVAL': 'pill-warn', 'APPROVED': 'pill-info',
+  'INVITING': 'pill-info', 'BIDDING': 'pill-info', 'BIDS_CLOSED': 'pill-warn',
+  'BIDS_RELEASED': 'pill-ok', 'AWARD_PENDING': 'pill-warn', 'AWARDED': 'pill-ok',
+  'CLOSED': '', 'CANCELLED': 'pill-danger' }.get(state, '') }}">{{ job_state_label(state) }}</span>
+{% endmacro %}
+
+{% macro bid_pill(state) %}
+<span class="pill {{ {
+  'DRAFT': '', 'SUBMITTED': 'pill-info', 'RELEASED': 'pill-ok', 'WON': 'pill-ok',
+  'REJECTED': 'pill-danger', 'WITHDRAWN': 'pill-danger', 'NOT_SELECTED': '' }.get(state, '') }}">{{ bid_state_label(state) }}</span>
+{% endmacro %}
+
+{% macro invitation_pill(state) %}
+<span class="pill {{ {
+  'SENT': 'pill-warn', 'ACCEPTED': 'pill-ok', 'DECLINED': 'pill-danger',
+  'EXPIRED': '', 'WITHDRAWN': 'pill-danger' }.get(state, '') }}">{{ invitation_state_label(state) }}</span>
+{% endmacro %}
+
+{% macro org_pill(status) %}
+<span class="pill {{ {
+  'PENDING': 'pill-warn', 'VERIFIED': 'pill-ok', 'REJECTED': 'pill-danger',
+  'SUSPENDED': 'pill-danger' }.get(status, '') }}">{{ org_status_label(status) }}</span>
+{% endmacro %}

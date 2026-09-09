@@ -1,0 +1,65 @@
+{#
+  The one page shell. Every full page extends this; htmx fragments extend
+  nothing and render a bare element (A6: server rendered HTML with
+  progressive enhancement, works with JavaScript disabled).
+#}<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow"><!-- FR-309: never indexed -->
+  <title>{% block title %}AB-Verified{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800;900&display=swap">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' fill='%231a2e4a'/><rect x='3' y='3' width='10' height='3' fill='%23fa0d0d'/></svg>">
+  <script src="/static/js/htmx.min.js" defer></script>
+  <script src="/static/js/alpine.min.js" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+
+{% if me.is_demo %}{% include "components/demo_banner.html" %}{% endif %}
+
+<header class="topbar">
+  <a href="{{ '/staff' if me.is_staff else ('/dashboard' if me.is_authenticated else '/') }}" class="brand">
+    AB<span class="dot">&#183;</span>Verified
+  </a>
+  <nav class="topnav" aria-label="Primary">
+    {% for item in nav %}
+      <a href="{{ item.href }}"
+         {% if request.url.path == item.href %}aria-current="page"{% endif %}>{{ item.label }}</a>
+    {% endfor %}
+  </nav>
+  <div class="topbar-right">
+    {% if me.is_authenticated %}
+      <span class="whoami"><strong>{{ me.full_name }}</strong> &#183; {{ me.role|lower }}</span>
+      <form method="post" action="/signout">
+        <button type="submit" class="btn btn-sm btn-ghost">Sign out</button>
+      </form>
+    {% else %}
+      <a href="/signin" class="btn btn-sm btn-ghost">Sign in</a>
+      <a href="/register" class="btn btn-sm">Register</a>
+    {% endif %}
+  </div>
+</header>
+
+<main id="main">
+  <div class="{% block wrapclass %}wrap{% endblock %}">
+    {% if flash %}
+      <p class="notice {% if flash.tone == 'error' %}notice-error{% else %}notice-ok{% endif %}"
+         role="status">{{ flash.message }}</p>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <span>AB-Verified &#183; a curated Australian IT marketplace</span>
+    <span class="mono">{{ environment }}{% if demo_mode %} &#183; demo mode{% endif %}</span>
+  </div>
+</footer>
+</body>
+</html>

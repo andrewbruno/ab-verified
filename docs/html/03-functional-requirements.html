@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3. Functional Requirements · AB-Verified Specification</title>
+<meta name="description" content="Numbered functional requirements for registration, demo mode, verification, jobs, bidding, notifications and audit.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html" class="on"><span class="n">3</span><span>Functional Requirements</span></a>
+<div class="subs">
+<a href="#3-1-registration-identity-fr-100">3.1 Registration &amp; Identity (FR-100)</a>
+<a href="#3-2-demo-mode-fr-150">3.2 Demo Mode (FR-150)</a>
+<a href="#3-3-staff-verification-fr-200">3.3 Staff Verification (FR-200)</a>
+<a href="#3-4-jobs-fr-300">3.4 Jobs (FR-300)</a>
+<a href="#3-5-invitations-bidding-fr-400">3.5 Invitations &amp; Bidding (FR-400)</a>
+<a href="#3-6-notifications-fr-500">3.6 Notifications (FR-500)</a>
+<a href="#3-7-audit-fr-600">3.7 Audit (FR-600)</a>
+</div>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 3. Functional Requirements</nav><h1 class="page"><span class="num">3</span>Functional Requirements</h1><p class="lede">Numbered functional requirements for registration, demo mode, verification, jobs, bidding, notifications and audit.</p><hr class="rule"><div class="prose"><p>Priorities use MoSCoW: <strong>M</strong> = Must, <strong>S</strong> = Should, <strong>C</strong> = Could.</p>
+<h2 id="3-1-registration-identity-fr-100"><span class="hn">3.1</span>Registration &amp; Identity (FR-100)<a class="anchor" href="#3-1-registration-identity-fr-100" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-101">
+<td class="rid">FR-101<a class="anchor" href="#FR-101" aria-label="Link to FR-101">#</a></td>
+<td>A visitor registers by choosing an account type (Client or Contractor) and supplying legal/business name, contact name, email, Australian mobile number, ABN and a password.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-102">
+<td class="rid">FR-102<a class="anchor" href="#FR-102" aria-label="Link to FR-102">#</a></td>
+<td>Email is verified by a single-use, time-limited link with a 24-hour TTL.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-103">
+<td class="rid">FR-103<a class="anchor" href="#FR-103" aria-label="Link to FR-103">#</a></td>
+<td>Mobile is verified by a 6-digit OTP SMS, valid 10 minutes, maximum 5 attempts and 3 resends per hour.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-104">
+<td class="rid">FR-104<a class="anchor" href="#FR-104" aria-label="Link to FR-104">#</a></td>
+<td>The ABN is validated <strong>structurally</strong> on submission using the ATO modulus-89 checksum before any external call is made.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-105">
+<td class="rid">FR-105<a class="anchor" href="#FR-105" aria-label="Link to FR-105">#</a></td>
+<td>The ABN is validated <strong>externally</strong> against the Australian Business Register; the system stores the returned entity name, entity type, GST registration status, ABN status and lookup timestamp.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-106">
+<td class="rid">FR-106<a class="anchor" href="#FR-106" aria-label="Link to FR-106">#</a></td>
+<td>An ABN may be attached to at most one active organisation. A second registration using the same ABN is flagged for Staff rather than silently rejected.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-107">
+<td class="rid">FR-107<a class="anchor" href="#FR-107" aria-label="Link to FR-107">#</a></td>
+<td>An organisation may hold both Client and Contractor roles under one ABN. Verification happens once per organisation; role-specific requirements are additive.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-108">
+<td class="rid">FR-108<a class="anchor" href="#FR-108" aria-label="Link to FR-108">#</a></td>
+<td>Passwords must be at least 12 characters and are checked against a breached-password corpus.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-109">
+<td class="rid">FR-109<a class="anchor" href="#FR-109" aria-label="Link to FR-109">#</a></td>
+<td>Staff accounts are created by invitation from an existing Staff member and require TOTP multi-factor authentication.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-110">
+<td class="rid">FR-110<a class="anchor" href="#FR-110" aria-label="Link to FR-110">#</a></td>
+<td>A Contractor may upload supporting documents: certificate of currency, professional indemnity insurance, licences, certifications.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-111">
+<td class="rid">FR-111<a class="anchor" href="#FR-111" aria-label="Link to FR-111">#</a></td>
+<td>If the ABR lookup fails or times out, registration still proceeds to the Staff queue, marked <code>ABR_UNAVAILABLE</code>, and the lookup is retried by a scheduled task.</td>
+<td style="text-align: center;">M</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-2-demo-mode-fr-150"><span class="hn">3.2</span>Demo Mode (FR-150)<a class="anchor" href="#3-2-demo-mode-fr-150" aria-label="Link to this heading">#</a></h2>
+<p>Demo mode exists so the workflow can be exercised end to end without registering four real businesses and waiting on OTPs. It is a <strong>testing affordance with production-grade authorisation</strong>: a demo session is a real authenticated session subject to exactly the same Row Level Security policies as any other user.</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-151">
+<td class="rid">FR-151<a class="anchor" href="#FR-151" aria-label="Link to FR-151">#</a></td>
+<td>The landing page offers a <strong>demo persona picker</strong> with one card per seeded persona: Demo Client, Demo Contractor (invited), Demo Contractor (not invited) and Demo Staff. Selecting a card signs the visitor in as that seeded user in one click.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-152">
+<td class="rid">FR-152<a class="anchor" href="#FR-152" aria-label="Link to FR-152">#</a></td>
+<td>Demo mode is controlled by a single environment flag, <code>DEMO_MODE</code>. When it is off, the picker is not rendered and the demo sign-in endpoint returns 404.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-153">
+<td class="rid">FR-153<a class="anchor" href="#FR-153" aria-label="Link to FR-153">#</a></td>
+<td>Demo sign-in issues a <strong>normal session for a real seeded user</strong>: the same token type, role claims and RLS enforcement as a live user. It must not use a service key, bypass policies, or take a privileged code path.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-154">
+<td class="rid">FR-154<a class="anchor" href="#FR-154" aria-label="Link to FR-154">#</a></td>
+<td>Demo accounts are seeded by a repeatable migration into a dedicated demo organisation set, with a realistic fixture: verified and unverified organisations, jobs at each lifecycle state, live invitations and bids awaiting release.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-155">
+<td class="rid">FR-155<a class="anchor" href="#FR-155" aria-label="Link to FR-155">#</a></td>
+<td>A persistent banner is shown in every demo session identifying the active persona, with a one-click <strong>switch persona</strong> control and a <strong>reset demo data</strong> control.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-156">
+<td class="rid">FR-156<a class="anchor" href="#FR-156" aria-label="Link to FR-156">#</a></td>
+<td>Reset restores the demo fixture to its seeded state. It affects only demo-owned rows and is itself an audited action.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-157">
+<td class="rid">FR-157<a class="anchor" href="#FR-157" aria-label="Link to FR-157">#</a></td>
+<td>Demo accounts use a reserved email domain and are excluded from all outbound email and SMS. A demo session never sends a real message to a real person.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-158">
+<td class="rid">FR-158<a class="anchor" href="#FR-158" aria-label="Link to FR-158">#</a></td>
+<td>The production environment sets <code>DEMO_MODE=false</code>, and a deployment check fails the build if demo seed data is present in the production database.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-159">
+<td class="rid">FR-159<a class="anchor" href="#FR-159" aria-label="Link to FR-159">#</a></td>
+<td>Simple email-and-password sign-in is available for all personas in non-production environments; production may additionally require MFA for Staff (FR-109).</td>
+<td style="text-align: center;">M</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-3-staff-verification-fr-200"><span class="hn">3.3</span>Staff Verification (FR-200)<a class="anchor" href="#3-3-staff-verification-fr-200" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-201">
+<td class="rid">FR-201<a class="anchor" href="#FR-201" aria-label="Link to FR-201">#</a></td>
+<td>A registration enters the Staff verification queue only once <strong>both</strong> email and mobile are verified and an ABR lookup has been attempted.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-202">
+<td class="rid">FR-202<a class="anchor" href="#FR-202" aria-label="Link to FR-202">#</a></td>
+<td>The queue shows per applicant: submitted details, ABR response, a name-similarity score between the submitted business name and the ABR entity name, duplicate-ABN flags, and uploaded documents.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-203">
+<td class="rid">FR-203<a class="anchor" href="#FR-203" aria-label="Link to FR-203">#</a></td>
+<td>Staff may <strong>Approve</strong>, <strong>Reject</strong> or <strong>Request more information</strong>; each requires a reason code and permits a free-text note.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-204">
+<td class="rid">FR-204<a class="anchor" href="#FR-204" aria-label="Link to FR-204">#</a></td>
+<td>Registration rejection reason codes: <code>ABN_NOT_FOUND</code>, <code>ABN_INACTIVE</code>, <code>NAME_MISMATCH</code>, <code>DUPLICATE_ENTITY</code>, <code>INSUFFICIENT_DOCUMENTS</code>, <code>SUSPECTED_FRAUD</code>, <code>OUT_OF_SCOPE</code>, <code>OTHER</code>.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-205">
+<td class="rid">FR-205<a class="anchor" href="#FR-205" aria-label="Link to FR-205">#</a></td>
+<td>"Request more information" returns the applicant to an editable state, notifies them with the Staff note, and returns them to the queue on resubmission.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-206">
+<td class="rid">FR-206<a class="anchor" href="#FR-206" aria-label="Link to FR-206">#</a></td>
+<td>A rejected applicant is notified with a human-readable reason. <code>SUSPECTED_FRAUD</code> is never disclosed verbatim; a generic message is sent instead.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-207">
+<td class="rid">FR-207<a class="anchor" href="#FR-207" aria-label="Link to FR-207">#</a></td>
+<td>Only a <strong>verified</strong> Client may post a job; only a <strong>verified</strong> Contractor may be invited or bid.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-208">
+<td class="rid">FR-208<a class="anchor" href="#FR-208" aria-label="Link to FR-208">#</a></td>
+<td>Staff may suspend or reinstate an organisation at any time, with a reason. Suspension immediately blocks new jobs, invitations and bids but preserves all history.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-209">
+<td class="rid">FR-209<a class="anchor" href="#FR-209" aria-label="Link to FR-209">#</a></td>
+<td>Verification decisions are immutable. A change of mind is recorded as a new decision superseding the previous one.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-210">
+<td class="rid">FR-210<a class="anchor" href="#FR-210" aria-label="Link to FR-210">#</a></td>
+<td>Active organisations are re-checked against the ABR periodically; a change to <code>CANCELLED</code> re-opens a verification case.</td>
+<td style="text-align: center;">C</td>
+</tr>
+<tr id="FR-211">
+<td class="rid">FR-211<a class="anchor" href="#FR-211" aria-label="Link to FR-211">#</a></td>
+<td>The queue supports assignment, so two Staff do not review the same applicant simultaneously.</td>
+<td style="text-align: center;">S</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-4-jobs-fr-300"><span class="hn">3.4</span>Jobs (FR-300)<a class="anchor" href="#3-4-jobs-fr-300" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-301">
+<td class="rid">FR-301<a class="anchor" href="#FR-301" aria-label="Link to FR-301">#</a></td>
+<td>A verified Client creates a job with title, description, category, required skills, engagement type (fixed price or day rate), budget range, location or "remote", start date and expected duration.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-302">
+<td class="rid">FR-302<a class="anchor" href="#FR-302" aria-label="Link to FR-302">#</a></td>
+<td>A job may be saved as a draft and edited freely while in <code>DRAFT</code>.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-303">
+<td class="rid">FR-303<a class="anchor" href="#FR-303" aria-label="Link to FR-303">#</a></td>
+<td>Submitting a job moves it to <code>PENDING_APPROVAL</code> and locks it against Client edits.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-304">
+<td class="rid">FR-304<a class="anchor" href="#FR-304" aria-label="Link to FR-304">#</a></td>
+<td>Staff <strong>approve</strong> or <strong>reject</strong> a job with a reason code. Rejection returns it to <code>DRAFT</code> with feedback.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-305">
+<td class="rid">FR-305<a class="anchor" href="#FR-305" aria-label="Link to FR-305">#</a></td>
+<td>Job rejection reason codes: <code>INCOMPLETE</code>, <code>OUT_OF_SCOPE</code>, <code>UNREALISTIC_BUDGET</code>, <code>CONTAINS_CONTACT_DETAILS</code>, <code>DUPLICATE</code>, <code>POLICY_BREACH</code>, <code>OTHER</code>.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-306">
+<td class="rid">FR-306<a class="anchor" href="#FR-306" aria-label="Link to FR-306">#</a></td>
+<td>Staff may redact or edit a job before approval; the original text is retained in the audit log.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-307">
+<td class="rid">FR-307<a class="anchor" href="#FR-307" aria-label="Link to FR-307">#</a></td>
+<td>An approved job carries a <strong>bid closing date</strong>, set by Staff at approval time.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-308">
+<td class="rid">FR-308<a class="anchor" href="#FR-308" aria-label="Link to FR-308">#</a></td>
+<td>A Client may cancel a job at any pre-award state, with a reason. Invited Contractors are notified.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-309">
+<td class="rid">FR-309<a class="anchor" href="#FR-309" aria-label="Link to FR-309">#</a></td>
+<td>Jobs are never publicly listed or indexed. Access is by authenticated, authorised request only.</td>
+<td style="text-align: center;">M</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-5-invitations-bidding-fr-400"><span class="hn">3.5</span>Invitations &amp; Bidding (FR-400)<a class="anchor" href="#3-5-invitations-bidding-fr-400" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-401">
+<td class="rid">FR-401<a class="anchor" href="#FR-401" aria-label="Link to FR-401">#</a></td>
+<td>Staff select verified Contractors to invite to an approved job. The system <em>suggests</em> candidates by skill, category and location match, but selection is always a Staff act.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-402">
+<td class="rid">FR-402<a class="anchor" href="#FR-402" aria-label="Link to FR-402">#</a></td>
+<td>Each invitation has its own state and expiry, defaulting to the job's bid closing date.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-403">
+<td class="rid">FR-403<a class="anchor" href="#FR-403" aria-label="Link to FR-403">#</a></td>
+<td>An invited Contractor is notified by email and SMS and may <strong>Accept</strong> (intend to bid), <strong>Decline</strong> with an optional reason, or let the invitation lapse.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-404">
+<td class="rid">FR-404<a class="anchor" href="#FR-404" aria-label="Link to FR-404">#</a></td>
+<td>Only a Contractor holding a <code>SENT</code> or <code>ACCEPTED</code> invitation may submit a bid on that job.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-405">
+<td class="rid">FR-405<a class="anchor" href="#FR-405" aria-label="Link to FR-405">#</a></td>
+<td>A bid contains price (or day rate and estimated days), proposed start date, estimated duration, an approach note and optional attachments.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-406">
+<td class="rid">FR-406<a class="anchor" href="#FR-406" aria-label="Link to FR-406">#</a></td>
+<td>A Contractor may edit or withdraw a bid until the bid closing date; every version is retained.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-407">
+<td class="rid">FR-407<a class="anchor" href="#FR-407" aria-label="Link to FR-407">#</a></td>
+<td>Contractors cannot see other Contractors' bids, nor the number or identity of other invitees.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-408">
+<td class="rid">FR-408<a class="anchor" href="#FR-408" aria-label="Link to FR-408">#</a></td>
+<td>Staff review submitted bids and <strong>release</strong> them to the Client, individually or in bulk. Staff may reject a bid with a reason so that it is never shown.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-409">
+<td class="rid">FR-409<a class="anchor" href="#FR-409" aria-label="Link to FR-409">#</a></td>
+<td>A Client sees only released bids, and only after the bid closing date or an explicit Staff release.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-410">
+<td class="rid">FR-410<a class="anchor" href="#FR-410" aria-label="Link to FR-410">#</a></td>
+<td>The Client selects a winning bid; the selection requires Staff confirmation to become an award.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-411">
+<td class="rid">FR-411<a class="anchor" href="#FR-411" aria-label="Link to FR-411">#</a></td>
+<td>On award, contact details are released to both parties, all other bids move to <code>NOT_SELECTED</code>, and those Contractors are notified.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-412">
+<td class="rid">FR-412<a class="anchor" href="#FR-412" aria-label="Link to FR-412">#</a></td>
+<td>Staff may re-open bidding on a job, for instance when every bid is rejected or the awarded Contractor withdraws.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-413">
+<td class="rid">FR-413<a class="anchor" href="#FR-413" aria-label="Link to FR-413">#</a></td>
+<td>Invitations and bidding close automatically at the scheduled datetime; expiry is an auditable system action.</td>
+<td style="text-align: center;">M</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-6-notifications-fr-500"><span class="hn">3.6</span>Notifications (FR-500)<a class="anchor" href="#3-6-notifications-fr-500" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-501">
+<td class="rid">FR-501<a class="anchor" href="#FR-501" aria-label="Link to FR-501">#</a></td>
+<td>Transactional email is sent for email verification, verification outcome, job approval or rejection, invitation, bid release, award and non-selection.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-502">
+<td class="rid">FR-502<a class="anchor" href="#FR-502" aria-label="Link to FR-502">#</a></td>
+<td>SMS is sent for mobile OTP, invitation received and award. SMS is deliberately reserved for time-critical events.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-503">
+<td class="rid">FR-503<a class="anchor" href="#FR-503" aria-label="Link to FR-503">#</a></td>
+<td>All notifications are queued and retried with exponential backoff; delivery status is recorded per message.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-504">
+<td class="rid">FR-504<a class="anchor" href="#FR-504" aria-label="Link to FR-504">#</a></td>
+<td>Users may opt out of non-transactional SMS, but not out of OTP or award notices.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-505">
+<td class="rid">FR-505<a class="anchor" href="#FR-505" aria-label="Link to FR-505">#</a></td>
+<td>Staff receive a digest of queue depths: pending verifications, pending job approvals, bids awaiting release.</td>
+<td style="text-align: center;">S</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="3-7-audit-fr-600"><span class="hn">3.7</span>Audit (FR-600)<a class="anchor" href="#3-7-audit-fr-600" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Requirement</th>
+<th style="text-align: center;">Pri</th>
+</tr>
+</thead>
+<tbody>
+<tr id="FR-601">
+<td class="rid">FR-601<a class="anchor" href="#FR-601" aria-label="Link to FR-601">#</a></td>
+<td>Every state transition writes an append-only audit record: actor, role, action, entity, before and after state, reason code, note, IP and timestamp.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-602">
+<td class="rid">FR-602<a class="anchor" href="#FR-602" aria-label="Link to FR-602">#</a></td>
+<td>Audit records are immutable. No role, including Staff, may update or delete them; corrections are new records.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-603">
+<td class="rid">FR-603<a class="anchor" href="#FR-603" aria-label="Link to FR-603">#</a></td>
+<td>Staff can view a full timeline for any organisation, user, job, invitation or bid.</td>
+<td style="text-align: center;">M</td>
+</tr>
+<tr id="FR-604">
+<td class="rid">FR-604<a class="anchor" href="#FR-604" aria-label="Link to FR-604">#</a></td>
+<td>Staff may not act on records belonging to their own organisation, a conflict-of-interest guard.</td>
+<td style="text-align: center;">S</td>
+</tr>
+<tr id="FR-605">
+<td class="rid">FR-605<a class="anchor" href="#FR-605" aria-label="Link to FR-605">#</a></td>
+<td>ABR lookup requests and responses are retained verbatim as evidence.</td>
+<td style="text-align: center;">M</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div><nav class="pager" aria-label="Section"><a href="02-personas-roles.html"><div class="dir">Previous</div><div class="ttl">2. Personas &amp; Roles</div></a><a class="next" href="04-non-functional-requirements.html"><div class="dir">Next</div><div class="ttl">4. Non-Functional Requirements</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#3-1-registration-identity-fr-100">3.1 Registration &amp; Identity (FR-100)</a><a href="#3-2-demo-mode-fr-150">3.2 Demo Mode (FR-150)</a><a href="#3-3-staff-verification-fr-200">3.3 Staff Verification (FR-200)</a><a href="#3-4-jobs-fr-300">3.4 Jobs (FR-300)</a><a href="#3-5-invitations-bidding-fr-400">3.5 Invitations &amp; Bidding (FR-400)</a><a href="#3-6-notifications-fr-500">3.6 Notifications (FR-500)</a><a href="#3-7-audit-fr-600">3.7 Audit (FR-600)</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>7. Key Flows · AB-Verified Specification</title>
+<meta name="description" content="Sequence and flow diagrams for registration, job posting through to award, the staff operating loop and demo sign-in.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html" class="on"><span class="n">7</span><span>Key Flows</span></a>
+<div class="subs">
+<a href="#7-1-registration-and-verification">7.1 Registration and verification</a>
+<a href="#7-2-job-posting-through-to-award">7.2 Job posting through to award</a>
+<a href="#7-3-staff-daily-operating-loop">7.3 Staff daily operating loop</a>
+<a href="#7-4-demo-persona-selection">7.4 Demo persona selection</a>
+</div>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 7. Key Flows</nav><h1 class="page"><span class="num">7</span>Key Flows</h1><p class="lede">Sequence and flow diagrams for registration, job posting through to award, the staff operating loop and demo sign-in.</p><hr class="rule"><div class="prose"><h2 id="7-1-registration-and-verification"><span class="hn">7.1</span>Registration and verification<a class="anchor" href="#7-1-registration-and-verification" aria-label="Link to this heading">#</a></h2>
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor A as Applicant
+    participant V as Vercel function
+    participant SB as Supabase Auth and Postgres
+    participant Q as pgmq queue and pg_cron
+    participant ABR as ABR web service
+    participant M as Email and SMS providers
+    actor S as Staff
+
+    A-&gt;&gt;V: Submit registration: name, email, mobile, ABN
+    V-&gt;&gt;V: Validate ABN checksum, modulus 89
+    V-&gt;&gt;SB: Create auth user, organisation, profile, status PENDING
+    SB--&gt;&gt;A: Email verification link
+    SB--&gt;&gt;A: Mobile OTP by SMS
+    A-&gt;&gt;V: Confirm link and enter OTP
+    V-&gt;&gt;SB: Mark email and mobile verified
+    V-&gt;&gt;Q: Enqueue abr_lookup
+    Q-&gt;&gt;V: Cron drains queue, invokes worker route
+    V-&gt;&gt;ABR: ABN lookup
+    ABR--&gt;&gt;V: Entity name, type, status, GST
+    V-&gt;&gt;SB: Store ABN_RECORD, compute name match, open case IN_REVIEW
+    S-&gt;&gt;V: Open verification queue
+    V-&gt;&gt;SB: Query under staff RLS context
+    SB--&gt;&gt;S: Applicant details, ABR evidence, flags, documents
+    alt Approve
+        S-&gt;&gt;V: Approve
+        V-&gt;&gt;SB: Organisation VERIFIED, decision row, audit trigger fires
+        V-&gt;&gt;Q: Enqueue approval email
+    else Request more information
+        S-&gt;&gt;V: Request info with note
+        V-&gt;&gt;SB: Case INFO_REQUESTED
+        V-&gt;&gt;Q: Enqueue info-requested email
+    else Reject
+        S-&gt;&gt;V: Reject with reason code
+        V-&gt;&gt;SB: Organisation REJECTED
+        V-&gt;&gt;Q: Enqueue rejection email with a safe reason
+    end
+    Q-&gt;&gt;M: Deliver queued messages with retry</pre></figure>
+<h2 id="7-2-job-posting-through-to-award"><span class="hn">7.2</span>Job posting through to award<a class="anchor" href="#7-2-job-posting-through-to-award" aria-label="Link to this heading">#</a></h2>
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor C as Client
+    participant V as Vercel function
+    participant SB as Supabase Postgres
+    actor S as Staff
+    actor K as Contractor
+
+    C-&gt;&gt;V: Create job, save as DRAFT
+    C-&gt;&gt;V: Submit job
+    V-&gt;&gt;SB: State PENDING_APPROVAL, job locked to client edits
+    S-&gt;&gt;V: Review job
+    alt Rejected
+        S-&gt;&gt;V: Reject with reason
+        V-&gt;&gt;SB: Back to DRAFT, client notified
+    else Approved
+        S-&gt;&gt;V: Approve and set bid closing date
+        V-&gt;&gt;SB: State APPROVED
+        S-&gt;&gt;V: Search verified contractors by skill and region
+        SB--&gt;&gt;S: Suggested contractors, advisory only
+        S-&gt;&gt;V: Invite selected contractors
+        V-&gt;&gt;SB: Insert invitations, enqueue email and SMS
+        K-&gt;&gt;V: Accept invitation
+        K-&gt;&gt;V: Submit bid, price, start date, approach
+        V-&gt;&gt;SB: Bid SUBMITTED version 1
+        Note over SB: pg_cron closes bidding at bids_close_at
+        S-&gt;&gt;V: Screen bids, reject unsuitable, release the rest
+        V-&gt;&gt;SB: Selected bids RELEASED, client notified
+        C-&gt;&gt;V: Compare released bids, select a winner
+        V-&gt;&gt;SB: Job AWARD_PENDING
+        S-&gt;&gt;V: Confirm the award
+        V-&gt;&gt;SB: AWARD row, winning bid WON, others NOT_SELECTED
+        V-&gt;&gt;SB: Enqueue award notices and contact detail release
+    end</pre></figure>
+<h2 id="7-3-staff-daily-operating-loop"><span class="hn">7.3</span>Staff daily operating loop<a class="anchor" href="#7-3-staff-daily-operating-loop" aria-label="Link to this heading">#</a></h2>
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TD
+    Start([Staff signs in with MFA]) --&gt; Dash[Operations dashboard with queue depths]
+    Dash --&gt; Q1{Pending verifications?}
+    Q1 --&gt;|yes| V[Review applicant against ABR evidence]
+    V --&gt; VD{Decision}
+    VD --&gt;|approve| VA[Organisation VERIFIED]
+    VD --&gt;|reject| VR[Organisation REJECTED, reason recorded]
+    VD --&gt;|need info| VI[Applicant notified, case parked]
+    VA --&gt; Dash
+    VR --&gt; Dash
+    VI --&gt; Dash
+    Q1 --&gt;|no| Q2{Jobs pending approval?}
+    Q2 --&gt;|yes| J[Review job content and budget]
+    J --&gt; JD{Decision}
+    JD --&gt;|approve| JA[Set bid closing date]
+    JD --&gt;|reject| JR[Return to client with feedback]
+    JA --&gt; INV[Curate and invite matched contractors]
+    INV --&gt; Dash
+    JR --&gt; Dash
+    Q2 --&gt;|no| Q3{Bids awaiting release?}
+    Q3 --&gt;|yes| B[Screen bids for quality and compliance]
+    B --&gt; BR[Release good bids, reject the rest with reasons]
+    BR --&gt; Dash
+    Q3 --&gt;|no| Q4{Awards awaiting confirmation?}
+    Q4 --&gt;|yes| AW[Run pre-award checks, confirm, release contact details]
+    AW --&gt; Dash
+    Q4 --&gt;|no| Done([Queues clear])</pre></figure>
+<h2 id="7-4-demo-persona-selection"><span class="hn">7.4</span>Demo persona selection<a class="anchor" href="#7-4-demo-persona-selection" aria-label="Link to this heading">#</a></h2>
+<figure class="diagram"><div class="d-bar"><span class="lang">Sequence</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">sequenceDiagram
+    autonumber
+    actor T as Tester
+    participant V as Vercel function
+    participant SB as Supabase Auth
+    participant DB as Postgres with RLS
+
+    T-&gt;&gt;V: GET / landing page
+    V-&gt;&gt;V: Read DEMO_MODE flag
+    alt DEMO_MODE is false
+        V--&gt;&gt;T: Landing page with no persona picker
+    else DEMO_MODE is true
+        V--&gt;&gt;T: Landing page with four persona cards
+        T-&gt;&gt;V: POST /demo/login persona=contractor_invited
+        V-&gt;&gt;V: Reject unless persona is in the seeded allowlist
+        V-&gt;&gt;SB: Sign in as the seeded demo user, ordinary credentials
+        SB--&gt;&gt;V: Session token with role and organisation claims
+        V--&gt;&gt;T: Set session cookie, redirect to that persona&#x27;s dashboard
+        T-&gt;&gt;V: Any subsequent request
+        V-&gt;&gt;DB: Query as the demo user, not as service role
+        DB--&gt;&gt;V: Rows permitted by RLS for that persona only
+    end</pre></figure>
+<hr /></div><nav class="pager" aria-label="Section"><a href="06-state-machines.html"><div class="dir">Previous</div><div class="ttl">6. State Machines</div></a><a class="next" href="08-architecture.html"><div class="dir">Next</div><div class="ttl">8. Architecture</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#7-1-registration-and-verification">7.1 Registration and verification</a><a href="#7-2-job-posting-through-to-award">7.2 Job posting through to award</a><a href="#7-3-staff-daily-operating-loop">7.3 Staff daily operating loop</a><a href="#7-4-demo-persona-selection">7.4 Demo persona selection</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

@@ -99,3 +99,9 @@ yarn-error.log*
 
 # ---- Vercel ----
 .vercel
+
+# Local development database
+var/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm

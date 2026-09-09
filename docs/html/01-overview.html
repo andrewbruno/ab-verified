@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1. Overview · AB-Verified Specification</title>
+<meta name="description" content="What the platform is, why every transition is staff gated, and the constraints the design starts from.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html" class="on"><span class="n">1</span><span>Overview</span></a>
+<div class="subs">
+<a href="#1-1-goals">1.1 Goals</a>
+<a href="#1-2-non-goals-v1">1.2 Non-Goals (v1)</a>
+<a href="#1-3-platform-constraints">1.3 Platform constraints</a>
+<a href="#1-4-assumptions">1.4 Assumptions</a>
+</div>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 1. Overview</nav><h1 class="page"><span class="num">1</span>Overview</h1><p class="lede">What the platform is, why every transition is staff gated, and the constraints the design starts from.</p><hr class="rule"><div class="prose"><p>AB-Verified is a small, staff-mediated IT marketplace for the Australian market. Clients post IT jobs; Contractors bid on them. Unlike an open marketplace, <strong>every meaningful transition is gated by Staff</strong>: Staff verify that Clients and Contractors are legitimate businesses, Staff approve jobs before they go live, and Staff explicitly invite Contractors to bid on a given job.</p>
+<p>This curated model is the defining architectural constraint. It means:</p>
+<ul>
+<li>The system is a <strong>workflow engine with a marketplace UI</strong>, not a marketplace with an admin panel bolted on.</li>
+<li>Discovery is <strong>push, not pull</strong>: Contractors do not browse an open job board; they receive invitations.</li>
+<li>Every state transition needs an <strong>actor, a timestamp, a reason and an audit record</strong>, because Staff decisions are commercially consequential and may be disputed.</li>
+</ul>
+<h2 id="1-1-goals"><span class="hn">1.1</span>Goals<a class="anchor" href="#1-1-goals" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Goal</th>
+</tr>
+</thead>
+<tbody>
+<tr id="G1">
+<td class="rid">G1<a class="anchor" href="#G1" aria-label="Link to G1">#</a></td>
+<td>Only verified, real Australian businesses transact on the platform.</td>
+</tr>
+<tr id="G2">
+<td class="rid">G2<a class="anchor" href="#G2" aria-label="Link to G2">#</a></td>
+<td>Staff retain control over which jobs go live and who is invited to bid.</td>
+</tr>
+<tr id="G3">
+<td class="rid">G3<a class="anchor" href="#G3" aria-label="Link to G3">#</a></td>
+<td>Clients receive a small, curated set of quality bids rather than bid spam.</td>
+</tr>
+<tr id="G4">
+<td class="rid">G4<a class="anchor" href="#G4" aria-label="Link to G4">#</a></td>
+<td>Every decision is auditable and explainable after the fact.</td>
+</tr>
+<tr id="G5">
+<td class="rid">G5<a class="anchor" href="#G5" aria-label="Link to G5">#</a></td>
+<td>The platform is operable by a very small team (1–3 staff) at launch.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1-2-non-goals-v1"><span class="hn">1.2</span>Non-Goals (v1)<a class="anchor" href="#1-2-non-goals-v1" aria-label="Link to this heading">#</a></h2>
+<ul>
+<li>No payments, escrow, invoicing or milestone billing.</li>
+<li>No public job board or SEO-indexed listings.</li>
+<li>No in-app messaging between Client and Contractor: contact details are released on award.</li>
+<li>No ratings, reviews or reputation scores.</li>
+<li>No native mobile applications.</li>
+<li>No multi-currency or non-Australian entity support.</li>
+</ul>
+<h2 id="1-3-platform-constraints"><span class="hn">1.3</span>Platform constraints<a class="anchor" href="#1-3-platform-constraints" aria-label="Link to this heading">#</a></h2>
+<p>These are fixed inputs to the design, not conclusions drawn from it.</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Constraint</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr id="PC1">
+<td class="rid">PC1<a class="anchor" href="#PC1" aria-label="Link to PC1">#</a></td>
+<td><strong>No Node.js</strong>, in the runtime or the build toolchain.</td>
+<td>Rules out React, Vue, Next.js, Vite, webpack and the Tailwind npm package. The application is server-rendered HTML with hypermedia interactivity.</td>
+</tr>
+<tr id="PC2">
+<td class="rid">PC2<a class="anchor" href="#PC2" aria-label="Link to PC2">#</a></td>
+<td><strong>Deployed on Vercel.</strong></td>
+<td>The application is a stateless serverless function. No long-running in-process workers, no local disk, no in-memory session or cache.</td>
+</tr>
+<tr id="PC3">
+<td class="rid">PC3<a class="anchor" href="#PC3" aria-label="Link to PC3">#</a></td>
+<td><strong>Supabase is the database.</strong></td>
+<td>Managed PostgreSQL, plus Supabase Auth, Storage and scheduling.</td>
+</tr>
+<tr id="PC4">
+<td class="rid">PC4<a class="anchor" href="#PC4" aria-label="Link to PC4">#</a></td>
+<td><strong>Row Level Security is the authorisation layer.</strong></td>
+<td>Access rules live in the database as policies, not only in application code.</td>
+</tr>
+<tr id="PC5">
+<td class="rid">PC5<a class="anchor" href="#PC5" aria-label="Link to PC5">#</a></td>
+<td><strong>Exactly three personas:</strong> Client, Contractor, Staff.</td>
+<td>No separate Admin persona. Staff hold all elevated rights. Scheduled work runs as the database, not as a user.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1-4-assumptions"><span class="hn">1.4</span>Assumptions<a class="anchor" href="#1-4-assumptions" aria-label="Link to this heading">#</a></h2>
+<ul>
+<li>Australian businesses only; every registering party has an ABN.</li>
+<li>Verification is <strong>human-in-the-loop, assisted by automation</strong>: an ABR lookup informs the Staff decision but never replaces it.</li>
+<li>Launch volume is low: hundreds of organisations and jobs, not millions.</li>
+</ul>
+<hr /></div><nav class="pager" aria-label="Section"><a href="index.html"><div class="dir">Previous</div><div class="ttl">Home and contents</div></a><a class="next" href="02-personas-roles.html"><div class="dir">Next</div><div class="ttl">2. Personas &amp; Roles</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#1-1-goals">1.1 Goals</a><a href="#1-2-non-goals-v1">1.2 Non-Goals (v1)</a><a href="#1-3-platform-constraints">1.3 Platform constraints</a><a href="#1-4-assumptions">1.4 Assumptions</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

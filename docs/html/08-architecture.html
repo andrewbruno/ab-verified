@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>8. Architecture · AB-Verified Specification</title>
+<meta name="description" content="System context, the modular monolith deployed as one serverless application, and the principles that hold it together.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html" class="on"><span class="n">8</span><span>Architecture</span></a>
+<div class="subs">
+<a href="#8-1-system-context">8.1 System context</a>
+<a href="#8-2-internal-module-structure">8.2 Internal module structure</a>
+<a href="#8-3-architectural-principles">8.3 Architectural principles</a>
+</div>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 8. Architecture</nav><h1 class="page"><span class="num">8</span>Architecture</h1><p class="lede">System context, the modular monolith deployed as one serverless application, and the principles that hold it together.</p><hr class="rule"><div class="prose"><h2 id="8-1-system-context"><span class="hn">8.1</span>System context<a class="anchor" href="#8-1-system-context" aria-label="Link to this heading">#</a></h2>
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart LR
+    subgraph Users
+        C[Client]
+        K[Contractor]
+        S[Staff]
+    end
+    subgraph Vercel[&quot;Vercel, region syd1&quot;]
+        APP[&quot;Python ASGI app, server rendered HTML&quot;]
+        WRK[&quot;Worker routes: queue drain, ABR, notifications&quot;]
+        CRON[&quot;Vercel Cron triggers&quot;]
+        CDN[&quot;Static assets: htmx, Alpine, compiled CSS&quot;]
+    end
+    subgraph Supabase[&quot;Supabase, ap-southeast-2&quot;]
+        AUTHS[&quot;Supabase Auth: sessions, email link, phone OTP&quot;]
+        PG[(&quot;PostgreSQL with Row Level Security&quot;)]
+        PGQ[&quot;pgmq queues and pg_cron schedules&quot;]
+        STORE[(&quot;Storage buckets: documents, attachments&quot;)]
+    end
+    subgraph External
+        ABR[&quot;ABR ABN Lookup web service&quot;]
+        MAIL[&quot;Transactional email provider&quot;]
+        SMS[&quot;SMS provider, also backs phone OTP&quot;]
+        OBS[&quot;Error tracking and logs&quot;]
+    end
+    C --&gt;|HTTPS| APP
+    K --&gt;|HTTPS| APP
+    S --&gt;|HTTPS + MFA| APP
+    APP --&gt; CDN
+    APP --&gt; AUTHS
+    APP --&gt;|&quot;user JWT, RLS applies&quot;| PG
+    APP --&gt; STORE
+    APP --&gt; PGQ
+    CRON --&gt; WRK
+    PGQ --&gt; WRK
+    WRK --&gt; PG
+    WRK --&gt; ABR
+    WRK --&gt; MAIL
+    WRK --&gt; SMS
+    AUTHS --&gt; SMS
+    APP --&gt; OBS
+    WRK --&gt; OBS</pre></figure>
+<h2 id="8-2-internal-module-structure"><span class="hn">8.2</span>Internal module structure<a class="anchor" href="#8-2-internal-module-structure" aria-label="Link to this heading">#</a></h2>
+<p>A <strong>modular monolith deployed as one serverless application</strong>: a single Python ASGI app behind one Vercel function, with hard internal boundaries. Modules communicate through published service functions; they never reach into each other's tables.</p>
+<figure class="diagram"><div class="d-bar"><span class="lang">Flowchart</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">flowchart TB
+    subgraph Request[&quot;Request path&quot;]
+        RT[&quot;Router and session middleware&quot;]
+        AUTHM[&quot;identity: sign-in, MFA, demo persona switch&quot;]
+        ORG[&quot;organisations: profiles, skills, documents&quot;]
+        VERIF[&quot;verification: cases, decisions, ABR evidence&quot;]
+        JOBS[&quot;jobs: drafting, moderation, lifecycle&quot;]
+        MATCH[&quot;matching: contractor suggestions&quot;]
+        BIDS[&quot;bidding: invitations, bids, awards&quot;]
+        STAFFC[&quot;staff console: queues and dashboards&quot;]
+    end
+    subgraph Worker[&quot;Worker path, cron invoked&quot;]
+        ABRW[&quot;abr_worker: lookup and retry&quot;]
+        NOTW[&quot;notify_worker: email and SMS dispatch&quot;]
+        EXPW[&quot;expiry_worker: close bidding, expire invitations&quot;]
+    end
+    subgraph Data[&quot;Data layer&quot;]
+        REPO[&quot;repositories: parameterised SQL, user JWT bound&quot;]
+        POL[&quot;RLS policies in PostgreSQL&quot;]
+        TRG[&quot;audit triggers&quot;]
+        QUE[&quot;pgmq queue client&quot;]
+    end
+    RT --&gt; AUTHM
+    RT --&gt; ORG
+    RT --&gt; VERIF
+    RT --&gt; JOBS
+    RT --&gt; BIDS
+    RT --&gt; STAFFC
+    JOBS --&gt; MATCH
+    MATCH --&gt; ORG
+    BIDS --&gt; JOBS
+    STAFFC --&gt; VERIF
+    STAFFC --&gt; JOBS
+    STAFFC --&gt; BIDS
+    AUTHM --&gt; REPO
+    ORG --&gt; REPO
+    VERIF --&gt; REPO
+    JOBS --&gt; REPO
+    BIDS --&gt; REPO
+    STAFFC --&gt; REPO
+    REPO --&gt; POL
+    POL --&gt; TRG
+    VERIF --&gt; QUE
+    JOBS --&gt; QUE
+    BIDS --&gt; QUE
+    QUE --&gt; ABRW
+    QUE --&gt; NOTW
+    EXPW --&gt; REPO
+    ABRW --&gt; REPO
+    NOTW --&gt; REPO</pre></figure>
+<h2 id="8-3-architectural-principles"><span class="hn">8.3</span>Architectural principles<a class="anchor" href="#8-3-architectural-principles" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Principle</th>
+<th>Consequence</th>
+</tr>
+</thead>
+<tbody>
+<tr id="A1">
+<td class="rid">A1<a class="anchor" href="#A1" aria-label="Link to A1">#</a></td>
+<td><strong>State transitions are the domain.</strong></td>
+<td>Each aggregate exposes explicit transition functions; no template or handler ever sets a status column directly.</td>
+</tr>
+<tr id="A2">
+<td class="rid">A2<a class="anchor" href="#A2" aria-label="Link to A2">#</a></td>
+<td><strong>The database is the authorisation boundary.</strong></td>
+<td>RLS policies are the primary enforcement (§9). Application checks exist for good error messages, not for safety. A bug in a handler leaks nothing.</td>
+</tr>
+<tr id="A3">
+<td class="rid">A3<a class="anchor" href="#A3" aria-label="Link to A3">#</a></td>
+<td><strong>Audit is written by database triggers.</strong></td>
+<td>An <code>AFTER</code> trigger on every domain table writes the audit row. Auditing cannot be forgotten in a new feature, and it survives writes made outside the application.</td>
+</tr>
+<tr id="A4">
+<td class="rid">A4<a class="anchor" href="#A4" aria-label="Link to A4">#</a></td>
+<td><strong>Every outbound integration is queued.</strong></td>
+<td>ABR, email and SMS run from <code>pgmq</code> drained by cron-invoked worker routes, so a provider outage never blocks a user request (FR-111).</td>
+</tr>
+<tr id="A5">
+<td class="rid">A5<a class="anchor" href="#A5" aria-label="Link to A5">#</a></td>
+<td><strong>Nothing lives in process memory.</strong></td>
+<td>Serverless functions are stateless and short-lived (PC2). Sessions are cookies validated against Supabase Auth; the queue, the schedule and the cache all live in Postgres.</td>
+</tr>
+<tr id="A6">
+<td class="rid">A6<a class="anchor" href="#A6" aria-label="Link to A6">#</a></td>
+<td><strong>Server-rendered HTML with progressive enhancement.</strong></td>
+<td>No JavaScript build pipeline (PC1). The application works with JavaScript disabled and is fast on poor connections.</td>
+</tr>
+<tr id="A7">
+<td class="rid">A7<a class="anchor" href="#A7" aria-label="Link to A7">#</a></td>
+<td><strong>The service role key never touches a user request path.</strong></td>
+<td>It is used only by worker routes and migrations. A user-facing handler that needs it is a design error.</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div><nav class="pager" aria-label="Section"><a href="07-key-flows.html"><div class="dir">Previous</div><div class="ttl">7. Key Flows</div></a><a class="next" href="09-authorisation-with-row-level-security.html"><div class="dir">Next</div><div class="ttl">9. Authorisation with Row Level Security</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#8-1-system-context">8.1 System context</a><a href="#8-2-internal-module-structure">8.2 Internal module structure</a><a href="#8-3-architectural-principles">8.3 Architectural principles</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

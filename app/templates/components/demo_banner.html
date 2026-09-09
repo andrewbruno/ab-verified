@@ -1,0 +1,11 @@
+{# FR-155: every demo page identifies the persona and offers switch and reset. #}
+<div class="demo-banner" role="region" aria-label="Demo session">
+  <span class="label">Demo mode</span>
+  <span>Signed in as <strong>{{ me.full_name }}</strong> ({{ me.role|lower }})</span>
+  <span class="spacer"></span>
+  <a href="/demo">Switch persona</a>
+  <form method="post" action="/demo/reset">
+    <button type="submit">Reset demo data</button>
+  </form>
+  <a href="/outbox">Outbox</a>
+</div>

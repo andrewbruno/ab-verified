@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>9. Authorisation with Row Level Security · AB-Verified Specification</title>
+<meta name="description" content="Row Level Security as the authorisation boundary: identity plumbing, baseline, representative policies and rules of engagement.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html" class="on"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<div class="subs">
+<a href="#9-1-identity-plumbing">9.1 Identity plumbing</a>
+<a href="#9-2-baseline">9.2 Baseline</a>
+<a href="#9-3-representative-policies">9.3 Representative policies</a>
+<a href="#9-4-storage">9.4 Storage</a>
+<a href="#9-5-rules-of-engagement">9.5 Rules of engagement</a>
+</div>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 9. Authorisation with Row Level Security</nav><h1 class="page"><span class="num">9</span>Authorisation with Row Level Security</h1><p class="lede">Row Level Security as the authorisation boundary: identity plumbing, baseline, representative policies and rules of engagement.</p><hr class="rule"><div class="prose"><p>RLS is the centrepiece of this design (PC4, NFR-05). The rule is: <strong>if a query can return a row, a policy said so.</strong></p>
+<h2 id="9-1-identity-plumbing"><span class="hn">9.1</span>Identity plumbing<a class="anchor" href="#9-1-identity-plumbing" aria-label="Link to this heading">#</a></h2>
+<ol>
+<li>Supabase Auth issues the session JWT. A <strong>custom access token hook</strong> adds two claims at sign-in: <code>app_role</code> (<code>CLIENT</code>, <code>CONTRACTOR</code> or <code>STAFF</code>) and <code>org_id</code>.</li>
+<li>Reading claims from the JWT rather than joining <code>user_profile</code> inside every policy avoids recursive policy evaluation and keeps policies index-friendly.</li>
+<li>Helper functions are <code>STABLE</code>, <code>SECURITY DEFINER</code>, with <code>search_path</code> pinned:</li>
+</ol>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="k">schema</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">exists</span><span class="w"> </span><span class="n">app</span><span class="p">;</span>
+
+<span class="k">create</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">replace</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="n">uuid</span>
+<span class="w">  </span><span class="k">language</span><span class="w"> </span><span class="k">sql</span><span class="w"> </span><span class="k">stable</span><span class="w"> </span><span class="k">security</span><span class="w"> </span><span class="k">definer</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">search_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="err">$$</span>
+<span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="k">nullif</span><span class="p">(</span>
+<span class="w">    </span><span class="n">current_setting</span><span class="p">(</span><span class="s1">'request.jwt.claims'</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)::</span><span class="n">jsonb</span><span class="w"> </span><span class="o">-&gt;&gt;</span><span class="w"> </span><span class="s1">'org_id'</span><span class="p">,</span><span class="w"> </span><span class="s1">''</span>
+<span class="w">  </span><span class="p">)::</span><span class="n">uuid</span><span class="p">;</span>
+<span class="err">$$</span><span class="p">;</span>
+
+<span class="k">create</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">replace</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="k">current_role</span><span class="p">()</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="nb">text</span>
+<span class="w">  </span><span class="k">language</span><span class="w"> </span><span class="k">sql</span><span class="w"> </span><span class="k">stable</span><span class="w"> </span><span class="k">security</span><span class="w"> </span><span class="k">definer</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">search_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="err">$$</span>
+<span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="k">coalesce</span><span class="p">(</span>
+<span class="w">    </span><span class="n">current_setting</span><span class="p">(</span><span class="s1">'request.jwt.claims'</span><span class="p">,</span><span class="w"> </span><span class="k">true</span><span class="p">)::</span><span class="n">jsonb</span><span class="w"> </span><span class="o">-&gt;&gt;</span><span class="w"> </span><span class="s1">'app_role'</span><span class="p">,</span><span class="w"> </span><span class="s1">'ANON'</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="err">$$</span><span class="p">;</span>
+
+<span class="k">create</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">replace</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="nb">boolean</span>
+<span class="w">  </span><span class="k">language</span><span class="w"> </span><span class="k">sql</span><span class="w"> </span><span class="k">stable</span><span class="w"> </span><span class="k">security</span><span class="w"> </span><span class="k">definer</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">search_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="err">$$</span>
+<span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="k">current_role</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'STAFF'</span><span class="p">;</span>
+<span class="err">$$</span><span class="p">;</span>
+
+<span class="k">create</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="k">replace</span><span class="w"> </span><span class="k">function</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">org_is_verified</span><span class="p">(</span><span class="n">p_org</span><span class="w"> </span><span class="n">uuid</span><span class="p">)</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="nb">boolean</span>
+<span class="w">  </span><span class="k">language</span><span class="w"> </span><span class="k">sql</span><span class="w"> </span><span class="k">stable</span><span class="w"> </span><span class="k">security</span><span class="w"> </span><span class="k">definer</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="n">search_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">''</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="err">$$</span>
+<span class="w">  </span><span class="k">select</span><span class="w"> </span><span class="k">exists</span><span class="w"> </span><span class="p">(</span>
+<span class="w">    </span><span class="k">select</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">organisation</span><span class="w"> </span><span class="n">o</span>
+<span class="w">    </span><span class="k">where</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">p_org</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">o</span><span class="p">.</span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'VERIFIED'</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="err">$$</span><span class="p">;</span>
+</pre></div>
+</div>
+<h2 id="9-2-baseline"><span class="hn">9.2</span>Baseline<a class="anchor" href="#9-2-baseline" aria-label="Link to this heading">#</a></h2>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="c1">-- Applied to every table in the public schema.</span>
+<span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span><span class="w"> </span><span class="n">enable</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="k">level</span><span class="w"> </span><span class="k">security</span><span class="p">;</span>
+<span class="k">alter</span><span class="w"> </span><span class="k">table</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span><span class="w"> </span><span class="k">force</span><span class="w"> </span><span class="k">row</span><span class="w"> </span><span class="k">level</span><span class="w"> </span><span class="k">security</span><span class="p">;</span><span class="w">   </span><span class="c1">-- applies to the table owner too</span>
+<span class="k">revoke</span><span class="w"> </span><span class="k">all</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">anon</span><span class="p">,</span><span class="w"> </span><span class="n">authenticated</span><span class="p">;</span><span class="w"> </span><span class="c1">-- then grant back deliberately</span>
+<span class="k">grant</span><span class="w"> </span><span class="k">select</span><span class="p">,</span><span class="w"> </span><span class="k">insert</span><span class="p">,</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span><span class="p">;</span>
+</pre></div>
+</div>
+<p><code>FORCE ROW LEVEL SECURITY</code> matters: without it, the table owner bypasses policies, which quietly defeats the whole scheme during migrations and in any tooling connected as the owner.</p>
+<h2 id="9-3-representative-policies"><span class="hn">9.3</span>Representative policies<a class="anchor" href="#9-3-representative-policies" aria-label="Link to this heading">#</a></h2>
+<p><strong>Organisations</strong>: you see your own; Staff see all.</p>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">org_select_own</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">organisation</span>
+<span class="k">for</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span><span class="w"> </span><span class="k">or</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+
+<span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">org_update_staff_only</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">organisation</span>
+<span class="k">for</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Jobs</strong>: the heart of FR-309 and FR-407. A Contractor sees a job only through an invitation.</p>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">job_select</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span>
+<span class="k">for</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span>
+<span class="w">   </span><span class="k">or</span><span class="w"> </span><span class="n">client_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">   </span><span class="k">or</span><span class="w"> </span><span class="k">exists</span><span class="w"> </span><span class="p">(</span>
+<span class="w">        </span><span class="k">select</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">invitation</span><span class="w"> </span><span class="n">i</span>
+<span class="w">        </span><span class="k">where</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">job_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">job</span><span class="p">.</span><span class="n">id</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">contractor_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'SENT'</span><span class="p">,</span><span class="s1">'ACCEPTED'</span><span class="p">,</span><span class="s1">'DECLINED'</span><span class="p">,</span><span class="s1">'EXPIRED'</span><span class="p">)</span>
+<span class="w">      </span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">-- A client may create a job only for their own, verified organisation.</span>
+<span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">job_insert_client</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span>
+<span class="k">for</span><span class="w"> </span><span class="k">insert</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">with</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="n">app</span><span class="p">.</span><span class="k">current_role</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'CLIENT'</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">client_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">org_is_verified</span><span class="p">(</span><span class="n">client_org_id</span><span class="p">)</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'DRAFT'</span>
+<span class="p">);</span>
+
+<span class="c1">-- A client may edit only their own job, and only while it is a draft (FR-303).</span>
+<span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">job_update_client_draft</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span>
+<span class="k">for</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w">  </span><span class="p">(</span><span class="w"> </span><span class="n">client_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'DRAFT'</span><span class="w"> </span><span class="p">)</span>
+<span class="k">with</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">client_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'DRAFT'</span><span class="p">,</span><span class="s1">'PENDING_APPROVAL'</span><span class="p">)</span><span class="w"> </span><span class="p">);</span>
+
+<span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">job_update_staff</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span>
+<span class="k">for</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Bids</strong>: encodes FR-407, FR-408 and FR-409 directly.</p>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">bid_select</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">bid</span>
+<span class="k">for</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">using</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span>
+<span class="w">   </span><span class="k">or</span><span class="w"> </span><span class="n">contractor_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span><span class="w">                 </span><span class="c1">-- my own bid, any state</span>
+<span class="w">   </span><span class="k">or</span><span class="w"> </span><span class="p">(</span><span class="w">                                                        </span><span class="c1">-- client: released only</span>
+<span class="w">        </span><span class="k">exists</span><span class="w"> </span><span class="p">(</span>
+<span class="w">          </span><span class="k">select</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">job</span><span class="w"> </span><span class="n">j</span>
+<span class="w">          </span><span class="k">where</span><span class="w"> </span><span class="n">j</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bid</span><span class="p">.</span><span class="n">job_id</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="n">j</span><span class="p">.</span><span class="n">client_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">        </span><span class="p">)</span>
+<span class="w">        </span><span class="k">and</span><span class="w"> </span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'RELEASED'</span><span class="p">,</span><span class="s1">'WON'</span><span class="p">,</span><span class="s1">'NOT_SELECTED'</span><span class="p">)</span>
+<span class="w">      </span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">-- A contractor may bid only where a live invitation authorises it (FR-404).</span>
+<span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">bid_insert_invited</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">bid</span>
+<span class="k">for</span><span class="w"> </span><span class="k">insert</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span>
+<span class="k">with</span><span class="w"> </span><span class="k">check</span><span class="w"> </span><span class="p">(</span>
+<span class="w">      </span><span class="n">app</span><span class="p">.</span><span class="k">current_role</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'CONTRACTOR'</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">contractor_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">org_is_verified</span><span class="p">(</span><span class="n">contractor_org_id</span><span class="p">)</span>
+<span class="w">  </span><span class="k">and</span><span class="w"> </span><span class="k">exists</span><span class="w"> </span><span class="p">(</span>
+<span class="w">        </span><span class="k">select</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">invitation</span><span class="w"> </span><span class="n">i</span>
+<span class="w">        </span><span class="k">where</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bid</span><span class="p">.</span><span class="n">invitation_id</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">job_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bid</span><span class="p">.</span><span class="n">job_id</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">contractor_org_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">current_org_id</span><span class="p">()</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="k">state</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="p">(</span><span class="s1">'SENT'</span><span class="p">,</span><span class="s1">'ACCEPTED'</span><span class="p">)</span>
+<span class="w">          </span><span class="k">and</span><span class="w"> </span><span class="n">i</span><span class="p">.</span><span class="n">expires_at</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">now</span><span class="p">()</span>
+<span class="w">      </span><span class="p">)</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+<p><strong>Audit</strong>: readable by Staff, writable by nobody (FR-602).</p>
+<div class="code"><div class="code-bar"><span class="lang">SQL</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="k">create</span><span class="w"> </span><span class="n">policy</span><span class="w"> </span><span class="n">audit_select_staff</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">audit_event</span>
+<span class="k">for</span><span class="w"> </span><span class="k">select</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">authenticated</span><span class="w"> </span><span class="k">using</span><span class="w"> </span><span class="p">(</span><span class="w"> </span><span class="n">app</span><span class="p">.</span><span class="n">is_staff</span><span class="p">()</span><span class="w"> </span><span class="p">);</span>
+<span class="c1">-- No insert, update or delete policy exists for any role.</span>
+<span class="c1">-- Rows are written solely by SECURITY DEFINER triggers.</span>
+<span class="k">revoke</span><span class="w"> </span><span class="k">insert</span><span class="p">,</span><span class="w"> </span><span class="k">update</span><span class="p">,</span><span class="w"> </span><span class="k">delete</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">public</span><span class="p">.</span><span class="n">audit_event</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">authenticated</span><span class="p">,</span><span class="w"> </span><span class="n">anon</span><span class="p">;</span>
+</pre></div>
+</div>
+<h2 id="9-4-storage"><span class="hn">9.4</span>Storage<a class="anchor" href="#9-4-storage" aria-label="Link to this heading">#</a></h2>
+<p>Verification documents and bid attachments live in <strong>private</strong> Supabase Storage buckets with their own policies keyed on the object path prefix (<code>org/&lt;org_id&gt;/…</code>), so a contractor cannot fetch another organisation's certificate of currency by guessing an object name. All downloads are short-lived signed URLs.</p>
+<h2 id="9-5-rules-of-engagement"><span class="hn">9.5</span>Rules of engagement<a class="anchor" href="#9-5-rules-of-engagement" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr id="R1">
+<td class="rid">R1<a class="anchor" href="#R1" aria-label="Link to R1">#</a></td>
+<td>Every new table ships with RLS enabled, forced, and at least one policy, in the same migration that creates it. A table with RLS enabled and no policy denies everything, and that is the correct default while policies are being written.</td>
+</tr>
+<tr id="R2">
+<td class="rid">R2<a class="anchor" href="#R2" aria-label="Link to R2">#</a></td>
+<td>Every policy has a paired test: one asserting the allowed case returns rows, one asserting the forbidden case returns zero rows (NFR-15). The forbidden-case test is the one that matters.</td>
+</tr>
+<tr id="R3">
+<td class="rid">R3<a class="anchor" href="#R3" aria-label="Link to R3">#</a></td>
+<td>The <code>service_role</code> key is used only in worker routes and migrations, never in a user request path (A7). It bypasses RLS entirely.</td>
+</tr>
+<tr id="R4">
+<td class="rid">R4<a class="anchor" href="#R4" aria-label="Link to R4">#</a></td>
+<td>Application-layer checks are duplicated deliberately, to produce a helpful 403 rather than a confusing empty list. They are never the only check.</td>
+</tr>
+<tr id="R5">
+<td class="rid">R5<a class="anchor" href="#R5" aria-label="Link to R5">#</a></td>
+<td>Policies are indexed for: <code>job(client_org_id)</code>, <code>invitation(job_id, contractor_org_id)</code>, <code>bid(job_id)</code>, <code>bid(contractor_org_id)</code>. An unindexed <code>EXISTS</code> inside a policy is a full scan on every row read.</td>
+</tr>
+<tr id="R6">
+<td class="rid">R6<a class="anchor" href="#R6" aria-label="Link to R6">#</a></td>
+<td>Demo sessions run under the same policies as everyone else (FR-153). Demo mode is a fixture, never an authorisation exception.</td>
+</tr>
+</tbody>
+</table></div>
+<hr /></div><nav class="pager" aria-label="Section"><a href="08-architecture.html"><div class="dir">Previous</div><div class="ttl">8. Architecture</div></a><a class="next" href="10-demo-mode.html"><div class="dir">Next</div><div class="ttl">10. Demo Mode</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#9-1-identity-plumbing">9.1 Identity plumbing</a><a href="#9-2-baseline">9.2 Baseline</a><a href="#9-3-representative-policies">9.3 Representative policies</a><a href="#9-4-storage">9.4 Storage</a><a href="#9-5-rules-of-engagement">9.5 Rules of engagement</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

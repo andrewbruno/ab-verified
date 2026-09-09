@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>10. Demo Mode · AB-Verified Specification</title>
+<meta name="description" content="Seeded personas that make the whole staff-gated workflow explorable in one click, under the same policies as real users.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html" class="on"><span class="n">10</span><span>Demo Mode</span></a>
+<div class="subs">
+<a href="#10-1-seeded-personas">10.1 Seeded personas</a>
+<a href="#10-2-behaviour">10.2 Behaviour</a>
+<a href="#10-3-non-production-only">10.3 Non-production only</a>
+</div>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 10. Demo Mode</nav><h1 class="page"><span class="num">10</span>Demo Mode</h1><p class="lede">Seeded personas that make the whole staff-gated workflow explorable in one click, under the same policies as real users.</p><hr class="rule"><div class="prose"><p>Demo mode makes the whole workflow explorable in one click, which matters for a product whose value is a multi-party, staff-gated process that is tedious to reproduce by hand.</p>
+<h2 id="10-1-seeded-personas"><span class="hn">10.1</span>Seeded personas<a class="anchor" href="#10-1-seeded-personas" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Card</th>
+<th>Signs in as</th>
+<th>Fixture state</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Demo Client</strong></td>
+<td><code>client@demo.ab-verified.invalid</code></td>
+<td>Verified. Owns one job with released bids awaiting selection, one job in bidding, one pending approval, one draft.</td>
+</tr>
+<tr>
+<td><strong>Demo Contractor, invited</strong></td>
+<td><code>contractor@demo.ab-verified.invalid</code></td>
+<td>Verified. Holds one open invitation and one accepted invitation with a bid in progress.</td>
+</tr>
+<tr>
+<td><strong>Demo Contractor, not invited</strong></td>
+<td><code>outsider@demo.ab-verified.invalid</code></td>
+<td>Verified, but invited to nothing. Exists to demonstrate that the demo client's jobs are invisible to them, the clearest possible demonstration of the RLS boundary.</td>
+</tr>
+<tr>
+<td><strong>Demo Staff</strong></td>
+<td><code>staff@demo.ab-verified.invalid</code></td>
+<td>Staff. Sees a populated queue: 7 verifications including a name mismatch, a duplicate ABN and a cancelled ABN; 4 jobs to moderate; 11 bids to release; 2 awards to confirm.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-2-behaviour"><span class="hn">10.2</span>Behaviour<a class="anchor" href="#10-2-behaviour" aria-label="Link to this heading">#</a></h2>
+<ul>
+<li>The picker renders on the landing page <strong>only</strong> when <code>DEMO_MODE=true</code> (FR-152). The endpoint 404s otherwise, so a stale bookmark cannot reach it in production.</li>
+<li>Selecting a card performs an ordinary password sign-in against a seeded Supabase Auth user, server-side, and sets a normal session cookie (FR-153).</li>
+<li>The persona name is requested by key and matched against a hard-coded allowlist; an arbitrary email can never be passed to the demo endpoint.</li>
+<li>Every demo page shows a banner: <em>"Demo mode: signed in as Demo Staff. Switch persona · Reset demo data."</em></li>
+<li>Outbound email and SMS are suppressed for <code>@demo.ab-verified.invalid</code> addresses and written to a visible in-app outbox instead (FR-157), so a tester can read the invitation that "would have been sent" without a real message reaching anyone.</li>
+<li>Reset re-runs the seed within a transaction, deleting only rows where <code>is_demo = true</code> (FR-156).</li>
+</ul>
+<h2 id="10-3-non-production-only"><span class="hn">10.3</span>Non-production only<a class="anchor" href="#10-3-non-production-only" aria-label="Link to this heading">#</a></h2>
+<p><code>DEMO_MODE</code> is false in the production Vercel environment. A deployment check queries production for any row with <code>is_demo = true</code> and fails the deploy if one exists (FR-158). The demo domain <code>.invalid</code> is reserved by RFC 2606 and can never receive mail, which makes accidental delivery impossible rather than merely unlikely.</p>
+<hr /></div><nav class="pager" aria-label="Section"><a href="09-authorisation-with-row-level-security.html"><div class="dir">Previous</div><div class="ttl">9. Authorisation with Row Level Security</div></a><a class="next" href="11-suggested-stack.html"><div class="dir">Next</div><div class="ttl">11. Suggested Stack</div></a></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#10-1-seeded-personas">10.1 Seeded personas</a><a href="#10-2-behaviour">10.2 Behaviour</a><a href="#10-3-non-production-only">10.3 Non-production only</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

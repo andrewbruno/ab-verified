@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design tokens · AB-Verified Specification</title>
+<meta name="description" content="Colours, type scale and component patterns taken from forward-deployed-engineer.ai, and the source of this site&#x27;s own styling.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html" class="on"><span class="n">P</span><span>Design tokens</span></a>
+<div class="subs">
+<a href="#brand-primitives">Brand primitives</a>
+<a href="#semantic-roles">Semantic roles</a>
+<a href="#surface-bands">Surface bands</a>
+<a href="#type-scale-fluid">Type scale (fluid)</a>
+</div>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content has-rail">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / Design tokens</nav><h1 class="page">Design tokens</h1><p class="lede">Colours, type scale and component patterns taken from forward-deployed-engineer.ai, and the source of this site&#x27;s own styling.</p><hr class="rule"><div class="prose"><p>Design tokens lifted from the live site on <strong>2026-09-09</strong>, for reuse when building
+the AB-Verified marketplace site.</p>
+<ul>
+<li>Source: <a href="https://forward-deployed-engineer.ai/">https://forward-deployed-engineer.ai/</a> (Next.js app, Kinetic IT branding)</li>
+<li>Stylesheet parsed: <code>/_next/static/css/ac690a9aaf3e82a2.css</code></li>
+<li>Files here: <a href="assets/palette-tokens.css"><code>tokens.css</code></a> (drop-in CSS custom properties),
+  <a href="assets/palette.json"><code>palette.json</code></a> (machine-readable)</li>
+</ul>
+<hr />
+<h1>Colours</h1>
+<h2 id="brand-primitives">Brand primitives<a class="anchor" href="#brand-primitives" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Hex</th>
+<th>RGB</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--red</code></td>
+<td><code>#fa0d0d</code></td>
+<td><code>250,13,13</code></td>
+<td>Accent — CTAs, rules, stat numbers. Kinetic IT brand red.</td>
+</tr>
+<tr>
+<td><code>--sky</code></td>
+<td><code>#29ccff</code></td>
+<td><code>41,204,255</code></td>
+<td>Bright cyan — links/highlights on dark</td>
+</tr>
+<tr>
+<td><code>--sky-mid</code></td>
+<td><code>#32a4cf</code></td>
+<td><code>50,164,207</code></td>
+<td>Mid cyan — gradients, secondary fills</td>
+</tr>
+<tr>
+<td><code>--sky-ink</code></td>
+<td><code>#0f6394</code></td>
+<td><code>15,99,148</code></td>
+<td>Deep cyan — links on light, cyan band on dark</td>
+</tr>
+<tr>
+<td><code>--navy</code></td>
+<td><code>#1a2e4a</code></td>
+<td><code>26,46,74</code></td>
+<td>Primary dark surface; body text on light</td>
+</tr>
+<tr>
+<td><code>--bone</code></td>
+<td><code>#ffffff</code></td>
+<td><code>255,255,255</code></td>
+<td>Text on dark; light surface</td>
+</tr>
+<tr>
+<td><code>--grey</code></td>
+<td><code>#f2f2f2</code></td>
+<td><code>242,242,242</code></td>
+<td>Alternate light surface</td>
+</tr>
+<tr>
+<td><em>(alt dark)</em></td>
+<td><code>#15263d</code></td>
+<td><code>21,38,61</code></td>
+<td>Alternate dark surface (<code>.surf-alt</code> on dark)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="semantic-roles">Semantic roles<a class="anchor" href="#semantic-roles" aria-label="Link to this heading">#</a></h2>
+<p>Everything downstream is written against roles, never raw hexes — that is what
+lets a section flip theme by changing five variables.</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Dark (default)</th>
+<th>Light</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--bg</code></td>
+<td><code>--navy</code></td>
+<td><code>#ffffff</code></td>
+</tr>
+<tr>
+<td><code>--fg</code></td>
+<td><code>--bone</code></td>
+<td><code>--navy</code></td>
+</tr>
+<tr>
+<td><code>--mut</code> (secondary text)</td>
+<td><code>rgba(fg, .62)</code></td>
+<td><code>rgba(fg, .64)</code></td>
+</tr>
+<tr>
+<td><code>--ln</code> (hairline border)</td>
+<td><code>rgba(fg, .16)</code></td>
+<td><code>rgba(fg, .12)</code></td>
+</tr>
+<tr>
+<td><code>--accent</code> / <code>--orange</code></td>
+<td><code>--red</code></td>
+<td><code>--red</code></td>
+</tr>
+<tr>
+<td><code>--blue</code></td>
+<td><code>--sky</code></td>
+<td><code>--sky-ink</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>--orange</code> is a legacy alias that still resolves to the accent; it is the hook
+most components actually reference (buttons, <code>::selection</code>, <code>.stat-num</code>,
+<code>.kicker-block</code> left rule). Keep the alias if porting components verbatim.</p>
+<h2 id="surface-bands">Surface bands<a class="anchor" href="#surface-bands" aria-label="Link to this heading">#</a></h2>
+<p>Sections opt into a surface by class, and the class rewrites the role variables
+for that subtree:</p>
+<ul>
+<li><code>.surf-alt</code> — subtle contrast band (<code>#f2f2f2</code> light / <code>#15263d</code> dark)</li>
+<li><code>.surf-blue</code> — cyan feature band. On light: cyan bg, navy text, accent
+  neutralised to navy. On dark: <code>--sky-ink</code> bg, white text, accent forced to
+  white.</li>
+<li><code>.paper-band</code>, <code>.surf-deep</code> — always navy + white regardless of theme</li>
+</ul>
+<hr />
+<h1>Typography</h1>
+<p><strong>One family: Roboto.</strong> All three font roles (<code>--font-d</code> display, <code>--font-b</code>
+body, <code>--font-m</code> mono/label) resolve to the same stack:</p>
+<div class="code"><div class="code-bar"><span class="lang">Text</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span>Roboto, "Roboto Fallback", Arial, "Helvetica Neue", sans-serif
+</pre></div>
+</div>
+<p>Self-hosted via <code>next/font</code> as subsetted woff2 with <code>font-display: swap</code>.
+For a non-Next build, pull the same family from Google Fonts:</p>
+<div class="code"><div class="code-bar"><span class="lang">HTML</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">"stylesheet"</span> <span class="na">href</span><span class="o">=</span><span class="s">"https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&amp;display=swap"</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Hierarchy comes from <strong>weight, case, letter-spacing and scale</strong> rather than
+from contrasting typefaces.</p>
+<ul>
+<li>Base body: <code>18px / 1.6</code></li>
+<li>Weights in use: 400, 550, 560, 600, 650, 700, 800, 900</li>
+<li>Line-heights: <code>.9</code>–<code>1.04</code> for display, <code>1.25</code>–<code>1.4</code> for subheads, <code>1.5</code>–<code>1.65</code>
+  for body</li>
+</ul>
+<h2 id="type-scale-fluid">Type scale (fluid)<a class="anchor" href="#type-scale-fluid" aria-label="Link to this heading">#</a></h2>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Use</th>
+<th><code>font-size</code></th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hero title</td>
+<td><code>clamp(2.1rem, 5.6vw, 5.2rem)</code></td>
+<td>weight 400, uppercase, <code>letter-spacing: -.015em</code>, <code>line-height: 1.04</code></td>
+</tr>
+<tr>
+<td>Section title</td>
+<td><code>clamp(1.85rem, 3.2vw, 2.75rem)</code></td>
+<td>weight 400, uppercase, <code>letter-spacing: .005em</code>, <code>text-wrap: balance</code></td>
+</tr>
+<tr>
+<td>Big link / next-step</td>
+<td><code>clamp(2rem, 5vw, 3.6rem)</code></td>
+<td>weight 800, uppercase</td>
+</tr>
+<tr>
+<td>Stat number</td>
+<td><code>clamp(2.6rem, 5vw, 4rem)</code></td>
+<td>weight 800, <code>line-height: .9</code>, coloured <code>--orange</code></td>
+</tr>
+<tr>
+<td>Card heading</td>
+<td><code>1.4rem</code>–<code>1.5rem</code></td>
+<td>weight 700, uppercase</td>
+</tr>
+<tr>
+<td>Lead paragraph</td>
+<td><code>clamp(18px, 1.5vw, 20px)</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Body</td>
+<td><code>18px</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Label / mono</td>
+<td><code>11px</code>–<code>13.5px</code></td>
+<td><code>letter-spacing: .12em</code>–<code>.24em</code>, uppercase</td>
+</tr>
+</tbody>
+</table></div>
+<p>Letter-spacing ladder: <code>-.015em</code> (display) → <code>.005em</code>–<code>.04em</code> (headings) →
+<code>.1em</code>–<code>.24em</code> (labels, nav, buttons).</p>
+<hr />
+<h1>Shape, rhythm, motion</h1>
+<ul>
+<li><strong><code>border-radius: 0</code> everywhere.</strong> The site has no rounded corners at all —
+  square edges are a load-bearing part of the look.</li>
+<li>Vertical rhythm: <code>--sp-1 clamp(20px,3vh,40px)</code>, <code>--sp-2 clamp(36px,5vh,60px)</code>,
+  <code>--sp-3 clamp(72px,10vh,120px)</code></li>
+<li>Fixed top bar: <code>--topbar-h: 53px</code>, <code>rgba(bg, .97)</code> + <code>backdrop-filter: blur(8px)</code>,
+  hairline bottom border</li>
+<li>Horizontal padding pattern: <code>clamp(16px, 3vw, 32px)</code></li>
+<li>Measure: body copy capped around <code>62ch</code></li>
+</ul>
+<hr />
+<h1>Component patterns worth copying</h1>
+<p><strong>Button</strong> — outline by default, fills with the accent on hover:</p>
+<div class="code"><div class="code-bar"><span class="lang">CSS</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">btn</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--font-m</span><span class="p">);</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">12</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="mi">600</span><span class="p">;</span><span class="w"> </span><span class="k">letter-spacing</span><span class="p">:</span><span class="w"> </span><span class="mf">.12</span><span class="kt">em</span><span class="p">;</span>
+<span class="w">  </span><span class="k">border</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="p">;</span><span class="w"> </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="kc">transparent</span><span class="p">;</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">inherit</span><span class="p">;</span>
+<span class="w">  </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">13</span><span class="kt">px</span><span class="w"> </span><span class="mi">22</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="k">text-decoration</span><span class="p">:</span><span class="w"> </span><span class="kc">none</span><span class="p">;</span>
+<span class="w">  </span><span class="k">transition</span><span class="p">:</span><span class="w"> </span><span class="k">background</span><span class="w"> </span><span class="mf">.18</span><span class="kt">s</span><span class="p">,</span><span class="w"> </span><span class="kc">color</span><span class="w"> </span><span class="mf">.18</span><span class="kt">s</span><span class="p">,</span><span class="w"> </span><span class="k">border-color</span><span class="w"> </span><span class="mf">.18</span><span class="kt">s</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="p">.</span><span class="nc">btn</span><span class="p">:</span><span class="nd">hover</span><span class="o">,</span><span class="w"> </span><span class="p">.</span><span class="nc">btn-solid</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">background</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--orange</span><span class="p">);</span><span class="w"> </span><span class="k">border-color</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--orange</span><span class="p">);</span><span class="w"> </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="mh">#fff</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">btn</span><span class="p">.</span><span class="nc">big</span><span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="k">padding</span><span class="p">:</span><span class="w"> </span><span class="mi">19</span><span class="kt">px</span><span class="w"> </span><span class="mi">34</span><span class="kt">px</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">btn</span><span class="p">.</span><span class="nc">armed</span><span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="k">box-shadow</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="mi">5</span><span class="kt">px</span><span class="w"> </span><span class="nb">rgba</span><span class="p">(</span><span class="nf">var</span><span class="p">(</span><span class="nv">--accent-rgb</span><span class="p">),</span><span class="w"> </span><span class="mf">.22</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">.</span><span class="nc">btn</span><span class="p">:</span><span class="nd">disabled</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">opacity</span><span class="p">:</span><span class="w"> </span><span class="mf">.45</span><span class="p">;</span><span class="w"> </span><span class="k">cursor</span><span class="p">:</span><span class="w"> </span><span class="kc">not-allowed</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Kicker block</strong> — accented left rule on a constrained measure:</p>
+<div class="code"><div class="code-bar"><span class="lang">CSS</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">kicker-block</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">border-left</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="kt">px</span><span class="w"> </span><span class="kc">solid</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--orange</span><span class="p">);</span>
+<span class="w">  </span><span class="k">padding-left</span><span class="p">:</span><span class="w"> </span><span class="nf">clamp</span><span class="p">(</span><span class="mi">18</span><span class="kt">px</span><span class="p">,</span><span class="w"> </span><span class="mf">2.5</span><span class="kt">vw</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="kt">px</span><span class="p">);</span>
+<span class="w">  </span><span class="k">max-width</span><span class="p">:</span><span class="w"> </span><span class="mi">62</span><span class="kt">ch</span><span class="p">;</span>
+<span class="w">  </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="nf">clamp</span><span class="p">(</span><span class="mi">18</span><span class="kt">px</span><span class="p">,</span><span class="w"> </span><span class="mf">1.5</span><span class="kt">vw</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="kt">px</span><span class="p">);</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Selection</strong> — inverts to the accent: <code>::selection { background: var(--orange); color: var(--bg); }</code></p>
+<hr />
+<h1>Notes for AB-Verified</h1>
+<ul>
+<li>The <code>-rgb</code> companion for each colour exists so alpha variants can be composed
+  as <code>rgba(var(--x-rgb), a)</code>. Keep that convention when adding new colours.</li>
+<li>Red is used sparingly — as a single accent per viewport, not as a fill.
+  Cyan carries the "informational" weight; navy carries structure.</li>
+<li>Only the primitives are hard-coded. If AB-Verified needs its own brand colour,
+  swap <code>--red</code>/<code>--red-rgb</code> and the whole system re-tints.</li>
+</ul></div><nav class="pager" aria-label="Section"><a href="15-open-questions.html"><div class="dir">Previous</div><div class="ttl">15. Open Questions</div></a><div class="spacer"></div></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#brand-primitives">Brand primitives</a><a href="#semantic-roles">Semantic roles</a><a href="#surface-bands">Surface bands</a><a href="#type-scale-fluid">Type scale (fluid)</a></nav></aside>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

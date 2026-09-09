@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>12. Route Sketch · AB-Verified Specification</title>
+<meta name="description" content="Every server-rendered route, who may call it and what it does.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html" class="on"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 12. Route Sketch</nav><h1 class="page"><span class="num">12</span>Route Sketch</h1><p class="lede">Every server-rendered route, who may call it and what it does.</p><hr class="rule"><div class="prose"><p>Server-rendered routes; htmx requests hit the same routes and receive HTML fragments.</p>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Actor</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/</code></td>
+<td>Public</td>
+<td>Landing page; demo persona picker when <code>DEMO_MODE=true</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/demo/login</code></td>
+<td>Public, demo only</td>
+<td>Sign in as a seeded persona from the allowlist</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/demo/reset</code></td>
+<td>Demo session</td>
+<td>Restore the demo fixture</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/register</code></td>
+<td>Public</td>
+<td>Create auth user, organisation and profile</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/verify/email/{token}</code></td>
+<td>Public</td>
+<td>Confirm email</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/verify/mobile</code></td>
+<td>Authenticated</td>
+<td>Submit OTP</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/dashboard</code></td>
+<td>Client, Contractor</td>
+<td>Role-appropriate home</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/jobs</code></td>
+<td>Client</td>
+<td>Create draft job</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/jobs/{id}/submit</code></td>
+<td>Client</td>
+<td>Move to <code>PENDING_APPROVAL</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/jobs/{id}/cancel</code></td>
+<td>Client</td>
+<td>Cancel with reason</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/jobs/{id}/bids</code></td>
+<td>Client</td>
+<td>Released bids only</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/jobs/{id}/select/{bid_id}</code></td>
+<td>Client</td>
+<td>Select a winner → <code>AWARD_PENDING</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/invitations</code></td>
+<td>Contractor</td>
+<td>Own invitations</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/invitations/{id}/accept</code></td>
+<td>Contractor</td>
+<td>Accept</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/invitations/{id}/decline</code></td>
+<td>Contractor</td>
+<td>Decline with reason</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/jobs/{id}/bid</code></td>
+<td>Contractor</td>
+<td>Submit or revise a bid</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/bids/{id}/withdraw</code></td>
+<td>Contractor</td>
+<td>Withdraw</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/staff</code></td>
+<td>Staff</td>
+<td>Operations dashboard</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/staff/verifications</code></td>
+<td>Staff</td>
+<td>Verification queue</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/verifications/{id}/decide</code></td>
+<td>Staff</td>
+<td>Approve, reject or request info</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/staff/jobs/pending</code></td>
+<td>Staff</td>
+<td>Job moderation queue</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/jobs/{id}/decide</code></td>
+<td>Staff</td>
+<td>Approve with closing date, or reject</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/staff/jobs/{id}/candidates</code></td>
+<td>Staff</td>
+<td>Suggested contractors</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/jobs/{id}/invite</code></td>
+<td>Staff</td>
+<td>Issue invitations</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/bids/{id}/release</code></td>
+<td>Staff</td>
+<td>Release a bid to the client</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/bids/{id}/reject</code></td>
+<td>Staff</td>
+<td>Reject a bid with reason</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/jobs/{id}/confirm-award</code></td>
+<td>Staff</td>
+<td>Confirm the award</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/staff/organisations/{id}/suspend</code></td>
+<td>Staff</td>
+<td>Suspend with reason</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/staff/audit/{entity_type}/{id}</code></td>
+<td>Staff</td>
+<td>Full entity timeline</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/internal/cron/drain-queue</code></td>
+<td>Cron, secret-protected</td>
+<td>Drain <code>pgmq</code>: ABR lookups and notifications</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/internal/cron/expire</code></td>
+<td>Cron, secret-protected</td>
+<td>Close bidding, expire invitations</td>
+</tr>
+</tbody>
+</table></div>
+<p>Internal cron routes are protected by a shared secret header and are the only routes permitted to use the <code>service_role</code> key (A7, R3).</p>
+<hr /></div><nav class="pager" aria-label="Section"><a href="11-suggested-stack.html"><div class="dir">Previous</div><div class="ttl">11. Suggested Stack</div></a><a class="next" href="13-security-privacy-notes.html"><div class="dir">Next</div><div class="ttl">13. Security &amp; Privacy Notes</div></a></nav></main>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

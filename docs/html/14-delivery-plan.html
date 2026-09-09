@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en-AU" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>14. Delivery Plan · AB-Verified Specification</title>
+<meta name="description" content="Six milestones from foundation to launch, with exit criteria and an indicative schedule.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231a2e4a'/%3E%3Crect x='5' y='5' width='22' height='4' fill='%23fa0d0d'/%3E%3Crect x='5' y='14' width='16' height='4' fill='%2329ccff'/%3E%3Crect x='5' y='23' width='22' height='4' fill='%23ffffff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="assets/docs.css">
+<link rel="stylesheet" href="assets/code.css">
+<script>(function(){try{var t=localStorage.getItem('abv-docs-theme');if(!t)t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+<button id="menu-btn" class="tb-btn menu-btn" type="button" aria-label="Open the contents">Menu</button>
+<a class="brand" href="index.html"><b>AB-Verified</b><span>Specification</span></a>
+<span class="grow"></span>
+<div class="search" role="search">
+<input id="search-input" type="search" placeholder="Search the specification" aria-label="Search the specification" autocomplete="off" spellcheck="false">
+<kbd>/</kbd>
+<div id="search-results" class="results"></div>
+</div>
+<a class="tb-link hide-sm" href="wireframes.html">Wireframes</a>
+<button id="theme-btn" class="tb-btn" type="button">Light</button>
+</header>
+<div id="scrim" class="scrim"></div>
+<div class="shell">
+<nav id="sidebar" class="sidebar" aria-label="Contents">
+<div class="grp">Documentation</div>
+<a href="index.html"><span class="n">0</span><span>Home and contents</span></a>
+<div class="grp">Specification</div>
+<a href="01-overview.html"><span class="n">1</span><span>Overview</span></a>
+<a href="02-personas-roles.html"><span class="n">2</span><span>Personas &amp; Roles</span></a>
+<a href="03-functional-requirements.html"><span class="n">3</span><span>Functional Requirements</span></a>
+<a href="04-non-functional-requirements.html"><span class="n">4</span><span>Non-Functional Requirements</span></a>
+<a href="05-domain-model.html"><span class="n">5</span><span>Domain Model</span></a>
+<a href="06-state-machines.html"><span class="n">6</span><span>State Machines</span></a>
+<a href="07-key-flows.html"><span class="n">7</span><span>Key Flows</span></a>
+<a href="08-architecture.html"><span class="n">8</span><span>Architecture</span></a>
+<a href="09-authorisation-with-row-level-security.html"><span class="n">9</span><span>Authorisation with Row Level Security</span></a>
+<a href="10-demo-mode.html"><span class="n">10</span><span>Demo Mode</span></a>
+<a href="11-suggested-stack.html"><span class="n">11</span><span>Suggested Stack</span></a>
+<a href="12-route-sketch.html"><span class="n">12</span><span>Route Sketch</span></a>
+<a href="13-security-privacy-notes.html"><span class="n">13</span><span>Security &amp; Privacy Notes</span></a>
+<a href="14-delivery-plan.html" class="on"><span class="n">14</span><span>Delivery Plan</span></a>
+<a href="15-open-questions.html"><span class="n">15</span><span>Open Questions</span></a>
+<div class="grp">Reference</div>
+<a href="palette.html"><span class="n">P</span><span>Design tokens</span></a>
+<a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
+</nav>
+<div class="content">
+<main id="main"><nav class="crumb"><a href="index.html">AB-Verified Specification</a> / 14. Delivery Plan</nav><h1 class="page"><span class="num">14</span>Delivery Plan</h1><p class="lede">Six milestones from foundation to launch, with exit criteria and an indicative schedule.</p><hr class="rule"><div class="prose"><figure class="diagram"><div class="d-bar"><span class="lang">Schedule</span><span class="grow"></span><button class="copy" type="button">Copy source</button></div><pre class="mermaid">gantt
+    title Indicative delivery plan
+    dateFormat YYYY-MM-DD
+    axisFormat %b
+    section Foundation
+    Schema, RLS policies, audit triggers, Vercel and Supabase wiring :m1, 2026-10-01, 30d
+    section Verification
+    Registration, OTP, ABR worker, staff queue :m2, after m1, 35d
+    section Jobs
+    Job drafting and moderation :m3, after m2, 25d
+    section Bidding
+    Invitations, bids, release :m4, after m3, 35d
+    section Award
+    Selection, confirmation, contact release :m5, after m4, 20d
+    section Launch
+    Demo fixtures, accessibility, pen test, pilot :m6, after m5, 30d</pre></figure>
+<div class="tbl-wrap"><table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>Exit criteria</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>M1 Foundation</strong></td>
+<td>Schema and policies migrated, RLS allow/deny test suite green, audit triggers firing, demo persona picker working end to end against seeded data.</td>
+</tr>
+<tr>
+<td><strong>M2 Verification</strong></td>
+<td>An applicant can register, verify email and mobile, be looked up against the ABR, and be approved or rejected by Staff with a reason.</td>
+</tr>
+<tr>
+<td><strong>M3 Jobs</strong></td>
+<td>A verified Client can draft and submit a job; Staff can approve with a bid closing date or reject with feedback.</td>
+</tr>
+<tr>
+<td><strong>M4 Bidding</strong></td>
+<td>Staff can invite matched Contractors; Contractors can accept and bid; Staff can release or reject bids.</td>
+</tr>
+<tr>
+<td><strong>M5 Award</strong></td>
+<td>Client selects, Staff confirms, contact details are released, losing bidders notified.</td>
+</tr>
+<tr>
+<td><strong>M6 Launch</strong></td>
+<td>WCAG 2.2 AA audit passed, penetration test remediated including an explicit RLS review, restore rehearsed, <code>DEMO_MODE</code> off in production, pilot cohort onboarded.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Demo fixtures are built in M1, not M6: they are how every later milestone gets exercised.</p>
+<hr /></div><nav class="pager" aria-label="Section"><a href="13-security-privacy-notes.html"><div class="dir">Previous</div><div class="ttl">13. Security &amp; Privacy Notes</div></a><a class="next" href="15-open-questions.html"><div class="dir">Next</div><div class="ttl">15. Open Questions</div></a></nav></main>
+</div>
+</div>
+<script src="assets/search-index.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>
