@@ -1,6 +1,8 @@
-# AB-Verified — Curated IT Marketplace Specification
+# AB-Verified: Curated IT Marketplace Specification
 
-**Status:** Draft v0.1 · **Date:** 2026-09-09 · **Scope:** Specification only — no implementation
+**Status:** Draft v0.2 · **Date:** 2026-09-09 · **Scope:** Specification only, no implementation
+
+> **Companion document:** [`wireframes/index.html`](wireframes/index.html) holds low-fidelity HTML wireframes for every screen referenced here. Open it in a browser.
 
 ---
 
@@ -11,7 +13,7 @@ AB-Verified is a small, staff-mediated IT marketplace for the Australian market.
 This curated model is the defining architectural constraint. It means:
 
 - The system is a **workflow engine with a marketplace UI**, not a marketplace with an admin panel bolted on.
-- Discovery is **push, not pull** — Contractors do not browse an open job board; they receive invitations.
+- Discovery is **push, not pull**: Contractors do not browse an open job board; they receive invitations.
 - Every state transition needs an **actor, a timestamp, a reason and an audit record**, because Staff decisions are commercially consequential and may be disputed.
 
 ### 1.1 Goals
@@ -28,49 +30,64 @@ This curated model is the defining architectural constraint. It means:
 
 - No payments, escrow, invoicing or milestone billing.
 - No public job board or SEO-indexed listings.
-- No in-app messaging between Client and Contractor — contact details are released on award.
+- No in-app messaging between Client and Contractor: contact details are released on award.
 - No ratings, reviews or reputation scores.
 - No native mobile applications.
 - No multi-currency or non-Australian entity support.
 
-### 1.3 Assumptions
+### 1.3 Platform constraints
+
+These are fixed inputs to the design, not conclusions drawn from it.
+
+| # | Constraint | Consequence |
+|---|---|---|
+| PC1 | **No Node.js**, in the runtime or the build toolchain. | Rules out React, Vue, Next.js, Vite, webpack and the Tailwind npm package. The application is server-rendered HTML with hypermedia interactivity. |
+| PC2 | **Deployed on Vercel.** | The application is a stateless serverless function. No long-running in-process workers, no local disk, no in-memory session or cache. |
+| PC3 | **Supabase is the database.** | Managed PostgreSQL, plus Supabase Auth, Storage and scheduling. |
+| PC4 | **Row Level Security is the authorisation layer.** | Access rules live in the database as policies, not only in application code. |
+| PC5 | **Exactly three personas:** Client, Contractor, Staff. | No separate Admin persona. Staff hold all elevated rights. Scheduled work runs as the database, not as a user. |
+
+### 1.4 Assumptions
 
 - Australian businesses only; every registering party has an ABN.
-- Verification is **human-in-the-loop, assisted by automation** — an ABR lookup informs the Staff decision but never replaces it.
-- Launch volume is low: hundreds of users and jobs, not millions. This justifies a single relational database and a modular monolith.
+- Verification is **human-in-the-loop, assisted by automation**: an ABR lookup informs the Staff decision but never replaces it.
+- Launch volume is low: hundreds of organisations and jobs, not millions.
 
 ---
 
 ## 2. Personas & Roles
 
+There are exactly three personas.
+
 | Persona | Description | Primary interest |
 |---|---|---|
-| **Client** | An Australian business needing IT work delivered. Registers, is verified, posts jobs, reviews bids, selects a winner. | Trustworthy contractors, quickly. |
+| **Client** | An Australian business needing IT work delivered. Registers, is verified, posts jobs, reviews released bids, selects a winner. | Trustworthy contractors, quickly. |
 | **Contractor** | An IT services business or sole trader. Registers, is verified, is invited to bid, submits bids. | Relevant, pre-qualified work. |
-| **Staff** | Platform operator. Verifies registrations, moderates jobs, curates the invite list per job, approves or rejects. | Keep the marketplace clean and matched. |
-| **Admin** | A Staff member with elevated rights: manage staff accounts, override decisions, read the full audit log. | Governance and recovery. |
-| **System** | Scheduled work and integrations: ABR lookups, email/SMS dispatch, invitation and bid expiry. | Reliability. |
+| **Staff** | The platform operator. Verifies registrations, moderates jobs, curates the invitation list per job, releases bids, confirms awards, suspends accounts, reads the audit log and manages other staff accounts. | Keep the marketplace clean and matched. |
+
+> Scheduled work (closing bidding, expiring invitations, retrying ABR lookups) is performed by the database on a schedule and recorded in the audit log with actor `system`. It is a mechanism, not a persona.
 
 ### 2.1 Role–Permission Matrix
 
-| Capability | Client | Contractor | Staff | Admin |
-|---|:--:|:--:|:--:|:--:|
-| Register, verify own email and mobile | ✅ | ✅ | — | — |
-| Submit ABN and verification documents | ✅ | ✅ | — | — |
-| View own verification status and reasons | ✅ | ✅ | ✅ | ✅ |
-| Approve / reject a registration | — | — | ✅ | ✅ |
-| Create / edit a draft job | ✅ own | — | ✅ | ✅ |
-| Approve / reject a job | — | — | ✅ | ✅ |
-| Invite contractors to bid | — | — | ✅ | ✅ |
-| Submit / withdraw a bid | — | ✅ invited only | — | — |
-| View bids on a job | ✅ own job, post-release | ✅ own bid only | ✅ | ✅ |
-| Award a job | ✅ own job, pending confirmation | — | ✅ | ✅ |
-| Suspend a user or organisation | — | — | ✅ | ✅ |
-| Manage staff accounts | — | — | — | ✅ |
-| Read audit log | — | — | ✅ scoped | ✅ all |
-| Override or reverse any decision | — | — | — | ✅ |
+| Capability | Client | Contractor | Staff |
+|---|:--:|:--:|:--:|
+| Register, verify own email and mobile | ✅ | ✅ | ✖ |
+| Submit ABN and verification documents | ✅ | ✅ | ✖ |
+| View own verification status and reasons | ✅ | ✅ | ✅ |
+| Approve / reject a registration | ✖ | ✖ | ✅ |
+| Create / edit a draft job | ✅ own | ✖ | ✅ |
+| Approve / reject a job | ✖ | ✖ | ✅ |
+| Invite contractors to bid | ✖ | ✖ | ✅ |
+| Submit / withdraw a bid | ✖ | ✅ invited only | ✖ |
+| View bids on a job | ✅ own job, released only | ✅ own bid only | ✅ |
+| Select a winning bid | ✅ own job | ✖ | ✖ |
+| Confirm an award | ✖ | ✖ | ✅ |
+| Suspend or reinstate an organisation | ✖ | ✖ | ✅ |
+| Read the audit log | ✖ | ✖ | ✅ |
+| Manage staff accounts | ✖ | ✖ | ✅ |
+| Override or reverse a decision | ✖ | ✖ | ✅ |
 
-> **Hard rule:** a Contractor can *never* see a job they were not invited to. Authorisation is enforced in the data-access layer, not only in the UI.
+> **Hard rule:** a Contractor can *never* see a job they were not invited to. This is enforced by a database policy (§9), not by the UI.
 
 ---
 
@@ -78,7 +95,7 @@ This curated model is the defining architectural constraint. It means:
 
 Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 
-### 3.1 Registration & Identity — FR-100
+### 3.1 Registration & Identity (FR-100)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
@@ -86,15 +103,31 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | FR-102 | Email is verified by a single-use, time-limited link with a 24-hour TTL. | M |
 | FR-103 | Mobile is verified by a 6-digit OTP SMS, valid 10 minutes, maximum 5 attempts and 3 resends per hour. | M |
 | FR-104 | The ABN is validated **structurally** on submission using the ATO modulus-89 checksum before any external call is made. | M |
-| FR-105 | The ABN is validated **externally** against the Australian Business Register web service; the system stores the returned entity name, entity type, GST registration status, ABN status and lookup timestamp. | M |
+| FR-105 | The ABN is validated **externally** against the Australian Business Register; the system stores the returned entity name, entity type, GST registration status, ABN status and lookup timestamp. | M |
 | FR-106 | An ABN may be attached to at most one active organisation. A second registration using the same ABN is flagged for Staff rather than silently rejected. | M |
 | FR-107 | An organisation may hold both Client and Contractor roles under one ABN. Verification happens once per organisation; role-specific requirements are additive. | S |
 | FR-108 | Passwords must be at least 12 characters and are checked against a breached-password corpus. | M |
-| FR-109 | Staff and Admin accounts are created by invitation only and require TOTP multi-factor authentication. | M |
-| FR-110 | A Contractor may upload supporting documents — certificate of currency, professional indemnity insurance, licences, certifications. | S |
-| FR-111 | If the ABR lookup fails or times out, registration still proceeds to the Staff queue, marked `ABR_UNAVAILABLE`, and the lookup is retried by a background task. | M |
+| FR-109 | Staff accounts are created by invitation from an existing Staff member and require TOTP multi-factor authentication. | M |
+| FR-110 | A Contractor may upload supporting documents: certificate of currency, professional indemnity insurance, licences, certifications. | S |
+| FR-111 | If the ABR lookup fails or times out, registration still proceeds to the Staff queue, marked `ABR_UNAVAILABLE`, and the lookup is retried by a scheduled task. | M |
 
-### 3.2 Staff Verification — FR-200
+### 3.2 Demo Mode (FR-150)
+
+Demo mode exists so the workflow can be exercised end to end without registering four real businesses and waiting on OTPs. It is a **testing affordance with production-grade authorisation**: a demo session is a real authenticated session subject to exactly the same Row Level Security policies as any other user.
+
+| ID | Requirement | Pri |
+|---|---|:--:|
+| FR-151 | The landing page offers a **demo persona picker** with one card per seeded persona: Demo Client, Demo Contractor (invited), Demo Contractor (not invited) and Demo Staff. Selecting a card signs the visitor in as that seeded user in one click. | M |
+| FR-152 | Demo mode is controlled by a single environment flag, `DEMO_MODE`. When it is off, the picker is not rendered and the demo sign-in endpoint returns 404. | M |
+| FR-153 | Demo sign-in issues a **normal session for a real seeded user**: the same token type, role claims and RLS enforcement as a live user. It must not use a service key, bypass policies, or take a privileged code path. | M |
+| FR-154 | Demo accounts are seeded by a repeatable migration into a dedicated demo organisation set, with a realistic fixture: verified and unverified organisations, jobs at each lifecycle state, live invitations and bids awaiting release. | M |
+| FR-155 | A persistent banner is shown in every demo session identifying the active persona, with a one-click **switch persona** control and a **reset demo data** control. | M |
+| FR-156 | Reset restores the demo fixture to its seeded state. It affects only demo-owned rows and is itself an audited action. | S |
+| FR-157 | Demo accounts use a reserved email domain and are excluded from all outbound email and SMS. A demo session never sends a real message to a real person. | M |
+| FR-158 | The production environment sets `DEMO_MODE=false`, and a deployment check fails the build if demo seed data is present in the production database. | M |
+| FR-159 | Simple email-and-password sign-in is available for all personas in non-production environments; production may additionally require MFA for Staff (FR-109). | M |
+
+### 3.3 Staff Verification (FR-200)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
@@ -103,14 +136,14 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | FR-203 | Staff may **Approve**, **Reject** or **Request more information**; each requires a reason code and permits a free-text note. | M |
 | FR-204 | Registration rejection reason codes: `ABN_NOT_FOUND`, `ABN_INACTIVE`, `NAME_MISMATCH`, `DUPLICATE_ENTITY`, `INSUFFICIENT_DOCUMENTS`, `SUSPECTED_FRAUD`, `OUT_OF_SCOPE`, `OTHER`. | M |
 | FR-205 | "Request more information" returns the applicant to an editable state, notifies them with the Staff note, and returns them to the queue on resubmission. | M |
-| FR-206 | A rejected applicant is notified with a human-readable reason. `SUSPECTED_FRAUD` is never disclosed verbatim — a generic message is sent instead. | M |
+| FR-206 | A rejected applicant is notified with a human-readable reason. `SUSPECTED_FRAUD` is never disclosed verbatim; a generic message is sent instead. | M |
 | FR-207 | Only a **verified** Client may post a job; only a **verified** Contractor may be invited or bid. | M |
 | FR-208 | Staff may suspend or reinstate an organisation at any time, with a reason. Suspension immediately blocks new jobs, invitations and bids but preserves all history. | M |
 | FR-209 | Verification decisions are immutable. A change of mind is recorded as a new decision superseding the previous one. | M |
 | FR-210 | Active organisations are re-checked against the ABR periodically; a change to `CANCELLED` re-opens a verification case. | C |
 | FR-211 | The queue supports assignment, so two Staff do not review the same applicant simultaneously. | S |
 
-### 3.3 Jobs — FR-300
+### 3.4 Jobs (FR-300)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
@@ -124,7 +157,7 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | FR-308 | A Client may cancel a job at any pre-award state, with a reason. Invited Contractors are notified. | M |
 | FR-309 | Jobs are never publicly listed or indexed. Access is by authenticated, authorised request only. | M |
 
-### 3.4 Invitations & Bidding — FR-400
+### 3.5 Invitations & Bidding (FR-400)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
@@ -139,10 +172,10 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | FR-409 | A Client sees only released bids, and only after the bid closing date or an explicit Staff release. | M |
 | FR-410 | The Client selects a winning bid; the selection requires Staff confirmation to become an award. | M |
 | FR-411 | On award, contact details are released to both parties, all other bids move to `NOT_SELECTED`, and those Contractors are notified. | M |
-| FR-412 | Staff may re-open bidding on a job — for instance when every bid is rejected or the awarded Contractor withdraws. | S |
-| FR-413 | Invitations and bids expire automatically at their closing datetime via a scheduled task; expiry is an auditable system action. | M |
+| FR-412 | Staff may re-open bidding on a job, for instance when every bid is rejected or the awarded Contractor withdraws. | S |
+| FR-413 | Invitations and bidding close automatically at the scheduled datetime; expiry is an auditable system action. | M |
 
-### 3.5 Notifications — FR-500
+### 3.6 Notifications (FR-500)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
@@ -152,14 +185,14 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | FR-504 | Users may opt out of non-transactional SMS, but not out of OTP or award notices. | S |
 | FR-505 | Staff receive a digest of queue depths: pending verifications, pending job approvals, bids awaiting release. | S |
 
-### 3.6 Audit & Administration — FR-600
+### 3.7 Audit (FR-600)
 
 | ID | Requirement | Pri |
 |---|---|:--:|
-| FR-601 | Every state transition writes an append-only audit record: actor, role, action, entity, before and after state, reason code, note, IP, user agent, timestamp. | M |
-| FR-602 | Audit records are immutable; corrections are new records. | M |
-| FR-603 | Admins can view a full timeline for any organisation, user, job, invitation or bid. | M |
-| FR-604 | Staff may not act on records belonging to their own organisation — a conflict-of-interest guard. | S |
+| FR-601 | Every state transition writes an append-only audit record: actor, role, action, entity, before and after state, reason code, note, IP and timestamp. | M |
+| FR-602 | Audit records are immutable. No role, including Staff, may update or delete them; corrections are new records. | M |
+| FR-603 | Staff can view a full timeline for any organisation, user, job, invitation or bid. | M |
+| FR-604 | Staff may not act on records belonging to their own organisation, a conflict-of-interest guard. | S |
 | FR-605 | ABR lookup requests and responses are retained verbatim as evidence. | M |
 
 ---
@@ -169,20 +202,20 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 | ID | Category | Requirement |
 |---|---|---|
 | NFR-01 | Availability | 99.5% monthly for the authenticated application; a single region is acceptable at launch. |
-| NFR-02 | Performance | P95 server render under 500 ms; Staff queue pages under 1 s with 1,000 rows. |
-| NFR-03 | Scale target | 5,000 organisations, 20,000 jobs, 100,000 bids within three years — comfortably single-node PostgreSQL. |
-| NFR-04 | Security | OWASP ASVS Level 2. TLS 1.2+ everywhere. Argon2id password hashing. Server-side sessions with `HttpOnly`, `Secure`, `SameSite=Lax` cookies. |
-| NFR-05 | Authorisation | Deny by default, enforced in the data-access layer. Every list query is scoped by actor. |
-| NFR-06 | Privacy | Privacy Act 1988 and the Australian Privacy Principles. Data resident in an Australian region. Verification documents encrypted at rest with a customer-managed key. |
+| NFR-02 | Performance | P95 server response under 500 ms warm; P95 cold start under 1.5 s; Staff queue pages under 1 s with 1,000 rows. |
+| NFR-03 | Scale target | 5,000 organisations, 20,000 jobs, 100,000 bids within three years, comfortably a single Supabase instance. |
+| NFR-04 | Security | OWASP ASVS Level 2. TLS 1.2+ everywhere. Password hashing and session issuance delegated to Supabase Auth. |
+| NFR-05 | Authorisation | Deny by default, enforced by Row Level Security in PostgreSQL and re-checked in the application. See §9. |
+| NFR-06 | Privacy | Privacy Act 1988 and the Australian Privacy Principles. Database and object storage hosted in `ap-southeast-2` (Sydney); serverless functions pinned to `syd1`. |
 | NFR-07 | Retention | Verification documents purged seven years after account closure; audit records retained seven years; OTPs and tokens purged on use or expiry. |
 | NFR-08 | Rate limiting | Per-IP and per-account limits on login, OTP request, ABN lookup and registration. |
 | NFR-09 | Accessibility | WCAG 2.2 AA across all Client- and Contractor-facing pages. |
-| NFR-10 | Observability | Structured JSON logs, request tracing, error tracking, and a business dashboard covering queue depth, time-to-verify and bids per job. |
-| NFR-11 | Backup & DR | Daily full backup plus point-in-time recovery. RPO 5 minutes, RTO 4 hours. Restores rehearsed quarterly. |
+| NFR-10 | Observability | Structured logs, error tracking, and a Staff-visible dashboard covering queue depth, time-to-verify and bids per job. |
+| NFR-11 | Backup & DR | Supabase daily backups plus point-in-time recovery. RPO 5 minutes, RTO 4 hours. Restores rehearsed quarterly. |
 | NFR-12 | Data integrity | No hard deletes on domain entities; soft-delete with tombstones. |
 | NFR-13 | Localisation | en-AU, Australia/Sydney for display, UTC in storage, AUD currency. |
-| NFR-14 | Maintainability | One deployable unit; a new engineer runs the entire stack locally with a single command. |
-| NFR-15 | Testability | Every state machine has exhaustive transition tests, including illegal transitions. |
+| NFR-14 | Maintainability | One command brings up the full stack locally, including the database, against the same migrations used in production. |
+| NFR-15 | Testability | Every state machine has exhaustive transition tests, and every RLS policy has a test asserting both the permitted and the denied case. |
 
 ---
 
@@ -190,12 +223,12 @@ Priorities use MoSCoW: **M** = Must, **S** = Should, **C** = Could.
 
 ```mermaid
 erDiagram
-    ORGANISATION ||--o{ USER : employs
+    ORGANISATION ||--o{ USER_PROFILE : employs
     ORGANISATION ||--|| ABN_RECORD : "identified by"
     ORGANISATION ||--o{ VERIFICATION_CASE : "subject of"
     ORGANISATION ||--o{ DOCUMENT : uploads
     VERIFICATION_CASE ||--o{ VERIFICATION_DECISION : "resolved by"
-    USER ||--o{ VERIFICATION_DECISION : makes
+    USER_PROFILE ||--o{ VERIFICATION_DECISION : makes
     ORGANISATION ||--o{ JOB : "posts as client"
     JOB ||--o{ INVITATION : issues
     JOB ||--o{ BID : receives
@@ -204,8 +237,8 @@ erDiagram
     INVITATION ||--o| BID : authorises
     BID ||--o{ BID_VERSION : "revised as"
     BID ||--o| AWARD : wins
-    USER ||--o{ AUDIT_EVENT : triggers
-    NOTIFICATION }o--|| USER : "addressed to"
+    USER_PROFILE ||--o{ AUDIT_EVENT : triggers
+    NOTIFICATION }o--|| USER_PROFILE : "addressed to"
 
     ORGANISATION {
         uuid id PK
@@ -215,6 +248,7 @@ erDiagram
         enum status "PENDING VERIFIED REJECTED SUSPENDED"
         jsonb skills
         string region
+        boolean is_demo
         timestamp created_at
     }
     ABN_RECORD {
@@ -228,15 +262,15 @@ erDiagram
         jsonb raw_response
         timestamp checked_at
     }
-    USER {
-        uuid id PK
-        uuid organisation_id FK
+    USER_PROFILE {
+        uuid id PK "= auth.users.id"
+        uuid organisation_id FK "null for staff"
         string email UK
         string mobile_e164
-        enum role "CLIENT CONTRACTOR STAFF ADMIN"
+        enum role "CLIENT CONTRACTOR STAFF"
         boolean email_verified
         boolean mobile_verified
-        boolean mfa_enabled
+        boolean is_demo
         timestamp created_at
     }
     VERIFICATION_CASE {
@@ -255,7 +289,8 @@ erDiagram
         uuid staff_user_id FK
         enum outcome "APPROVE REJECT REQUEST_INFO"
         string reason_code
-        text note
+        text note_to_applicant
+        text internal_note
         timestamp decided_at
     }
     JOB {
@@ -307,7 +342,8 @@ erDiagram
     }
     AUDIT_EVENT {
         uuid id PK
-        uuid actor_user_id FK
+        uuid actor_user_id FK "null for system"
+        string actor_role
         string entity_type
         uuid entity_id
         string action
@@ -321,11 +357,13 @@ erDiagram
 
 ### 5.1 Key modelling decisions
 
-1. **The organisation is the verified unit, not the user.** An ABN belongs to a business; people come and go. This makes FR-107 (one organisation, both roles) natural and avoids re-verifying every new employee.
-2. **`VERIFICATION_CASE` is separate from `ORGANISATION.status`.** The case is the workflow record with its own history; the status column on the organisation is the denormalised, queryable current answer.
-3. **`INVITATION` authorises `BID`.** Making the invitation a first-class entity with a foreign key on the bid turns "may this contractor bid?" into a schema-level constraint rather than application logic that can be forgotten.
-4. **Bids are versioned.** FR-406 permits edits, and disputes require knowing what was offered and when.
-5. **`AWARD` is a distinct entity** requiring both a client selector and a staff confirmer, encoding FR-410 in the schema instead of implying it.
+1. **The organisation is the verified unit, not the user.** An ABN belongs to a business; people come and go. This makes FR-107 (one organisation, both roles) natural and avoids re-verifying every new employee. It is also the unit RLS policies pivot on: almost every policy reduces to "does this row belong to my organisation?"
+2. **`USER_PROFILE.id` is the Supabase `auth.users.id`.** Identity lives in Supabase Auth; application attributes (role and organisation) live in a profile table that policies can read.
+3. **`VERIFICATION_CASE` is separate from `ORGANISATION.status`.** The case is the workflow record with its own history; the status column is the denormalised, queryable current answer, and the one RLS reads.
+4. **`INVITATION` authorises `BID`.** A foreign key from bid to invitation turns "may this contractor bid?" into a schema-level constraint rather than application logic that can be forgotten.
+5. **Bids are versioned.** FR-406 permits edits, and disputes require knowing what was offered and when.
+6. **`AWARD` is a distinct entity** requiring both a client selector and a staff confirmer, encoding FR-410 in the schema instead of implying it.
+7. **`is_demo` is a column, not a separate database.** Demo rows live alongside real ones so they exercise the same policies; the flag exists so the reset routine and the production deployment check can find them (FR-156, FR-158).
 
 ---
 
@@ -346,7 +384,7 @@ stateDiagram-v2
     InReview --> Rejected: Staff rejects with reason code
     Verified --> Suspended: Staff suspends with reason
     Suspended --> Verified: Staff reinstates
-    Verified --> InReview: ABR re-check finds ABN cancelled
+    Verified --> InReview: scheduled ABR re-check finds ABN cancelled
     Rejected --> [*]
     Suspended --> [*]: account closed
 ```
@@ -413,42 +451,42 @@ stateDiagram-v2
 sequenceDiagram
     autonumber
     actor A as Applicant
-    participant W as Web App
-    participant Q as Task Queue
-    participant ABR as ABR Web Service
-    participant M as Email/SMS Providers
+    participant V as Vercel function
+    participant SB as Supabase Auth and Postgres
+    participant Q as pgmq queue and pg_cron
+    participant ABR as ABR web service
+    participant M as Email and SMS providers
     actor S as Staff
 
-    A->>W: Submit registration: name, email, mobile, ABN
-    W->>W: Validate ABN checksum, modulus 89
-    W-->>A: Account created, status PENDING
-    W->>Q: enqueue send_email_verification
-    W->>Q: enqueue send_mobile_otp
-    Q->>M: Deliver verification link and OTP
-    A->>W: Click link, enter OTP
-    W->>W: Mark email and mobile verified
-    W->>Q: enqueue abr_lookup
-    Q->>ABR: ABN lookup
-    ABR-->>Q: Entity name, type, status, GST
-    Q->>W: Store ABN_RECORD, compute name match score
-    W->>W: Open VERIFICATION_CASE, state IN_REVIEW
-    S->>W: Open verification queue
-    W-->>S: Applicant details, ABR evidence, flags, documents
+    A->>V: Submit registration: name, email, mobile, ABN
+    V->>V: Validate ABN checksum, modulus 89
+    V->>SB: Create auth user, organisation, profile, status PENDING
+    SB-->>A: Email verification link
+    SB-->>A: Mobile OTP by SMS
+    A->>V: Confirm link and enter OTP
+    V->>SB: Mark email and mobile verified
+    V->>Q: Enqueue abr_lookup
+    Q->>V: Cron drains queue, invokes worker route
+    V->>ABR: ABN lookup
+    ABR-->>V: Entity name, type, status, GST
+    V->>SB: Store ABN_RECORD, compute name match, open case IN_REVIEW
+    S->>V: Open verification queue
+    V->>SB: Query under staff RLS context
+    SB-->>S: Applicant details, ABR evidence, flags, documents
     alt Approve
-        S->>W: Approve
-        W->>W: Organisation status VERIFIED, audit event
-        W->>Q: enqueue verification_approved_email
-        Q->>M: Notify applicant
+        S->>V: Approve
+        V->>SB: Organisation VERIFIED, decision row, audit trigger fires
+        V->>Q: Enqueue approval email
     else Request more information
-        S->>W: Request info with note
-        W->>Q: enqueue info_requested_email
-        Q->>M: Notify applicant, case returns to queue on resubmit
+        S->>V: Request info with note
+        V->>SB: Case INFO_REQUESTED
+        V->>Q: Enqueue info-requested email
     else Reject
-        S->>W: Reject with reason code
-        W->>W: Organisation status REJECTED, audit event
-        W->>Q: enqueue verification_rejected_email
-        Q->>M: Notify applicant with a safe reason
+        S->>V: Reject with reason code
+        V->>SB: Organisation REJECTED
+        V->>Q: Enqueue rejection email with a safe reason
     end
+    Q->>M: Deliver queued messages with retry
 ```
 
 ### 7.2 Job posting through to award
@@ -457,39 +495,36 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor C as Client
-    participant W as Web App
+    participant V as Vercel function
+    participant SB as Supabase Postgres
     actor S as Staff
     actor K as Contractor
-    participant Q as Task Queue
 
-    C->>W: Create job, save as DRAFT
-    C->>W: Submit job
-    W->>W: State PENDING_APPROVAL, job locked
-    S->>W: Review job
+    C->>V: Create job, save as DRAFT
+    C->>V: Submit job
+    V->>SB: State PENDING_APPROVAL, job locked to client edits
+    S->>V: Review job
     alt Rejected
-        S->>W: Reject with reason
-        W->>Q: notify client, job returns to DRAFT
+        S->>V: Reject with reason
+        V->>SB: Back to DRAFT, client notified
     else Approved
-        S->>W: Approve and set bid closing date
-        W->>W: State APPROVED
-        S->>W: Search verified contractors by skill and region
-        W-->>S: Suggested contractors
-        S->>W: Invite selected contractors
-        W->>Q: enqueue invitation email and SMS per contractor
-        Q->>K: Invitation delivered
-        K->>W: Accept invitation
-        K->>W: Submit bid, price, start date, approach
-        W->>W: Bid SUBMITTED, version 1
-        Note over W: Closing date reached, scheduled task closes bidding
-        S->>W: Review bids, reject unsuitable, release the rest
-        W->>Q: notify client that bids are available
-        C->>W: Compare released bids, select a winner
-        W->>W: State AWARD_PENDING
-        S->>W: Confirm the award
-        W->>W: Create AWARD, winning bid WON, others NOT_SELECTED
-        W->>Q: enqueue award notices and contact detail release
-        Q->>C: Winning contractor contact details
-        Q->>K: Award or non-selection notice
+        S->>V: Approve and set bid closing date
+        V->>SB: State APPROVED
+        S->>V: Search verified contractors by skill and region
+        SB-->>S: Suggested contractors, advisory only
+        S->>V: Invite selected contractors
+        V->>SB: Insert invitations, enqueue email and SMS
+        K->>V: Accept invitation
+        K->>V: Submit bid, price, start date, approach
+        V->>SB: Bid SUBMITTED version 1
+        Note over SB: pg_cron closes bidding at bids_close_at
+        S->>V: Screen bids, reject unsuitable, release the rest
+        V->>SB: Selected bids RELEASED, client notified
+        C->>V: Compare released bids, select a winner
+        V->>SB: Job AWARD_PENDING
+        S->>V: Confirm the award
+        V->>SB: AWARD row, winning bid WON, others NOT_SELECTED
+        V->>SB: Enqueue award notices and contact detail release
     end
 ```
 
@@ -497,7 +532,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-    Start([Staff signs in]) --> Dash[Operations dashboard with queue depths]
+    Start([Staff signs in with MFA]) --> Dash[Operations dashboard with queue depths]
     Dash --> Q1{Pending verifications?}
     Q1 -->|yes| V[Review applicant against ABR evidence]
     V --> VD{Decision}
@@ -510,9 +545,9 @@ flowchart TD
     Q1 -->|no| Q2{Jobs pending approval?}
     Q2 -->|yes| J[Review job content and budget]
     J --> JD{Decision}
-    JD -->|approve| JA[Set bid closing date, then curate invitees]
+    JD -->|approve| JA[Set bid closing date]
     JD -->|reject| JR[Return to client with feedback]
-    JA --> INV[Invite matched contractors]
+    JA --> INV[Curate and invite matched contractors]
     INV --> Dash
     JR --> Dash
     Q2 -->|no| Q3{Bids awaiting release?}
@@ -520,9 +555,36 @@ flowchart TD
     B --> BR[Release good bids, reject the rest with reasons]
     BR --> Dash
     Q3 -->|no| Q4{Awards awaiting confirmation?}
-    Q4 -->|yes| AW[Confirm client selection, release contact details]
+    Q4 -->|yes| AW[Run pre-award checks, confirm, release contact details]
     AW --> Dash
     Q4 -->|no| Done([Queues clear])
+```
+
+### 7.4 Demo persona selection
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor T as Tester
+    participant V as Vercel function
+    participant SB as Supabase Auth
+    participant DB as Postgres with RLS
+
+    T->>V: GET / landing page
+    V->>V: Read DEMO_MODE flag
+    alt DEMO_MODE is false
+        V-->>T: Landing page with no persona picker
+    else DEMO_MODE is true
+        V-->>T: Landing page with four persona cards
+        T->>V: POST /demo/login persona=contractor_invited
+        V->>V: Reject unless persona is in the seeded allowlist
+        V->>SB: Sign in as the seeded demo user, ordinary credentials
+        SB-->>V: Session token with role and organisation claims
+        V-->>T: Set session cookie, redirect to that persona's dashboard
+        T->>V: Any subsequent request
+        V->>DB: Query as the demo user, not as service role
+        DB-->>V: Rows permitted by RLS for that persona only
+    end
 ```
 
 ---
@@ -536,165 +598,387 @@ flowchart LR
     subgraph Users
         C[Client]
         K[Contractor]
-        S[Staff and Admin]
+        S[Staff]
     end
-    subgraph Platform["AB-Verified Platform"]
-        APP[Web application, server rendered]
-        WRK[Background workers]
-        DB[(PostgreSQL)]
-        OBJ[(Object storage for documents)]
-        RDS[(Redis: cache, queue broker, rate limits)]
+    subgraph Vercel["Vercel, region syd1"]
+        APP["Python ASGI app, server rendered HTML"]
+        WRK["Worker routes: queue drain, ABR, notifications"]
+        CRON["Vercel Cron triggers"]
+        CDN["Static assets: htmx, Alpine, compiled CSS"]
+    end
+    subgraph Supabase["Supabase, ap-southeast-2"]
+        AUTHS["Supabase Auth: sessions, email link, phone OTP"]
+        PG[("PostgreSQL with Row Level Security")]
+        PGQ["pgmq queues and pg_cron schedules"]
+        STORE[("Storage buckets: documents, attachments")]
     end
     subgraph External
-        ABR[ABR ABN Lookup web service]
-        SES[Transactional email provider]
-        SMS[SMS provider]
-        OTEL[Logging, metrics and error tracking]
+        ABR["ABR ABN Lookup web service"]
+        MAIL["Transactional email provider"]
+        SMS["SMS provider, also backs phone OTP"]
+        OBS["Error tracking and logs"]
     end
     C -->|HTTPS| APP
     K -->|HTTPS| APP
     S -->|HTTPS + MFA| APP
-    APP --> DB
-    APP --> RDS
-    APP --> OBJ
-    APP -->|enqueue| RDS
-    WRK -->|dequeue| RDS
-    WRK --> DB
+    APP --> CDN
+    APP --> AUTHS
+    APP -->|"user JWT, RLS applies"| PG
+    APP --> STORE
+    APP --> PGQ
+    CRON --> WRK
+    PGQ --> WRK
+    WRK --> PG
     WRK --> ABR
-    WRK --> SES
+    WRK --> MAIL
     WRK --> SMS
-    APP --> OTEL
-    WRK --> OTEL
+    AUTHS --> SMS
+    APP --> OBS
+    WRK --> OBS
 ```
 
 ### 8.2 Internal module structure
 
-A **modular monolith**: one deployable unit, hard internal boundaries. Modules communicate through published service functions and domain events, never by reaching into each other's tables.
+A **modular monolith deployed as one serverless application**: a single Python ASGI app behind one Vercel function, with hard internal boundaries. Modules communicate through published service functions; they never reach into each other's tables.
 
 ```mermaid
 flowchart TB
-    subgraph Edge
-        RP[Reverse proxy, TLS, rate limiting]
+    subgraph Request["Request path"]
+        RT["Router and session middleware"]
+        AUTHM["identity: sign-in, MFA, demo persona switch"]
+        ORG["organisations: profiles, skills, documents"]
+        VERIF["verification: cases, decisions, ABR evidence"]
+        JOBS["jobs: drafting, moderation, lifecycle"]
+        MATCH["matching: contractor suggestions"]
+        BIDS["bidding: invitations, bids, awards"]
+        STAFFC["staff console: queues and dashboards"]
     end
-    subgraph Application
-        AUTH[identity: registration, login, MFA, sessions]
-        VERIF[verification: cases, decisions, ABR evidence]
-        ORG[organisations: profiles, skills, documents]
-        JOBS[jobs: drafting, moderation, lifecycle]
-        MATCH[matching: contractor suggestions]
-        BIDS[bidding: invitations, bids, awards]
-        NOTIF[notifications: templates, dispatch, delivery status]
-        AUDIT[audit: append-only event log]
-        STAFF[staff console: queues, dashboards]
+    subgraph Worker["Worker path, cron invoked"]
+        ABRW["abr_worker: lookup and retry"]
+        NOTW["notify_worker: email and SMS dispatch"]
+        EXPW["expiry_worker: close bidding, expire invitations"]
     end
-    subgraph Platform_Services
-        POL[authorisation policy engine]
-        EVT[in-process domain event bus]
-        QUE[task queue client]
+    subgraph Data["Data layer"]
+        REPO["repositories: parameterised SQL, user JWT bound"]
+        POL["RLS policies in PostgreSQL"]
+        TRG["audit triggers"]
+        QUE["pgmq queue client"]
     end
-    RP --> AUTH
-    RP --> STAFF
-    AUTH --> ORG
-    ORG --> VERIF
-    VERIF --> EVT
-    JOBS --> EVT
-    BIDS --> EVT
-    EVT --> NOTIF
-    EVT --> AUDIT
+    RT --> AUTHM
+    RT --> ORG
+    RT --> VERIF
+    RT --> JOBS
+    RT --> BIDS
+    RT --> STAFFC
     JOBS --> MATCH
     MATCH --> ORG
     BIDS --> JOBS
-    STAFF --> VERIF
-    STAFF --> JOBS
-    STAFF --> BIDS
-    NOTIF --> QUE
+    STAFFC --> VERIF
+    STAFFC --> JOBS
+    STAFFC --> BIDS
+    AUTHM --> REPO
+    ORG --> REPO
+    VERIF --> REPO
+    JOBS --> REPO
+    BIDS --> REPO
+    STAFFC --> REPO
+    REPO --> POL
+    POL --> TRG
     VERIF --> QUE
-    AUTH --> POL
-    JOBS --> POL
-    BIDS --> POL
-    STAFF --> POL
+    JOBS --> QUE
+    BIDS --> QUE
+    QUE --> ABRW
+    QUE --> NOTW
+    EXPW --> REPO
+    ABRW --> REPO
+    NOTW --> REPO
 ```
 
 ### 8.3 Architectural principles
 
 | # | Principle | Consequence |
 |---|---|---|
-| A1 | **State transitions are the domain.** | Each aggregate exposes explicit transition functions; no view or template ever sets a status field directly. |
-| A2 | **Deny by default authorisation.** | A single policy layer answers "may actor X do Y to Z?" Views call it; querysets are scoped through it. |
-| A3 | **Audit as a side effect of the event bus.** | Every transition emits a domain event; the audit module subscribes. Auditing cannot be forgotten in a new feature. |
-| A4 | **Outbound integrations are always asynchronous.** | ABR, email and SMS run in workers with retries, so a provider outage never blocks a user request (FR-111). |
-| A5 | **The monolith stays modular until measured pain.** | At this scale, extracting services costs more than it saves. Module boundaries make later extraction cheap if needed. |
-| A6 | **Server-rendered HTML with progressive enhancement.** | No JavaScript build pipeline; the application works with JavaScript disabled and is fast on poor connections. |
+| A1 | **State transitions are the domain.** | Each aggregate exposes explicit transition functions; no template or handler ever sets a status column directly. |
+| A2 | **The database is the authorisation boundary.** | RLS policies are the primary enforcement (§9). Application checks exist for good error messages, not for safety. A bug in a handler leaks nothing. |
+| A3 | **Audit is written by database triggers.** | An `AFTER` trigger on every domain table writes the audit row. Auditing cannot be forgotten in a new feature, and it survives writes made outside the application. |
+| A4 | **Every outbound integration is queued.** | ABR, email and SMS run from `pgmq` drained by cron-invoked worker routes, so a provider outage never blocks a user request (FR-111). |
+| A5 | **Nothing lives in process memory.** | Serverless functions are stateless and short-lived (PC2). Sessions are cookies validated against Supabase Auth; the queue, the schedule and the cache all live in Postgres. |
+| A6 | **Server-rendered HTML with progressive enhancement.** | No JavaScript build pipeline (PC1). The application works with JavaScript disabled and is fast on poor connections. |
+| A7 | **The service role key never touches a user request path.** | It is used only by worker routes and migrations. A user-facing handler that needs it is a design error. |
 
 ---
 
-## 9. Suggested Stack
+## 9. Authorisation with Row Level Security
 
-The constraint is explicit: **no Node.js anywhere** — not in the runtime, and not in the build toolchain. That rules out React, Vue, Next.js, Vite, webpack, PostCSS and the Tailwind npm package. The recommendation below therefore uses a server-rendered architecture with hypermedia interactivity and standalone, single-binary asset tooling.
+RLS is the centrepiece of this design (PC4, NFR-05). The rule is: **if a query can return a row, a policy said so.**
 
-### 9.1 Recommended: Python + Django
+### 9.1 Identity plumbing
+
+1. Supabase Auth issues the session JWT. A **custom access token hook** adds two claims at sign-in: `app_role` (`CLIENT`, `CONTRACTOR` or `STAFF`) and `org_id`.
+2. Reading claims from the JWT rather than joining `user_profile` inside every policy avoids recursive policy evaluation and keeps policies index-friendly.
+3. Helper functions are `STABLE`, `SECURITY DEFINER`, with `search_path` pinned:
+
+```sql
+create schema if not exists app;
+
+create or replace function app.current_org_id() returns uuid
+  language sql stable security definer set search_path = '' as $$
+  select nullif(
+    current_setting('request.jwt.claims', true)::jsonb ->> 'org_id', ''
+  )::uuid;
+$$;
+
+create or replace function app.current_role() returns text
+  language sql stable security definer set search_path = '' as $$
+  select coalesce(
+    current_setting('request.jwt.claims', true)::jsonb ->> 'app_role', 'ANON'
+  );
+$$;
+
+create or replace function app.is_staff() returns boolean
+  language sql stable security definer set search_path = '' as $$
+  select app.current_role() = 'STAFF';
+$$;
+
+create or replace function app.org_is_verified(p_org uuid) returns boolean
+  language sql stable security definer set search_path = '' as $$
+  select exists (
+    select 1 from public.organisation o
+    where o.id = p_org and o.status = 'VERIFIED'
+  );
+$$;
+```
+
+### 9.2 Baseline
+
+```sql
+-- Applied to every table in the public schema.
+alter table public.job enable row level security;
+alter table public.job force row level security;   -- applies to the table owner too
+revoke all on public.job from anon, authenticated; -- then grant back deliberately
+grant select, insert, update on public.job to authenticated;
+```
+
+`FORCE ROW LEVEL SECURITY` matters: without it, the table owner bypasses policies, which quietly defeats the whole scheme during migrations and in any tooling connected as the owner.
+
+### 9.3 Representative policies
+
+**Organisations**: you see your own; Staff see all.
+
+```sql
+create policy org_select_own on public.organisation
+for select to authenticated
+using ( id = app.current_org_id() or app.is_staff() );
+
+create policy org_update_staff_only on public.organisation
+for update to authenticated
+using ( app.is_staff() ) with check ( app.is_staff() );
+```
+
+**Jobs**: the heart of FR-309 and FR-407. A Contractor sees a job only through an invitation.
+
+```sql
+create policy job_select on public.job
+for select to authenticated
+using (
+      app.is_staff()
+   or client_org_id = app.current_org_id()
+   or exists (
+        select 1 from public.invitation i
+        where i.job_id = job.id
+          and i.contractor_org_id = app.current_org_id()
+          and i.state in ('SENT','ACCEPTED','DECLINED','EXPIRED')
+      )
+);
+
+-- A client may create a job only for their own, verified organisation.
+create policy job_insert_client on public.job
+for insert to authenticated
+with check (
+      app.current_role() = 'CLIENT'
+  and client_org_id = app.current_org_id()
+  and app.org_is_verified(client_org_id)
+  and state = 'DRAFT'
+);
+
+-- A client may edit only their own job, and only while it is a draft (FR-303).
+create policy job_update_client_draft on public.job
+for update to authenticated
+using  ( client_org_id = app.current_org_id() and state = 'DRAFT' )
+with check ( client_org_id = app.current_org_id() and state in ('DRAFT','PENDING_APPROVAL') );
+
+create policy job_update_staff on public.job
+for update to authenticated
+using ( app.is_staff() ) with check ( app.is_staff() );
+```
+
+**Bids**: encodes FR-407, FR-408 and FR-409 directly.
+
+```sql
+create policy bid_select on public.bid
+for select to authenticated
+using (
+      app.is_staff()
+   or contractor_org_id = app.current_org_id()                 -- my own bid, any state
+   or (                                                        -- client: released only
+        exists (
+          select 1 from public.job j
+          where j.id = bid.job_id and j.client_org_id = app.current_org_id()
+        )
+        and state in ('RELEASED','WON','NOT_SELECTED')
+      )
+);
+
+-- A contractor may bid only where a live invitation authorises it (FR-404).
+create policy bid_insert_invited on public.bid
+for insert to authenticated
+with check (
+      app.current_role() = 'CONTRACTOR'
+  and contractor_org_id = app.current_org_id()
+  and app.org_is_verified(contractor_org_id)
+  and exists (
+        select 1 from public.invitation i
+        where i.id = bid.invitation_id
+          and i.job_id = bid.job_id
+          and i.contractor_org_id = app.current_org_id()
+          and i.state in ('SENT','ACCEPTED')
+          and i.expires_at > now()
+      )
+);
+```
+
+**Audit**: readable by Staff, writable by nobody (FR-602).
+
+```sql
+create policy audit_select_staff on public.audit_event
+for select to authenticated using ( app.is_staff() );
+-- No insert, update or delete policy exists for any role.
+-- Rows are written solely by SECURITY DEFINER triggers.
+revoke insert, update, delete on public.audit_event from authenticated, anon;
+```
+
+### 9.4 Storage
+
+Verification documents and bid attachments live in **private** Supabase Storage buckets with their own policies keyed on the object path prefix (`org/<org_id>/…`), so a contractor cannot fetch another organisation's certificate of currency by guessing an object name. All downloads are short-lived signed URLs.
+
+### 9.5 Rules of engagement
+
+| # | Rule |
+|---|---|
+| R1 | Every new table ships with RLS enabled, forced, and at least one policy, in the same migration that creates it. A table with RLS enabled and no policy denies everything, and that is the correct default while policies are being written. |
+| R2 | Every policy has a paired test: one asserting the allowed case returns rows, one asserting the forbidden case returns zero rows (NFR-15). The forbidden-case test is the one that matters. |
+| R3 | The `service_role` key is used only in worker routes and migrations, never in a user request path (A7). It bypasses RLS entirely. |
+| R4 | Application-layer checks are duplicated deliberately, to produce a helpful 403 rather than a confusing empty list. They are never the only check. |
+| R5 | Policies are indexed for: `job(client_org_id)`, `invitation(job_id, contractor_org_id)`, `bid(job_id)`, `bid(contractor_org_id)`. An unindexed `EXISTS` inside a policy is a full scan on every row read. |
+| R6 | Demo sessions run under the same policies as everyone else (FR-153). Demo mode is a fixture, never an authorisation exception. |
+
+---
+
+## 10. Demo Mode
+
+Demo mode makes the whole workflow explorable in one click, which matters for a product whose value is a multi-party, staff-gated process that is tedious to reproduce by hand.
+
+### 10.1 Seeded personas
+
+| Card | Signs in as | Fixture state |
+|---|---|---|
+| **Demo Client** | `client@demo.ab-verified.invalid` | Verified. Owns one job with released bids awaiting selection, one job in bidding, one pending approval, one draft. |
+| **Demo Contractor, invited** | `contractor@demo.ab-verified.invalid` | Verified. Holds one open invitation and one accepted invitation with a bid in progress. |
+| **Demo Contractor, not invited** | `outsider@demo.ab-verified.invalid` | Verified, but invited to nothing. Exists to demonstrate that the demo client's jobs are invisible to them, the clearest possible demonstration of the RLS boundary. |
+| **Demo Staff** | `staff@demo.ab-verified.invalid` | Staff. Sees a populated queue: 7 verifications including a name mismatch, a duplicate ABN and a cancelled ABN; 4 jobs to moderate; 11 bids to release; 2 awards to confirm. |
+
+### 10.2 Behaviour
+
+- The picker renders on the landing page **only** when `DEMO_MODE=true` (FR-152). The endpoint 404s otherwise, so a stale bookmark cannot reach it in production.
+- Selecting a card performs an ordinary password sign-in against a seeded Supabase Auth user, server-side, and sets a normal session cookie (FR-153).
+- The persona name is requested by key and matched against a hard-coded allowlist; an arbitrary email can never be passed to the demo endpoint.
+- Every demo page shows a banner: *"Demo mode: signed in as Demo Staff. Switch persona · Reset demo data."*
+- Outbound email and SMS are suppressed for `@demo.ab-verified.invalid` addresses and written to a visible in-app outbox instead (FR-157), so a tester can read the invitation that "would have been sent" without a real message reaching anyone.
+- Reset re-runs the seed within a transaction, deleting only rows where `is_demo = true` (FR-156).
+
+### 10.3 Non-production only
+
+`DEMO_MODE` is false in the production Vercel environment. A deployment check queries production for any row with `is_demo = true` and fails the deploy if one exists (FR-158). The demo domain `.invalid` is reserved by RFC 2606 and can never receive mail, which makes accidental delivery impossible rather than merely unlikely.
+
+---
+
+## 11. Suggested Stack
+
+Fixed by constraint: **no Node.js** (PC1), **Vercel** (PC2), **Supabase with RLS** (PC3, PC4). Those three decide most of the rest.
+
+### 11.1 Recommended
 
 | Layer | Choice | Rationale |
 |---|---|---|
-| Language | **Python 3.13** | Large Australian hiring pool; excellent library coverage for SOAP/JSON integration and document handling. |
-| Web framework | **Django 5.x** | The single biggest fit factor: `django-admin` gives Staff a credible verification and moderation console on day one, and the ORM, migrations, auth, permissions, CSRF and form validation are batteries-included. This project is 70% admin workflow. |
-| Interactivity | **htmx + Alpine.js** (served as static vendored files, no npm) | Delivers partial-page updates, queue filtering, inline approvals and modals without a JavaScript build step. |
-| CSS | **Tailwind CSS standalone CLI** (single Go binary) or **PicoCSS/Bulma** vendored | Tailwind ships a precompiled standalone binary that needs no Node.js — this is the specific detail that makes "no Node" workable with a modern CSS workflow. |
-| Database | **PostgreSQL 16** | Transactional integrity for state machines, JSONB for ABR payloads and skill sets, full-text search for contractor matching, row-level constraints. |
-| Task queue | **Celery + Redis**, or **Django-Q2** for a lighter footprint | Async ABR lookups, email/SMS dispatch, scheduled expiry of invitations and bids. |
-| Scheduling | **Celery Beat** | Bid closing, invitation expiry, ABR re-checks, staff digests. |
-| Object storage | **S3-compatible** (AWS S3 Sydney, or MinIO locally) | Verification documents and bid attachments, server-side encrypted, accessed by short-lived signed URLs. |
-| Email | **Amazon SES** (ap-southeast-2) or Postmark | Transactional deliverability with webhook delivery status. |
-| SMS | **Twilio** or **Amazon SNS** | OTP and time-critical invitation and award notices. |
-| Auth | Django auth + **django-otp** (TOTP) + **django-axes** (lockout) | FR-109 MFA for staff, brute-force protection. |
-| ABN validation | Local modulus-89 checksum + **ABR ABN Lookup web service** (`zeep` for SOAP, or the JSON endpoint) | FR-104 and FR-105; requires a free registered GUID from the ABR. |
-| Testing | pytest, pytest-django, factory-boy, Playwright for Python | State-machine transition tests and end-to-end staff workflows. |
-| Quality | ruff, mypy, django-stubs, bandit, pip-audit | Static analysis and dependency scanning in CI. |
-| Packaging | **uv** for dependency management, Docker image | Reproducible builds, one-command local setup (NFR-14). |
-| Hosting | Docker on **AWS ap-southeast-2** (ECS Fargate or a single EC2 with Docker Compose), RDS PostgreSQL, ElastiCache Redis | Australian data residency (NFR-06). Fly.io Sydney is a lower-cost alternative. |
-| Observability | Sentry, OpenTelemetry, CloudWatch or Grafana Cloud | NFR-10. |
-| CI/CD | GitHub Actions: ruff, mypy, pytest, migration check, image build, deploy | — |
+| Language | **Python 3.12** | Supported first-class by the Vercel Python runtime; large Australian hiring pool; good ABR/SOAP and document tooling. |
+| Web framework | **FastAPI** (ASGI) exported from `api/index.py`, with `vercel.json` rewriting all paths to it | Fast cold starts, native ASGI, minimal dependency weight. Serverless rewards a small import graph. |
+| Templating | **Jinja2**, server-rendered HTML fragments | Full pages and htmx partials come from the same templates. |
+| Interactivity | **htmx** + **Alpine.js**, vendored as static files under `/public` | Inline approvals, queue filtering and modals with no JavaScript build step (PC1). |
+| CSS | **Tailwind CSS standalone CLI**, a single Go binary, run locally with the compiled stylesheet committed | Tailwind's standalone binary needs no Node. Committing the output keeps the Vercel build free of any JS toolchain. A hand-written stylesheet is an equally valid fallback. |
+| Database | **Supabase PostgreSQL 15+**, project region `ap-southeast-2` | NFR-06 data residency. Transactional integrity for the state machines, JSONB for ABR payloads, full-text search for contractor matching. |
+| Authorisation | **Row Level Security** + a custom access token hook adding `app_role` and `org_id` claims | §9. The security model of the product. |
+| Identity | **Supabase Auth**: email/password, magic link, and phone OTP | Delivers FR-102 and FR-103 without hand-rolling token and OTP handling. TOTP MFA for Staff (FR-109). |
+| DB connection | **Supavisor transaction pooler** (port 6543), prepared statements disabled, one short-lived connection per invocation | Serverless functions must not hold direct Postgres connections; transaction-mode pooling is the supported pattern and the pooler does not support prepared statements. |
+| Queue | **pgmq** (Supabase Queues) | The queue lives in the database, so enqueue is transactional with the state change that caused it. No external broker to run. |
+| Scheduling | **pg_cron** for in-database transitions (close bidding, expire invitations) and **Vercel Cron** to invoke worker routes for outbound work | Serverless has no resident worker (A5); cron invocation is the substitute. |
+| Object storage | **Supabase Storage**, private buckets with path-prefix policies and signed URLs | Verification documents and bid attachments, under the same RLS model. |
+| Email | **Resend** or **Amazon SES** (`ap-southeast-2`) | Transactional deliverability with webhook delivery status (FR-503). |
+| SMS | **Twilio** | Backs both Supabase phone OTP and the platform's own invitation and award notices. |
+| ABN validation | Local modulus-89 checksum, then the **ABR ABN Lookup web service** (`zeep` for SOAP, or the JSON endpoint) | FR-104 and FR-105. Requires a free registered GUID, held in Vercel environment variables. |
+| Migrations | **Supabase CLI**, installed as the standalone binary rather than from npm | Keeps schema, policies and seed data in version control and reproducible locally (NFR-14). |
+| Local dev | `supabase start` (Docker) + `uvicorn` | The full stack, including RLS policies, runs locally against the same migrations as production. |
+| Testing | pytest, `pytest-asyncio`, Playwright for Python, plus a dedicated RLS policy test suite | Transition tests and the paired allow/deny policy tests of R2. |
+| Quality | ruff, mypy, bandit, pip-audit | In CI on every pull request. |
+| Observability | Vercel logs, Supabase logs, Sentry (Python SDK) | NFR-10. |
+| CI/CD | GitHub Actions → Vercel preview per PR, with `supabase db push` gated on review | Preview deployments run with `DEMO_MODE=true`; production does not. |
 
-### 9.2 Alternatives considered
+### 11.2 What this stack gives up, honestly
+
+| Trade-off | Detail | Mitigation |
+|---|---|---|
+| **No batteries-included admin** | Django's admin would have delivered much of the Staff console for free; on Vercel's serverless Python runtime with Supabase Auth and RLS, Django's session, ORM and permission layers largely duplicate what Supabase provides, and its cold start is heavier. The Staff console is therefore hand-built. | The Staff console is the product's core surface (S-10 to S-16), so it warrants purpose-built screens rather than generic CRUD. Budget for it explicitly in M2. |
+| **Cold starts** | A Python function that has been idle adds latency to the first request. | Keep the import graph small; enable Fluid compute; the Staff console is used in bursts, which warms it naturally. |
+| **Function timeouts** | Long operations cannot run in a request. | All external calls are queued (A4). No worker route processes an unbounded batch: each drains a fixed number of messages and re-arms. |
+| **Connection limits** | Serverless concurrency can exhaust Postgres connections. | Supavisor transaction mode, no prepared statements, no connection held across an await boundary. |
+| **RLS complexity** | Policy bugs are silent: they return fewer or more rows rather than raising. | R2's paired allow/deny tests, and policy review treated as security review. |
+| **Two places to reason about access** | Policies in SQL, checks in Python. | R4 makes the precedence explicit: the database decides, the application explains. |
+
+### 11.3 Alternatives considered
 
 | Option | Verdict |
 |---|---|
-| **Go + templ + htmx** | Excellent single-binary deployment and performance, but no admin scaffolding — the Staff console would be hand-built, which is precisely where most of this system's value lives. Choose if the team is already strong in Go. |
-| **C# / .NET 9 + ASP.NET Core Razor Pages** | A very strong second choice: first-class typing, Identity, EF Core, and mature Azure hosting in Australia East. Pick this if the team is Microsoft-oriented; the admin console still needs building, though scaffolding helps. |
-| **Ruby on Rails + Hotwire** | Comparable productivity to Django, and Hotwire is the closest peer to htmx. Weaker built-in admin than Django unless a gem such as Avo is added. Note that importmap-rails avoids Node, but some Rails tooling still assumes it. |
-| **PHP / Laravel + Livewire + Filament** | Filament is arguably the best admin panel in any ecosystem and is a genuinely strong fit. Cheapest hosting. Chosen against only because the Python ecosystem has a deeper hiring pool for this team. |
-| **Any SPA framework** | Excluded by the no-Node constraint, and unjustified regardless: this application is forms, queues and tables, where server-rendered HTML is simpler and faster to ship. |
-
-### 9.3 Why this stack fits the requirements
-
-- **FR-200 series** — Django's admin plus custom Staff views deliver the verification queue, assignment and decision recording with far less code than any alternative.
-- **FR-601 audit** — Django signals and a domain event bus make append-only auditing structural rather than optional.
-- **FR-111 / A4** — Celery gives retries and dead-lettering for the ABR integration for free.
-- **NFR-05** — Django's queryset layer is the natural place to enforce actor-scoped access so a Contractor's query cannot return an uninvited job.
-- **No Node** — htmx, Alpine and the Tailwind standalone binary provide a modern UI with zero JavaScript toolchain.
+| **Django on Vercel** | Viable and would shorten M2 via the admin. Rejected as the default because its auth, ORM session model and migration story overlap awkwardly with Supabase Auth and RLS, and cold starts are heavier. Reconsider if the Staff console proves larger than estimated. |
+| **Go + templ + htmx on Vercel** | Excellent cold starts and a single binary. Rejected on team familiarity and the weaker ABR/SOAP tooling story. |
+| **Supabase Edge Functions for workers** | They run on Deno, i.e. a JavaScript runtime, which sits against the spirit of PC1. `pg_cron` plus Vercel Cron keeps everything Python and SQL. |
+| **PostgREST direct from the browser** | Supabase makes this easy, and RLS would hold. Rejected: it requires a client-side JavaScript application (PC1) and would expose the data model directly to the browser. |
+| **Any SPA framework** | Excluded by PC1, and unjustified regardless: this application is forms, queues and tables. |
 
 ---
 
-## 10. Interface Sketch
+## 12. Route Sketch
 
-REST-ish server-rendered routes; htmx requests hit the same routes and receive HTML fragments. A JSON API is deferred to v2.
+Server-rendered routes; htmx requests hit the same routes and receive HTML fragments.
 
 | Method | Path | Actor | Purpose |
 |---|---|---|---|
-| `POST` | `/register` | Public | Create organisation and first user |
+| `GET` | `/` | Public | Landing page; demo persona picker when `DEMO_MODE=true` |
+| `POST` | `/demo/login` | Public, demo only | Sign in as a seeded persona from the allowlist |
+| `POST` | `/demo/reset` | Demo session | Restore the demo fixture |
+| `POST` | `/register` | Public | Create auth user, organisation and profile |
 | `GET` | `/verify/email/{token}` | Public | Confirm email |
 | `POST` | `/verify/mobile` | Authenticated | Submit OTP |
 | `GET` | `/dashboard` | Client, Contractor | Role-appropriate home |
 | `POST` | `/jobs` | Client | Create draft job |
 | `POST` | `/jobs/{id}/submit` | Client | Move to `PENDING_APPROVAL` |
 | `POST` | `/jobs/{id}/cancel` | Client | Cancel with reason |
-| `GET` | `/invitations` | Contractor | List own invitations |
+| `GET` | `/jobs/{id}/bids` | Client | Released bids only |
+| `POST` | `/jobs/{id}/select/{bid_id}` | Client | Select a winner → `AWARD_PENDING` |
+| `GET` | `/invitations` | Contractor | Own invitations |
 | `POST` | `/invitations/{id}/accept` | Contractor | Accept |
 | `POST` | `/invitations/{id}/decline` | Contractor | Decline with reason |
-| `POST` | `/jobs/{id}/bids` | Contractor | Submit or revise a bid |
+| `POST` | `/jobs/{id}/bid` | Contractor | Submit or revise a bid |
 | `POST` | `/bids/{id}/withdraw` | Contractor | Withdraw |
-| `GET` | `/jobs/{id}/bids` | Client | Released bids only |
-| `POST` | `/jobs/{id}/select/{bid_id}` | Client | Select a winner, `AWARD_PENDING` |
+| `GET` | `/staff` | Staff | Operations dashboard |
 | `GET` | `/staff/verifications` | Staff | Verification queue |
 | `POST` | `/staff/verifications/{id}/decide` | Staff | Approve, reject or request info |
 | `GET` | `/staff/jobs/pending` | Staff | Job moderation queue |
@@ -705,22 +989,26 @@ REST-ish server-rendered routes; htmx requests hit the same routes and receive H
 | `POST` | `/staff/bids/{id}/reject` | Staff | Reject a bid with reason |
 | `POST` | `/staff/jobs/{id}/confirm-award` | Staff | Confirm the award |
 | `POST` | `/staff/organisations/{id}/suspend` | Staff | Suspend with reason |
-| `GET` | `/admin/audit/{entity_type}/{id}` | Admin | Full entity timeline |
+| `GET` | `/staff/audit/{entity_type}/{id}` | Staff | Full entity timeline |
+| `POST` | `/internal/cron/drain-queue` | Cron, secret-protected | Drain `pgmq`: ABR lookups and notifications |
+| `POST` | `/internal/cron/expire` | Cron, secret-protected | Close bidding, expire invitations |
+
+Internal cron routes are protected by a shared secret header and are the only routes permitted to use the `service_role` key (A7, R3).
 
 ---
 
-## 11. Security & Privacy Notes
+## 13. Security & Privacy Notes
 
-- **Contact detail embargo.** Email addresses and phone numbers of the counterparty are withheld until award (FR-411). Job and bid free-text is scanned for email addresses and phone numbers at submission and flagged for Staff (`CONTAINS_CONTACT_DETAILS`), since embargo is otherwise trivially bypassed.
-- **Enumeration resistance.** Registration and password reset return identical responses whether or not an account exists. Job, bid and invitation identifiers are UUIDv7 rather than sequential integers.
-- **File uploads.** Verification documents and bid attachments are restricted by type and size, stored outside the web root, served only through short-lived signed URLs, and scanned for malware before Staff view them.
-- **Staff privilege.** Staff hold broad read access to commercially sensitive bids. This is mitigated by mandatory MFA, per-action audit logging, the conflict-of-interest guard (FR-604), and an Admin-visible report of unusual Staff read volume.
-- **ABR credentials.** The ABR GUID is a secret held in a managed secret store, never in source control, and its use is rate-limited per the ABR terms of service.
+- **Contact detail embargo.** Counterparty email addresses and phone numbers are withheld until award (FR-411). Job and bid free text is scanned for contact details on submission and flagged to Staff (`CONTAINS_CONTACT_DETAILS`), because the embargo is otherwise trivially bypassed in prose.
+- **Enumeration resistance.** Registration and password reset return identical responses whether or not an account exists. Identifiers are UUIDs, never sequential integers.
+- **File uploads.** Restricted by type and size, stored in private buckets, served only through short-lived signed URLs, and scanned before Staff open them.
+- **Staff privilege.** Staff hold broad read access to commercially sensitive bids. Mitigated by mandatory TOTP MFA, trigger-written audit logging that Staff cannot alter (FR-602), the conflict-of-interest guard (FR-604), and a report of unusual Staff read volume.
+- **Secrets.** The Supabase `service_role` key, the ABR GUID, and the cron shared secret live in Vercel environment variables scoped to server-side use, never in a `NEXT_PUBLIC`-style client-exposed variable and never in source control. Only the anon key may reach the browser, and it is safe there precisely because RLS is enforced.
 - **Personal information.** ABNs, mobile numbers and uploaded documents are personal information under the Privacy Act. A retention schedule (NFR-07) and a documented access-and-correction process are prerequisites for launch.
 
 ---
 
-## 12. Delivery Plan
+## 14. Delivery Plan
 
 ```mermaid
 gantt
@@ -728,39 +1016,41 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %b
     section Foundation
-    Schema, auth, audit bus        :m1, 2026-10-01, 30d
+    Schema, RLS policies, audit triggers, Vercel and Supabase wiring :m1, 2026-10-01, 30d
     section Verification
-    Registration, OTP, ABR, queue  :m2, after m1, 35d
+    Registration, OTP, ABR worker, staff queue :m2, after m1, 35d
     section Jobs
-    Job drafting and moderation    :m3, after m2, 25d
+    Job drafting and moderation :m3, after m2, 25d
     section Bidding
-    Invitations, bids, release     :m4, after m3, 35d
+    Invitations, bids, release :m4, after m3, 35d
     section Award
-    Selection, confirmation, release of contact details :m5, after m4, 20d
+    Selection, confirmation, contact release :m5, after m4, 20d
     section Launch
-    Hardening, accessibility, pen test, pilot :m6, after m5, 30d
+    Demo fixtures, accessibility, pen test, pilot :m6, after m5, 30d
 ```
 
 | Milestone | Exit criteria |
 |---|---|
-| **M1 Foundation** | Schema migrated, authentication and MFA working, audit events emitted for every transition, CI green. |
+| **M1 Foundation** | Schema and policies migrated, RLS allow/deny test suite green, audit triggers firing, demo persona picker working end to end against seeded data. |
 | **M2 Verification** | An applicant can register, verify email and mobile, be looked up against the ABR, and be approved or rejected by Staff with a reason. |
 | **M3 Jobs** | A verified Client can draft and submit a job; Staff can approve with a bid closing date or reject with feedback. |
 | **M4 Bidding** | Staff can invite matched Contractors; Contractors can accept and bid; Staff can release or reject bids. |
-| **M5 Award** | Client selects, Staff confirms, contact details are released, and losing bidders are notified. |
-| **M6 Launch** | WCAG 2.2 AA audit passed, penetration test remediated, backup restore rehearsed, pilot cohort onboarded. |
+| **M5 Award** | Client selects, Staff confirms, contact details are released, losing bidders notified. |
+| **M6 Launch** | WCAG 2.2 AA audit passed, penetration test remediated including an explicit RLS review, restore rehearsed, `DEMO_MODE` off in production, pilot cohort onboarded. |
+
+Demo fixtures are built in M1, not M6: they are how every later milestone gets exercised.
 
 ---
 
-## 13. Open Questions
+## 15. Open Questions
 
 | # | Question | Impact |
 |---|---|---|
-| Q1 | Is a Client permitted to see the identity of bidding Contractors before award, or only anonymised profiles? | Changes bid release UI and the contact embargo rules. |
-| Q2 | Can a Contractor request an invitation to a job they have heard about, or is push-only absolute? | Adds an entire "expression of interest" flow if permitted. |
+| Q1 | Is a Client permitted to see the identity of bidding Contractors before award, or only anonymised capability profiles? | Changes the bid release UI and the `bid_select` policy. |
+| Q2 | Can a Contractor request an invitation to a job they have heard about, or is push-only absolute? | Adds an expression-of-interest flow and a new policy path into `job`. |
 | Q3 | Are sole traders without a registered business name in scope? The ABR entity name for an individual is a personal name, which will systematically depress the name-match score. | Affects FR-202 scoring and the rejection rate. |
-| Q4 | What is the target Staff response time, and does it need to be a published SLA? | Drives queue alerting and possibly out-of-hours staffing. |
-| Q5 | Does the platform take a commission, and if so is it recorded at award time even though payments are out of scope? | Adds a commercial-terms field to `AWARD`. |
-| Q6 | Should Staff be able to invite a Contractor who is not yet verified, triggering an expedited verification? | Adds a state to both the invitation and verification machines. |
-| Q7 | Is ABN Lookup sufficient evidence, or is director or identity verification also required for higher-value jobs? | Could introduce a tiered verification model. |
-| Q8 | What happens commercially if an awarded engagement collapses — does the platform re-open bidding automatically? | Extends FR-412 beyond a manual Staff action. |
+| Q4 | What is the target Staff response time, and is it a published SLA? | Drives queue alerting and possibly out-of-hours staffing. |
+| Q5 | Does the platform take a commission, and if so is it recorded at award time even though payments are out of scope? | Adds commercial terms to `AWARD`. |
+| Q6 | Should Staff be able to invite a Contractor who is not yet verified, triggering expedited verification? | Adds a state to both the invitation and verification machines, and relaxes `bid_insert_invited`. |
+| Q7 | Is ABN Lookup sufficient evidence, or is director or identity verification also needed for higher-value jobs? | Could introduce tiered verification. |
+| Q8 | What happens commercially if an awarded engagement collapses: does bidding re-open automatically? | Extends FR-412 beyond a manual Staff action. |
