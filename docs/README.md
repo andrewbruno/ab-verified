@@ -6,7 +6,7 @@ A curated IT marketplace for the Australian market: Clients post jobs, Contracto
 
 | Document | What it covers |
 |---|---|
-| [`html/index.html`](html/index.html) | The documentation site: `SPEC.md` published as a multi-page HTML site with a contents sidebar, an on-this-page rail, prev/next paging, search, deep links to every requirement ID, a light and dark theme, and the wireframes bundled in. This is the one to open for a walkthrough, and the one to deploy. |
+| [`../public/docs/index.html`](../public/docs/index.html) | The documentation site: `SPEC.md` published as a multi-page HTML site with a contents sidebar, an on-this-page rail, prev/next paging, search, deep links to every requirement ID, a light and dark theme, and the wireframes bundled in. This is the one to open for a walkthrough. It is served by the application at `/docs`. |
 | [`SPEC.md`](SPEC.md) | The specification, and the source the site is generated from: personas, functional and non-functional requirements, domain model, state machines, flow and architecture diagrams, the Row Level Security design, the suggested stack, routes, security notes, delivery plan and open questions. |
 | [`wireframes/index.html`](wireframes/index.html) | Low-fidelity HTML wireframes for all 18 screens, cross-referenced to the requirement IDs in `SPEC.md`. Open it in a browser: it is self-contained, needs no server and prints cleanly. |
 | [`palette/`](palette/README.md) | The design tokens, colours, type scale and component patterns taken from forward-deployed-engineer.ai. |
@@ -23,7 +23,7 @@ These are inputs to the design, not conclusions from it:
 
 ## The documentation site
 
-`docs/html/` is a static site: plain HTML, CSS and one small script, no framework
+`public/docs/` is a static site: plain HTML, CSS and one small script, no framework
 and no Node.js (PC1). Markdown stays the source of truth, so edit `SPEC.md` and
 regenerate:
 
@@ -32,15 +32,17 @@ pip install markdown pygments
 python scripts/build_docs_html.py
 ```
 
-The build writes every `docs/html/*.html` page, the search index, the Pygments
+The build writes every `public/docs/*.html` page, the search index, the Pygments
 stylesheet and a copy of the wireframes. Only `assets/docs.css` and
-`assets/docs.js` are hand maintained; everything else in `docs/html/` is
+`assets/docs.js` are hand maintained; everything else in `public/docs/` is
 generated and should not be edited by hand.
 
-To view it, open `docs/html/index.html` in a browser, or serve the folder with
-`python -m http.server` from inside it. To deploy it with the application, copy
-or mount `docs/html/` under a served path (for example `/public/docs/`), since
-`vercel.json` rewrites every unmatched path to the Python function.
+The site is served with the application at `/docs`, and needs no build step to
+get there. It is built into `public/`, so on Vercel the CDN serves it directly
+and the Python function is never invoked for a documentation page; locally
+`app/main.py` mounts the same directory at the same path. To read it without
+starting the application at all, open `public/docs/index.html` in a browser:
+every link in the site is relative, so it works from the file system too.
 
 ## Diagrams
 

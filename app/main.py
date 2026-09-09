@@ -15,8 +15,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import ROOT, get_settings
 from app.db.connection import init_db
-from app.security.context import Forbidden, NotFound
 from app.domain.states import IllegalTransition
+from app.security.context import Forbidden, NotFound
 
 log = logging.getLogger("ab_verified")
 
@@ -42,10 +42,20 @@ def create_app() -> FastAPI:
     else:
         log.info("static assets served by the CDN, not by the application")
 
-    from app.modules.identity.routes import router as identity_router
-    from app.modules.organisations.routes import router as organisations_router
-    from app.modules.jobs.routes import router as jobs_router
+    # The specification site, built by scripts/build_docs_html.py. It lives
+    # under public/ for the same reason the assets do: on Vercel the CDN serves
+    # it without invoking the function at all. `html=True` resolves a bare
+    # directory request to its index.html, which is what the CDN does too.
+    docs = ROOT / "public" / "docs"
+    if docs.is_dir():
+        app.mount("/docs", StaticFiles(directory=str(docs), html=True), name="docs")
+    else:
+        log.info("documentation served by the CDN, not by the application")
+
     from app.modules.bidding.routes import router as bidding_router
+    from app.modules.identity.routes import router as identity_router
+    from app.modules.jobs.routes import router as jobs_router
+    from app.modules.organisations.routes import router as organisations_router
     from app.modules.staff.routes import router as staff_router
     from app.workers.routes import router as worker_router
 
@@ -66,9 +76,9 @@ def create_app() -> FastAPI:
 
 
 def _install_error_handlers(app: FastAPI) -> None:
-    from app.web import Ctx, render
     from app.db.connection import connect
     from app.security import session as session_mod
+    from app.web import Ctx, render
 
     def _error_page(request: Request, status: int, heading: str, message: str) -> HTMLResponse:
         with connect() as conn:

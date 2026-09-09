@@ -2,7 +2,7 @@
 """Build the AB-Verified HTML documentation site.
 
 Reads the Markdown sources under ``docs/`` and writes a multi-page static site
-to ``docs/html/``: one page per top-level specification section, plus a home
+to ``public/docs/``: one page per top-level specification section, plus a home
 page, a copy of the wireframes and the palette reference. Every page carries
 the same table of contents, an on-this-page rail, prev/next paging and a
 client-side search index.
@@ -13,15 +13,15 @@ Usage (no Node.js anywhere, per PC1):
     python scripts/build_docs_html.py
 
 Hand-maintained files that the build leaves alone:
-    docs/html/assets/docs.css
-    docs/html/assets/docs.js
+    public/docs/assets/docs.css
+    public/docs/assets/docs.js
 
 Generated files (do not edit):
-    docs/html/*.html
-    docs/html/assets/code.css
-    docs/html/assets/search-index.js
-    docs/html/assets/palette-tokens.css
-    docs/html/assets/palette.json
+    public/docs/*.html
+    public/docs/assets/code.css
+    public/docs/assets/search-index.js
+    public/docs/assets/palette-tokens.css
+    public/docs/assets/palette.json
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ from pygments.util import ClassNotFound
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
-OUT = DOCS / "html"
+OUT = ROOT / "public" / "docs"
 ASSETS = OUT / "assets"
 
 SITE_TITLE = "AB-Verified"
