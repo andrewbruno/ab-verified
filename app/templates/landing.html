@@ -26,6 +26,7 @@
       <a class="btn btn-big" href="/register">Register your business</a>
       <a class="btn btn-big" href="/signin">Sign in</a>
       {% if personas %}<a class="btn btn-big" href="#demo">Try it as a demo persona</a>{% endif %}
+      {% if personas %}<a class="btn btn-big" href="/demo/walkthrough">Watch the full journey</a>{% endif %}
     </div>
   </div>
 </section>
@@ -84,6 +85,10 @@
       Every page you then see is filtered by the same database policies that
       protect live data, so the demo cannot show you more than the persona is
       entitled to.
+    </p>
+
+    <p style="margin-bottom:var(--sp-1)">
+      <a class="btn" href="/demo/walkthrough">Watch the full journey instead (40 seconds)</a>
     </p>
 
     {% include "demo/_persona_cards.html" %}

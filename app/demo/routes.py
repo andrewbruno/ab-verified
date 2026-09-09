@@ -40,6 +40,17 @@ def picker(ctx: Ctx = Depends(get_ctx)) -> Response:
     return render(ctx, "demo/picker.html", personas=personas.ordered())
 
 
+@router.get("/demo/walkthrough")
+def walkthrough(ctx: Ctx = Depends(get_ctx)) -> Response:
+    """The recorded journey, for a visitor who would rather watch than click.
+
+    The video is a static file under public/, so on Vercel the CDN serves it
+    and the function is never invoked for the 5 MB of it.
+    """
+    _require_demo_mode()
+    return render(ctx, "demo/walkthrough.html")
+
+
 @router.post("/demo/login")
 def demo_login(ctx: Ctx = Depends(get_ctx), persona: str = Form("")) -> Response:
     """FR-151 to FR-153: sign in as one of the seeded personas.

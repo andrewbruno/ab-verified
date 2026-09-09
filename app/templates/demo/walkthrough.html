@@ -1,0 +1,56 @@
+{% extends "layout/base.html" %}
+{% from "components/macros.html" import page_head %}
+{% block title %}Watch the full journey &#183; AB-Verified{% endblock %}
+
+{# The recorded walkthrough. The file is produced by scripts/record_demo.py,
+   which films the same journey the end-to-end test asserts, so what plays here
+   cannot be a flow the application no longer has. #}
+{% block content %}
+
+{{ page_head(
+    "Watch the full journey",
+    lead="Forty seconds, no sound, no narration: one job carried from a client's submission to a confirmed award, with Staff gating every step. Recorded from the running application, not mocked up.",
+    kicker="Demo mode") }}
+
+<div class="card" style="padding:0;overflow:hidden">
+  <video
+    controls
+    preload="metadata"
+    playsinline
+    poster="/static/demo/journey-poster.png"
+    style="display:block;width:100%;height:auto;background:var(--navy, #1a2e4a)"
+    aria-describedby="walkthrough-steps">
+    <source src="/static/demo/journey.webm" type="video/webm">
+    <p class="small" style="padding:16px">
+      Your browser cannot play this video.
+      <a href="/static/demo/journey.webm">Download it instead</a>, or use the
+      persona cards below to walk the journey yourself.
+    </p>
+  </video>
+</div>
+
+<div class="grid grid-2" style="margin-top:var(--sp-1)">
+  <div class="card card-quiet">
+    <h3>What you are watching</h3>
+    <ol id="walkthrough-steps" class="small muted" style="margin-top:10px;padding-left:18px">
+      <li>Staff review a job the client submitted, and set its bid closing date.</li>
+      <li>Staff choose who may bid. Nobody else can see the job at all.</li>
+      <li>The invited contractor accepts and lodges a bid.</li>
+      <li>Staff screen the bids before the client ever sees them.</li>
+      <li>The client compares the released bids and selects one.</li>
+      <li>Staff confirm the award, which finally releases contact details.</li>
+    </ol>
+  </div>
+  <div class="card card-quiet">
+    <h3>Three people, not one workflow</h3>
+    <p class="small muted" style="margin-top:8px">
+      The video signs in and out as Staff, Contractor and Client in turn,
+      because no single account can perform this journey. That is the
+      marketplace's design rather than a limitation of the demo: every
+      meaningful transition needs a person on the other side of it.
+    </p>
+    <p style="margin-top:14px"><a class="btn btn-sm" href="/demo">Try it yourself</a></p>
+  </div>
+</div>
+
+{% endblock %}
