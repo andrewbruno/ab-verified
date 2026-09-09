@@ -191,10 +191,15 @@ jobs:
           echo "url=$url" >> "$GITHUB_OUTPUT"
           echo "Deployed $url" >> "$GITHUB_STEP_SUMMARY"
 
+      # Against the production alias, not the deployment-specific URL the
+      # deploy step prints. Vercel's Deployment Protection redirects those to
+      # SSO, so they answer 302 to an anonymous client however healthy the
+      # deployment is. The alias is what a visitor actually reaches.
       - name: Smoke test what was just deployed
         run: |
           set -e
-          url="${{ steps.deploy.outputs.url }}"
+          url="https://ab-verified-one.vercel.app"
+          echo "Deployment: ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
           for path in / /docs /static/css/app.css; do
             code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url$path")
             echo "$path -> $code"
