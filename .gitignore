@@ -1,0 +1,90 @@
+# ---- Secrets & local config ----
+# The spec (§11) requires the ABR GUID and provider credentials to stay
+# out of source control. Never commit a populated env file.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+sdist/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ---- Virtual environments / uv ----
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# ---- Django ----
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+/media/
+/staticfiles/
+/static_root/
+
+# ---- Celery ----
+celerybeat-schedule
+celerybeat.pid
+
+# ---- Testing & coverage ----
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+/test-results/
+/playwright-report/
+
+# ---- Type checking & linting ----
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# ---- Tailwind standalone binary (vendored, not committed) ----
+tailwindcss
+tailwindcss.exe
+
+# ---- Database dumps & backups ----
+*.dump
+*.sql.gz
+*.bak
+
+# ---- Docker ----
+docker-compose.override.yml
+
+# ---- Editors & IDEs ----
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+desktop.ini
