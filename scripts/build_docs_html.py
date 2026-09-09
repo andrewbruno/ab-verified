@@ -202,7 +202,9 @@ def decorate_tables(fragment: str) -> str:
     return fragment
 
 
-def to_html(md_text: str) -> tuple[str, list[dict]]:
+def to_html(md_text: str, shift: bool = True) -> tuple[str, list[dict]]:
+    """Convert one page of Markdown. ``shift`` promotes source ### to page <h2>,
+    which is right for spec sections whose own title is the page <h1>."""
     blocks: list[str] = []
 
     def stash(match: re.Match) -> str:
@@ -213,7 +215,8 @@ def to_html(md_text: str) -> tuple[str, list[dict]]:
     converter = markdown.Markdown(extensions=["tables", "sane_lists", "attr_list"])
     fragment = converter.convert(stashed)
     fragment = CODE_TOKEN_RE.sub(lambda m: blocks[int(m.group(1))], fragment)
-    fragment = shift_headings(fragment)
+    if shift:
+        fragment = shift_headings(fragment)
     fragment, headings = decorate_headings(fragment)
     fragment = decorate_tables(fragment)
     return fragment, headings
@@ -484,7 +487,7 @@ def build() -> None:
             body, headings = to_html(page["section"]["md"])
         elif "raw_md" in page:
             md_text = re.sub(r"^# .*\n", "", page["raw_md"], count=1)
-            body, headings = to_html(md_text)
+            body, headings = to_html(md_text, shift=False)
         else:
             continue
         page["body"] = body

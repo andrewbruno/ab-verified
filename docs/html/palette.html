@@ -51,10 +51,11 @@
 <div class="grp">Reference</div>
 <a href="palette.html" class="on"><span class="n">P</span><span>Design tokens</span></a>
 <div class="subs">
-<a href="#brand-primitives">Brand primitives</a>
-<a href="#semantic-roles">Semantic roles</a>
-<a href="#surface-bands">Surface bands</a>
-<a href="#type-scale-fluid">Type scale (fluid)</a>
+<a href="#colours">Colours</a>
+<a href="#typography">Typography</a>
+<a href="#shape-rhythm-motion">Shape, rhythm, motion</a>
+<a href="#component-patterns-worth-copying">Component patterns worth copying</a>
+<a href="#notes-for-ab-verified">Notes for AB-Verified</a>
 </div>
 <a href="wireframes.html"><span class="n">W</span><span>Wireframes, all 18 screens</span></a>
 </nav>
@@ -68,8 +69,8 @@ the AB-Verified marketplace site.</p>
   <a href="assets/palette.json"><code>palette.json</code></a> (machine-readable)</li>
 </ul>
 <hr />
-<h1>Colours</h1>
-<h2 id="brand-primitives">Brand primitives<a class="anchor" href="#brand-primitives" aria-label="Link to this heading">#</a></h2>
+<h2 id="colours">Colours<a class="anchor" href="#colours" aria-label="Link to this heading">#</a></h2>
+<h3 id="brand-primitives">Brand primitives<a class="anchor" href="#brand-primitives" aria-label="Link to this heading">#</a></h3>
 <div class="tbl-wrap"><table>
 <thead>
 <tr>
@@ -130,7 +131,7 @@ the AB-Verified marketplace site.</p>
 </tr>
 </tbody>
 </table></div>
-<h2 id="semantic-roles">Semantic roles<a class="anchor" href="#semantic-roles" aria-label="Link to this heading">#</a></h2>
+<h3 id="semantic-roles">Semantic roles<a class="anchor" href="#semantic-roles" aria-label="Link to this heading">#</a></h3>
 <p>Everything downstream is written against roles, never raw hexes — that is what
 lets a section flip theme by changing five variables.</p>
 <div class="tbl-wrap"><table>
@@ -177,7 +178,7 @@ lets a section flip theme by changing five variables.</p>
 <p><code>--orange</code> is a legacy alias that still resolves to the accent; it is the hook
 most components actually reference (buttons, <code>::selection</code>, <code>.stat-num</code>,
 <code>.kicker-block</code> left rule). Keep the alias if porting components verbatim.</p>
-<h2 id="surface-bands">Surface bands<a class="anchor" href="#surface-bands" aria-label="Link to this heading">#</a></h2>
+<h3 id="surface-bands">Surface bands<a class="anchor" href="#surface-bands" aria-label="Link to this heading">#</a></h3>
 <p>Sections opt into a surface by class, and the class rewrites the role variables
 for that subtree:</p>
 <ul>
@@ -188,7 +189,7 @@ for that subtree:</p>
 <li><code>.paper-band</code>, <code>.surf-deep</code> — always navy + white regardless of theme</li>
 </ul>
 <hr />
-<h1>Typography</h1>
+<h2 id="typography">Typography<a class="anchor" href="#typography" aria-label="Link to this heading">#</a></h2>
 <p><strong>One family: Roboto.</strong> All three font roles (<code>--font-d</code> display, <code>--font-b</code>
 body, <code>--font-m</code> mono/label) resolve to the same stack:</p>
 <div class="code"><div class="code-bar"><span class="lang">Text</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span>Roboto, "Roboto Fallback", Arial, "Helvetica Neue", sans-serif
@@ -207,7 +208,7 @@ from contrasting typefaces.</p>
 <li>Line-heights: <code>.9</code>–<code>1.04</code> for display, <code>1.25</code>–<code>1.4</code> for subheads, <code>1.5</code>–<code>1.65</code>
   for body</li>
 </ul>
-<h2 id="type-scale-fluid">Type scale (fluid)<a class="anchor" href="#type-scale-fluid" aria-label="Link to this heading">#</a></h2>
+<h3 id="type-scale-fluid">Type scale (fluid)<a class="anchor" href="#type-scale-fluid" aria-label="Link to this heading">#</a></h3>
 <div class="tbl-wrap"><table>
 <thead>
 <tr>
@@ -262,7 +263,7 @@ from contrasting typefaces.</p>
 <p>Letter-spacing ladder: <code>-.015em</code> (display) → <code>.005em</code>–<code>.04em</code> (headings) →
 <code>.1em</code>–<code>.24em</code> (labels, nav, buttons).</p>
 <hr />
-<h1>Shape, rhythm, motion</h1>
+<h2 id="shape-rhythm-motion">Shape, rhythm, motion<a class="anchor" href="#shape-rhythm-motion" aria-label="Link to this heading">#</a></h2>
 <ul>
 <li><strong><code>border-radius: 0</code> everywhere.</strong> The site has no rounded corners at all —
   square edges are a load-bearing part of the look.</li>
@@ -274,7 +275,7 @@ from contrasting typefaces.</p>
 <li>Measure: body copy capped around <code>62ch</code></li>
 </ul>
 <hr />
-<h1>Component patterns worth copying</h1>
+<h2 id="component-patterns-worth-copying">Component patterns worth copying<a class="anchor" href="#component-patterns-worth-copying" aria-label="Link to this heading">#</a></h2>
 <p><strong>Button</strong> — outline by default, fills with the accent on hover:</p>
 <div class="code"><div class="code-bar"><span class="lang">CSS</span><span class="grow"></span><button class="copy" type="button">Copy</button></div><div class="highlight"><pre><span></span><span class="p">.</span><span class="nc">btn</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="k">font-family</span><span class="p">:</span><span class="w"> </span><span class="nf">var</span><span class="p">(</span><span class="nv">--font-m</span><span class="p">);</span>
@@ -300,7 +301,7 @@ from contrasting typefaces.</p>
 </div>
 <p><strong>Selection</strong> — inverts to the accent: <code>::selection { background: var(--orange); color: var(--bg); }</code></p>
 <hr />
-<h1>Notes for AB-Verified</h1>
+<h2 id="notes-for-ab-verified">Notes for AB-Verified<a class="anchor" href="#notes-for-ab-verified" aria-label="Link to this heading">#</a></h2>
 <ul>
 <li>The <code>-rgb</code> companion for each colour exists so alpha variants can be composed
   as <code>rgba(var(--x-rgb), a)</code>. Keep that convention when adding new colours.</li>
@@ -308,7 +309,7 @@ from contrasting typefaces.</p>
   Cyan carries the "informational" weight; navy carries structure.</li>
 <li>Only the primitives are hard-coded. If AB-Verified needs its own brand colour,
   swap <code>--red</code>/<code>--red-rgb</code> and the whole system re-tints.</li>
-</ul></div><nav class="pager" aria-label="Section"><a href="15-open-questions.html"><div class="dir">Previous</div><div class="ttl">15. Open Questions</div></a><div class="spacer"></div></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#brand-primitives">Brand primitives</a><a href="#semantic-roles">Semantic roles</a><a href="#surface-bands">Surface bands</a><a href="#type-scale-fluid">Type scale (fluid)</a></nav></aside>
+</ul></div><nav class="pager" aria-label="Section"><a href="15-open-questions.html"><div class="dir">Previous</div><div class="ttl">15. Open Questions</div></a><div class="spacer"></div></nav></main><aside class="rail"><h2>On this page</h2><nav aria-label="On this page"><a href="#colours">Colours</a><a href="#typography">Typography</a><a href="#shape-rhythm-motion">Shape, rhythm, motion</a><a href="#component-patterns-worth-copying">Component patterns worth copying</a><a href="#notes-for-ab-verified">Notes for AB-Verified</a></nav></aside>
 </div>
 </div>
 <script src="assets/search-index.js"></script>

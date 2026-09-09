@@ -330,8 +330,9 @@ figure.diagram .mermaid.raw{
   .sidebar.open{transform:translateX(0)}
   .scrim{position:fixed;inset:var(--topbar-h) 0 0;background:rgba(0,0,0,.45);z-index:54;display:none}
   .scrim.on{display:block}
-  .hide-sm{display:none}
+  .hide-sm,.brand span{display:none}
   .search{width:auto;flex:1}
+  .topbar{gap:10px;padding:0 12px}
   .pager{grid-template-columns:1fr}
   .pager .next{text-align:left}
 }
