@@ -1,13 +1,24 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["syd1"],
-  "functions": {
-    "api/index.py": { "maxDuration": 30 }
-  },
-  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }],
-  "crons": [
-    { "path": "/internal/cron/drain-queue", "schedule": "0 18 * * *" },
-    { "path": "/internal/cron/expire", "schedule": "30 18 * * *" }
+  "regions": [
+    "syd1"
   ],
-  "github": { "silent": false }
+  "functions": {
+    "api/index.py": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/internal/cron/drain-queue",
+      "schedule": "0 18 * * *"
+    },
+    {
+      "path": "/internal/cron/expire",
+      "schedule": "30 18 * * *"
+    }
+  ],
+  "github": {
+    "silent": false
+  }
 }
