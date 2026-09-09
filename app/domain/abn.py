@@ -32,7 +32,7 @@ def is_valid(abn: str) -> bool:
         return False
     values = [int(d) for d in digits]
     values[0] -= 1
-    total = sum(v * w for v, w in zip(values, _WEIGHTS))
+    total = sum(v * w for v, w in zip(values, _WEIGHTS, strict=True))
     return total % 89 == 0
 
 

@@ -7,8 +7,9 @@ call a service function, and return `render(...)` or `redirect(...)`.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Any, Iterator
+from typing import Any
 from urllib.parse import quote, urlencode
 
 from fastapi import Request
@@ -25,8 +26,8 @@ from app.domain.states import (
     JOB_STATE_LABELS,
     ORG_STATUS_LABELS,
 )
-from app.security.context import ANONYMOUS, Forbidden, NotFound, SecurityContext
 from app.security import session as session_mod
+from app.security.context import ANONYMOUS, Forbidden, NotFound, SecurityContext
 
 templates = Jinja2Templates(directory=str(ROOT / "app" / "templates"))
 templates.env.filters["datetime"] = common.fmt_datetime
@@ -200,6 +201,7 @@ def query_string(**params: Any) -> str:
 
 
 __all__ = [
+    "ANONYMOUS",
     "Ctx",
     "Forbidden",
     "NotFound",
@@ -212,5 +214,4 @@ __all__ = [
     "sign_in_response",
     "sign_out_response",
     "templates",
-    "ANONYMOUS",
 ]

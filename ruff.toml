@@ -1,0 +1,43 @@
+# Lint configuration.
+#
+# The rule set is listed explicitly rather than left to ruff's defaults. Those
+# defaults widen with each ruff release, so an unpinned linter and an implicit
+# rule set together mean a build that goes red on a day nobody touched the
+# repository. CI pins the version; this file pins the rules.
+
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = [
+    "E",      # pycodestyle
+    "F",      # pyflakes
+    "I",      # import sorting
+    "B",      # bugbear
+    "UP",     # pyupgrade
+    "DTZ",    # naive datetimes, which this codebase treats as a bug
+    "RUF",
+]
+
+ignore = [
+    # FastAPI's whole dependency system is function calls in argument
+    # defaults: Depends(), Form(), Header(). FastAPI's own documentation
+    # tells you to disable this rule, and every hit in this repository is
+    # that pattern rather than the mutable-default bug B008 is aimed at.
+    "B008",
+    # `a + [b]` rather than `[*a, b]`. A readability preference with no
+    # correctness content, and the codebase is consistent about the former.
+    "RUF005",
+]
+
+[lint.per-file-ignores]
+# Tests unpack fixture tuples for readability and deliberately bind names
+# they do not go on to use.
+"tests/*" = ["RUF059"]
+# The documentation generator holds HTML templates as string literals and
+# builds them with %-formatting throughout. Both rules fight that consistently
+# applied local style rather than finding anything wrong with it.
+"scripts/build_docs_html.py" = ["E501", "UP031"]
+
+[lint.isort]
+known-first-party = ["app", "scripts", "tests"]

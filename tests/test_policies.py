@@ -17,9 +17,9 @@ import inspect
 
 import pytest
 
+from app.demo.fixture import did
 from app.domain import audit as audit_mod
 from app.domain import repo
-from app.demo.fixture import did
 from app.security import policies
 from app.security.context import ANONYMOUS, NotFound
 

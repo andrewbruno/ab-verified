@@ -21,12 +21,11 @@ The pgmq vocabulary is kept deliberately:
 from __future__ import annotations
 
 import json
+from datetime import timedelta
 from typing import Any
 
 from app.db.connection import Db
 from app.domain.common import iso, json_dump, new_id, now, now_iso, parse
-
-from datetime import timedelta
 
 # Queue names. Both are drained by POST /internal/cron/drain-queue.
 ABR_LOOKUP = "abr_lookup"

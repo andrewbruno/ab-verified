@@ -6,6 +6,6 @@ local SQLite backend the same predicates are applied by
 `app.security.policies`.
 """
 
-from app.db.connection import Db, connect, init_db, query, query_one, execute
+from app.db.connection import Db, connect, execute, init_db, query, query_one
 
-__all__ = ["Db", "connect", "init_db", "query", "query_one", "execute"]
+__all__ = ["Db", "connect", "execute", "init_db", "query", "query_one"]

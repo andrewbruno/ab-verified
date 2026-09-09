@@ -372,7 +372,7 @@ def _build(conn: sqlite3.Connection) -> None:
         "BIDDING", budget=(24000, 40000), location="Sydney, NSW",
         closes_in=5, created_days=18,
     )
-    j_pentest = _job(
+    _job(
         conn, "pentest", bayside,
         "Annual penetration test of the patient portal",
         "Grey-box penetration test of our patient booking portal and its API, with "
@@ -392,7 +392,7 @@ def _build(conn: sqlite3.Connection) -> None:
     )
 
     # --- Jobs: Nullarbor, populating the staff queues ---------------------
-    j_scanners = _job(
+    _job(
         conn, "scanners", nullarbor,
         "Warehouse barcode scanner fleet refresh",
         "Replace 90 ageing handheld scanners across two distribution centres, "
@@ -503,7 +503,7 @@ def _build(conn: sqlite3.Connection) -> None:
 
     # --- The service desk job: eight submitted bids awaiting release ------
     day_rates = [1_250, 1_390, 1_450, 1_180, 1_520, 1_320, 1_610, 1_275]
-    for (slug, name, region, skills), rate in zip(CONTRACTOR_BENCH, day_rates):
+    for (slug, _name, region, _skills), rate in zip(CONTRACTOR_BENCH, day_rates, strict=True):
         inv = _invitation(conn, f"servicedesk_{slug}", j_servicedesk, bench[slug], staff_id,
                           "ACCEPTED", expires_in=-1, sent_days=20)
         _bid(conn, f"servicedesk_{slug}", j_servicedesk, inv, bench[slug],

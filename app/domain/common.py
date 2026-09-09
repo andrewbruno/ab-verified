@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta, timezone
 from typing import Any
 
 SYDNEY = timezone(timedelta(hours=10))  # AEST; the display offset only.
@@ -20,7 +20,7 @@ def new_id() -> str:
 
 
 def now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def now_iso() -> str:
@@ -28,7 +28,7 @@ def now_iso() -> str:
 
 
 def iso(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat(timespec="seconds")
+    return value.astimezone(UTC).isoformat(timespec="seconds")
 
 
 def parse(value: str | None) -> datetime | None:
@@ -39,7 +39,7 @@ def parse(value: str | None) -> datetime | None:
     except ValueError:
         return None
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=timezone.utc)
+        parsed = parsed.replace(tzinfo=UTC)
     return parsed
 
 

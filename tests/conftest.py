@@ -41,8 +41,8 @@ os.environ.pop("ABR_GUID", None)
 from app.config import get_settings  # noqa: E402
 from app.db import connection as db_connection  # noqa: E402
 from app.demo import fixture as demo_fixture  # noqa: E402
-from app.security.context import ANONYMOUS, SecurityContext  # noqa: E402
 from app.security import session as session_mod  # noqa: E402
+from app.security.context import ANONYMOUS, SecurityContext  # noqa: E402
 
 get_settings.cache_clear()
 

@@ -22,8 +22,9 @@ identically whichever module ends up owning them.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import datetime, timedelta
-from typing import Any, Iterable
+from typing import Any
 
 from app.db.connection import Db
 from app.domain import audit, notify, repo, scanning
@@ -213,7 +214,7 @@ def parse_local_datetime(value: str | None) -> str | None:
     text = value.strip().replace(" ", "T")
     for pattern in ("%Y-%m-%dT%H:%M", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%d"):
         try:
-            naive = datetime.strptime(text, pattern)
+            naive = datetime.strptime(text, pattern)  # noqa: DTZ007 -- made aware on return
         except ValueError:
             continue
         return iso(naive.replace(tzinfo=SYDNEY))
@@ -1223,11 +1224,33 @@ def _display(value: str | None) -> str:
 
 
 __all__ = [
-    "assert_no_conflict", "approve_job", "award_checks", "awards_pending",
-    "bid_checks", "bids_awaiting_release", "confirm_award", "dashboard",
-    "decline_award", "issue_invitations", "job_bid_screen", "job_review",
-    "metrics", "notify_org", "organisation_detail", "parse_local_datetime",
-    "pending_jobs", "recent_audit", "redact_job", "reject_bid", "reject_job",
-    "reinstate_organisation", "release_all", "release_bid", "reopen_bidding",
-    "suspend_organisation", "timeline", "transition", "withdraw_invitation",
+    "approve_job",
+    "assert_no_conflict",
+    "award_checks",
+    "awards_pending",
+    "bid_checks",
+    "bids_awaiting_release",
+    "confirm_award",
+    "dashboard",
+    "decline_award",
+    "issue_invitations",
+    "job_bid_screen",
+    "job_review",
+    "metrics",
+    "notify_org",
+    "organisation_detail",
+    "parse_local_datetime",
+    "pending_jobs",
+    "recent_audit",
+    "redact_job",
+    "reinstate_organisation",
+    "reject_bid",
+    "reject_job",
+    "release_all",
+    "release_bid",
+    "reopen_bidding",
+    "suspend_organisation",
+    "timeline",
+    "transition",
+    "withdraw_invitation",
 ]

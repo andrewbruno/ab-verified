@@ -95,7 +95,7 @@ def score_candidate(job: dict[str, Any], org: dict[str, Any]) -> dict[str, Any]:
     elif job_state and org_state:
         reasons.append(f"different state ({org_state} against {job_state})")
 
-    total = int(round(min(100.0, score)))
+    total = round(min(100.0, score))
     return {
         "score": total,
         "matched_skills": matched,

@@ -15,19 +15,43 @@ from app.db.connection import Db
 from app.domain.common import new_id, now_iso
 
 TEMPLATES: dict[str, tuple[str, str]] = {
-    "email_verification": ("Confirm your email address", "Confirm your email to continue your AB-Verified registration."),
-    "verification_approved": ("Your business is verified", "Your organisation has been verified. You can now use the marketplace."),
+    "email_verification": (
+        "Confirm your email address",
+        "Confirm your email to continue your AB-Verified registration.",
+    ),
+    "verification_approved": (
+        "Your business is verified",
+        "Your organisation has been verified. You can now use the marketplace.",
+    ),
     "verification_rejected": ("About your AB-Verified registration", "{reason}"),
     "verification_info_requested": ("We need a little more information", "{reason}"),
     "job_approved": ("Your job is approved", "'{title}' has been approved and bidding closes {closes}."),
     "job_rejected": ("Your job needs changes", "'{title}' was returned to draft. {reason}"),
-    "job_cancelled": ("A job you were invited to has been cancelled", "'{title}' has been cancelled by the client."),
-    "invitation_sent": ("You have been invited to bid", "You have been invited to bid on '{title}'. Invitations close {closes}."),
+    "job_cancelled": (
+        "A job you were invited to has been cancelled",
+        "'{title}' has been cancelled by the client.",
+    ),
+    "invitation_sent": (
+        "You have been invited to bid",
+        "You have been invited to bid on '{title}'. Invitations close {closes}.",
+    ),
     "invitation_expired": ("An invitation has expired", "Your invitation to bid on '{title}' has expired."),
-    "bid_released": ("Bids are ready to review", "Bids on '{title}' have been released for your review."),
-    "award_confirmed": ("You have won the work", "Your bid on '{title}' has been awarded. Contact details have been released."),
-    "award_client": ("Your award is confirmed", "The award on '{title}' is confirmed. Contact details have been released."),
-    "not_selected": ("An outcome on a bid you submitted", "Another bid was selected for '{title}'. Thank you for bidding."),
+    "bid_released": (
+        "Bids are ready to review",
+        "Bids on '{title}' have been released for your review.",
+    ),
+    "award_confirmed": (
+        "You have won the work",
+        "Your bid on '{title}' has been awarded. Contact details have been released.",
+    ),
+    "award_client": (
+        "Your award is confirmed",
+        "The award on '{title}' is confirmed. Contact details have been released.",
+    ),
+    "not_selected": (
+        "An outcome on a bid you submitted",
+        "Another bid was selected for '{title}'. Thank you for bidding.",
+    ),
     "mobile_otp": ("Your AB-Verified code", "Your verification code is {code}. It expires in 10 minutes."),
     "staff_digest": ("AB-Verified queue digest", "{body}"),
 }
