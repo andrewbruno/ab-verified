@@ -16,12 +16,12 @@ Three rules shape the code below:
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 from typing import Any
 
 from app.db.connection import Db
 from app.domain import audit, repo, scanning, states
-from app.domain.common import is_past, json_dump, new_id, now, now_iso, parse
+from app.domain.common import SYDNEY, is_past, json_dump, new_id, now, now_iso, parse
 from app.domain.reasons import INVITATION_DECLINE
 from app.security.context import Forbidden, NotFound, SecurityContext
 
@@ -594,11 +594,15 @@ def _date(value: Any, key: str, errors: dict[str, str]) -> str | None:
     if not raw:
         return None
     try:
-        parsed = datetime.strptime(raw[:10], "%Y-%m-%d").date()
+        parsed = datetime.strptime(raw[:10], "%Y-%m-%d").date()  # noqa: DTZ007
     except ValueError:
         errors[key] = "Give the date as a calendar date, for example 9 Sep 2026."
         return None
-    if parsed < date.today():
+    # "In the past" means in the past in Sydney, not on whichever timezone the
+    # function happens to run in. On Vercel that is UTC, which is up to eleven
+    # hours behind, so date.today() here rejected a start date of "today" for
+    # most of an Australian working day.
+    if parsed < now().astimezone(SYDNEY).date():
         errors[key] = "The proposed start cannot be in the past."
         return None
     return parsed.isoformat()
@@ -606,11 +610,11 @@ def _date(value: Any, key: str, errors: dict[str, str]) -> str | None:
 
 __all__ = [
     "BidInvalid",
-    "closing_soon",
     "accept_invitation",
     "attachments",
     "authorising_invitation",
     "bid_for_job",
+    "closing_soon",
     "decline_invitation",
     "editable_bid",
     "my_bids",
